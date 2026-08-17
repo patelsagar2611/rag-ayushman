@@ -1,0 +1,17 @@
+# Install CPU-only torch FIRST, or pip resolves it from PyPI as a
+# sentence-transformers dependency and pulls the ~2.5 GB CUDA build:
+#
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+
+chromadb==1.5.9
+sentence-transformers==5.7.0
+pymupdf==1.28.2
+rank-bm25==0.2.2
+streamlit==1.61.1
+requests==2.34.2
+python-dotenv==1.2.2
+
+# Routes TLS verification through the Windows cert store. Several .gov.in hosts
+# present a chain Windows trusts but certifi does not.
+truststore==0.10.4

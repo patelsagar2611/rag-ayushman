@@ -1,0 +1,23 @@
+# Virtualenv
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Corpus: downloadable via src/download.py, never committed
+data/raw/
+data/processed/
+
+# Chroma persistent store: rebuildable via src/index.py
+chroma/
+
+# Local config
+.env
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
