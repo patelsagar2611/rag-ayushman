@@ -1,0 +1,5 @@
+question,expected_answer,source_file,page,must_contain,notes,reason
+What is helpline number of SHA or NHA?,14255,operation_manual.pdf,30,14255,Tests number written only in one doc but mentioned in several,"Helpline number is rendered as a graphic; ""helpline"" appears on p.30 but 14255 is nowhere in the extracted text."
+How many new procedures added in HBP 2.1?,617,operation_manual.pdf,18,617,Test data from image,"HBP 2.1 procedure count sits in an image-based table; ""procedures"" appears on p.18 but 617 is nowhere in the extracted text."
+What is package price for cataract surgery with foldable hydrophobic acrylic IOL as per HBP 2.0?,7500,stg_manual.pdf,16,7500,Tests numbers in table inside image of doc,Package rate table on p.16 is an image; 7500 is nowhere in the extracted text.
+What was preauth request count after 15th august 2020?,5.7 lakh,stg_manual.pdf,24,,Test data from image,Pre-auth trend is a chart image; 5.7 lakh is nowhere in the extracted text.

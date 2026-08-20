@@ -64,24 +64,85 @@ python -m eval.run_eval --min-hit-rate 0.7   # exit 1 below threshold
 python -m eval.diff_editions                 # regenerate Docs/empanelment-diff.md
 ```
 
-Questions live in `eval/golden_set.csv` (`question, expected_answer, source_file, page,
-notes`). `source_file` and `page` may each be a comma-separated list paired by position, so
-one question can point at several pages — which the version-conflict questions need, since
-the answer lives in two documents. `expected_answer` of literally `ABSTAIN`, with empty
-`source_file`/`page`, marks a question the corpus should not be able to answer.
+### Golden set schema
+
+`eval/golden_set.csv` — one question per row:
+
+| Column | Meaning |
+|---|---|
+| `question` | Asked verbatim. This text gets embedded, so typos cost retrieval quality. |
+| `expected_answer` | Human reference for manual review, **not** auto-compared. Literal `ABSTAIN` marks an unanswerable question. |
+| `source_file` | Filename(s). `,` or `;` separated. |
+| `page` | Page number(s), same separators. |
+| `must_contain` | Substrings the answer must include. **`;` separated only** — values like `5,00,000` contain commas. |
+| `notes` | What this row tests. |
+
+Pages are **physical position in the file**, matching your PDF viewer's page counter — not
+the number printed on the page. Government PDFs have roman-numeral front matter, so the two
+routinely differ.
+
+One filename broadcasts across several pages (`empanelment_v2_0.pdf` + `5;6`). Equal-length
+lists pair positionally, which is what version-conflict rows need, since the answer sits on
+a different page in each edition.
+
+`must_contain` is a case-insensitive substring test with whitespace collapsed. Use
+**distinctive** values — `70%`, `15 days`, `5,00,000`. Short common words are useless as
+checks: `No` matches inside "notice", "cannot" and "known", so it passes unconditionally.
+
+### Finding page numbers
+
+```powershell
+python -m eval.find "inpatient beds"
+python -m eval.find "show-cause notice" --file empanelment_v2_0.pdf
+python -m eval.find "\d+ working days" --regex
+```
+
+Plain keyword search over `pages.jsonl`, deliberately **not** vector search — using the
+system's own retrieval to decide which page an answer is on is circular, and would score
+itself perfectly by construction.
+
+### Why these metrics
 
 Every run writes a self-describing JSON file to `eval/results/`, recording k, the embedding
 model and the chunk parameters alongside the metrics — a metrics table is meaningless
 without knowing what produced it.
+
+**MRR, not just hit rate.** Hit rate is binary: rank 1 and rank 5 both score 1.0. MRR scores
+them 1.0 and 0.2. Since the known weakness is answer-bearing chunks ranking below topical
+ones, MRR is the number the Phase 2 reranker has to move; hit rate could stay flat while the
+reranker does real work.
 
 **Retrieval metrics need no LLM**, which is what makes CI viable: GitHub Actions cannot run
 Ollama, but `--retrieval-only` still measures hit rate and MRR — the half of the system most
 likely to regress. Faithfulness is deliberately not scored: it needs a judge, and an LLM
 judge grading an LLM's answers largely measures the model agreeing with itself.
 
-The golden set currently holds **2 example rows, not a real eval set.** They exist to show
-the two row shapes and must be verified or deleted. Writing the remaining 60–80 by hand is
-the next task, and per the brief's anti-goals it must not be generated.
+Latency is measured after a warmup call to both stages. Unwarmed, the embedding model load
+(~5s) and Ollama's model load land entirely on question 1 and distort p50/p95.
+
+### Known gaps — answers the pipeline cannot reach
+
+`eval/known_gaps.csv` holds questions that were written, verified against the PDFs, and then
+**excluded from scoring** because their answer is not in the extracted text at all. In each
+case the value is rendered as part of an image — a chart, or a table saved as a graphic —
+so PyMuPDF never sees it.
+
+The evidence is specific rather than assumed: for the helpline number, the word "helpline"
+*is* extracted from p.30 of `operation_manual.pdf` while `14255` appears nowhere in the file.
+Same shape for the HBP 2.1 procedure count on p.18.
+
+This is a real limitation and worth stating plainly: `src/inspect_corpus.py` cleared all 11
+PDFs as text-native, but it measures **average characters per page**, which cannot detect an
+image-embedded table sitting on an otherwise text-heavy page. Document-level triage is not
+the same as content-level coverage.
+
+They are excluded rather than deleted for two reasons. Scored, they would be permanent
+retrieval failures — capping hit rate for a reason unrelated to retrieval quality, and
+immune to anything Phase 2 reranking does. Deleted, the finding would be lost. Kept aside,
+they are the concrete case for adding OCR in a later phase.
+
+**The golden set is still being written** — it is not yet a real eval set, and numbers from
+it are not yet meaningful. Per the brief's anti-goals it is hand-written, never generated.
 
 ## Layout
 
@@ -96,6 +157,12 @@ src/index.py           BGE embeddings -> Chroma; model + query prefix live here
 src/retrieve.py        dense vector search
 src/generate.py        prompt construction + Ollama call
 app.py                 Streamlit UI
+eval/golden_set.csv    hand-written questions, committed
+eval/known_gaps.csv    written but unscorable (answer lives in an image)
+eval/run_eval.py       scoring harness; --retrieval-only needs no LLM
+eval/find.py           keyword lookup, for filling in page numbers
+eval/diff_editions.py  where the two empanelment editions disagree
+eval/results/          one committed JSON per run
 ```
 
 ## Corpus provenance

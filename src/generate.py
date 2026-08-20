@@ -48,15 +48,25 @@ def call_ollama(prompt):
             "model": OLLAMA_MODEL,
             "prompt": prompt,
             "stream": False,
+            # Ollama unloads an idle model after 5 minutes by default. Mid-eval
+            # that means a cold reload -- ~2.5 minutes for a 7B model on CPU --
+            # which blew past the old 300s timeout and killed a whole run.
+            "keep_alive": "30m",
             "options": {
                 # Deterministic, so eval runs are comparable across changes.
                 "temperature": 0,
                 # Five chunks of ~600 tokens overruns Ollama's 4096 default, which
                 # would silently drop the sources at the front of the prompt.
                 "num_ctx": 8192,
+                # Cap the answer. Uncapped, the model can enumerate for 1000+
+                # tokens -- minutes at CPU speed -- and one verbose answer then
+                # dominates the runtime of a whole eval. A cited answer needs
+                # nothing like this much room.
+                "num_predict": 512,
             },
         },
-        timeout=300,
+        # Generous enough to survive one cold reload on top of generation.
+        timeout=900,
     )
     response.raise_for_status()
     return response.json()["response"].strip()

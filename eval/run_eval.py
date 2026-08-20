@@ -37,6 +37,14 @@ ABSTAIN_MARKER = "ABSTAIN"
 # Matches "[2]" and "[2, 4]" in a generated answer.
 CITATION_RE = re.compile(r"\[([\d,\s]+)\]")
 
+# source_file and page accept either separator, since a semicolon is the natural
+# thing to reach for and silently dropping the row would look like a miss.
+LIST_SEP_RE = re.compile(r"[;,]")
+
+# must_contain splits on SEMICOLON ONLY -- the values are things like "5,00,000",
+# which contain commas of their own.
+MUST_CONTAIN_SEP = ";"
+
 HIT_RATE_CUTOFFS = (1, 3, 5)
 
 
@@ -46,6 +54,7 @@ class Case:
     question: str
     expected_answer: str
     targets: list  # [(source_file, page), ...] -- any one counts as a hit
+    must_contain: list
     notes: str
 
     @property
@@ -61,17 +70,51 @@ class Outcome:
     answer: str = ""
     cited_ranks: list = field(default_factory=list)
     citation_correct: bool = False
+    missing_substrings: list = field(default_factory=list)
+    error: str = ""
     retrieve_ms: float = 0.0
     generate_ms: float = 0.0
 
 
-def load_golden(path):
-    """Parse the golden set.
+def normalise(text):
+    """Collapse whitespace and case, so PDF line breaks do not defeat matching."""
+    return re.sub(r"\s+", " ", text or "").strip().lower()
 
-    source_file and page may each hold a comma-separated list, paired by
-    position, so one question can legitimately point at several pages -- which
-    the version-conflict questions need, since the answer lives in two documents.
+
+def split_field(value):
+    return [s.strip() for s in LIST_SEP_RE.split(value or "") if s.strip()]
+
+
+def build_targets(files, pages, row):
+    """Pair filenames with page numbers.
+
+    One file with several pages is the common case -- a fact spanning pages 5 and
+    6 of a single document -- so a lone filename broadcasts across every page
+    rather than forcing you to repeat it. Equal-length lists pair positionally,
+    which is what the version-conflict questions need, since their answer lives
+    on a different page of each edition.
     """
+    numbers = []
+    for p in pages:
+        try:
+            numbers.append(int(p))
+        except ValueError:
+            print(f"  row {row}: page '{p}' is not an integer")
+
+    if not files or not numbers:
+        return []
+    if len(files) == 1:
+        return [(files[0], p) for p in numbers]
+    if len(numbers) == 1:
+        return [(f, numbers[0]) for f in files]
+    if len(files) == len(numbers):
+        return list(zip(files, numbers))
+
+    print(f"  row {row}: {len(files)} file(s) cannot be paired with {len(numbers)} page(s)")
+    return []
+
+
+def load_golden(path):
     if not path.exists():
         raise SystemExit(f"{path} not found")
 
@@ -82,25 +125,21 @@ def load_golden(path):
             if not question:
                 continue
 
-            files = [s.strip() for s in (raw.get("source_file") or "").split(",") if s.strip()]
-            pages = [s.strip() for s in (raw.get("page") or "").split(",") if s.strip()]
-
-            targets = []
-            if len(files) != len(pages):
-                print(f"  row {i}: {len(files)} source_file(s) but {len(pages)} page(s) -- skipping targets")
-            else:
-                for fname, page in zip(files, pages):
-                    try:
-                        targets.append((fname, int(page)))
-                    except ValueError:
-                        print(f"  row {i}: page '{page}' is not an integer")
-
             cases.append(
                 Case(
                     row=i,
                     question=question,
                     expected_answer=(raw.get("expected_answer") or "").strip(),
-                    targets=targets,
+                    targets=build_targets(
+                        split_field(raw.get("source_file")),
+                        split_field(raw.get("page")),
+                        i,
+                    ),
+                    must_contain=[
+                        s.strip()
+                        for s in (raw.get("must_contain") or "").split(MUST_CONTAIN_SEP)
+                        if s.strip()
+                    ],
                     notes=(raw.get("notes") or "").strip(),
                 )
             )
@@ -132,7 +171,7 @@ def validate(cases):
                 problems += 1
             continue
         if not case.targets:
-            print(f"  row {case.row}: no source_file/page -- cannot score retrieval")
+            print(f"  row {case.row}: no usable source_file/page -- cannot score retrieval")
             problems += 1
             continue
         for fname, page in case.targets:
@@ -199,7 +238,18 @@ def evaluate(cases, k, retrieval_only):
 
         if not retrieval_only:
             t0 = time.perf_counter()
-            text = answer_from_hits(case.question, hits)
+            try:
+                text = answer_from_hits(case.question, hits)
+            except Exception as e:
+                # A single timeout or dropped connection used to abort the whole
+                # run and lose every question before it. Record and carry on --
+                # errored questions are excluded from generation metrics rather
+                # than silently counted as wrong answers.
+                outcome.error = f"{type(e).__name__}: {e}"
+                outcome.generate_ms = (time.perf_counter() - t0) * 1000
+                outcomes.append(outcome)
+                print("E", end="", flush=True)
+                continue
             outcome.generate_ms = (time.perf_counter() - t0) * 1000
             outcome.answer = text
             outcome.cited_ranks = parse_citations(text)
@@ -211,6 +261,13 @@ def evaluate(cases, k, retrieval_only):
                 if hit and (hit["source_file"], hit["page"]) in case.targets:
                     outcome.citation_correct = True
                     break
+
+            # Plain substring check, no judge involved. Catches the failure that
+            # matters most on numeric questions: right page found, wrong figure stated.
+            normalised = normalise(text)
+            outcome.missing_substrings = [
+                s for s in case.must_contain if normalise(s) not in normalised
+            ]
 
         outcomes.append(outcome)
         mark = "." if (outcome.first_hit_rank or case.should_abstain) else "x"
@@ -224,10 +281,17 @@ def summarise(outcomes, k, retrieval_only):
     answerable = [o for o in outcomes if not o.case.should_abstain and o.case.targets]
     abstain_cases = [o for o in outcomes if o.case.should_abstain]
 
-    metrics = {"n_total": len(outcomes), "n_answerable": len(answerable), "n_abstain": len(abstain_cases)}
+    metrics = {
+        "n_total": len(outcomes),
+        "n_answerable": len(answerable),
+        "n_abstain": len(abstain_cases),
+    }
 
     # --- Retrieval ---
-    for cutoff in [c for c in HIT_RATE_CUTOFFS if c <= k] + ([k] if k not in HIT_RATE_CUTOFFS else []):
+    cutoffs = [c for c in HIT_RATE_CUTOFFS if c <= k]
+    if k not in cutoffs:
+        cutoffs.append(k)
+    for cutoff in cutoffs:
         got = sum(1 for o in answerable if 0 < o.first_hit_rank <= cutoff)
         metrics[f"hit_rate@{cutoff}"] = got / len(answerable) if answerable else 0.0
 
@@ -245,6 +309,11 @@ def summarise(outcomes, k, retrieval_only):
         def abstained(o):
             return o.answer.strip() == ABSTAIN.strip()
 
+        errored = [o for o in outcomes if o.error]
+        metrics["n_generation_errors"] = len(errored)
+        abstain_cases = [o for o in abstain_cases if not o.error]
+        answerable = [o for o in answerable if not o.error]
+
         correct_abstentions = sum(1 for o in abstain_cases if abstained(o))
         false_abstentions = sum(1 for o in answerable if abstained(o))
 
@@ -254,11 +323,21 @@ def summarise(outcomes, k, retrieval_only):
         metrics["false_abstention_rate"] = (
             false_abstentions / len(answerable) if answerable else None
         )
+
         answered = [o for o in answerable if not abstained(o)]
         metrics["citation_correctness"] = (
             sum(1 for o in answered if o.citation_correct) / len(answered) if answered else 0.0
         )
         metrics["uncited_answers"] = sum(1 for o in answered if not o.cited_ranks)
+
+        checked = [o for o in answered if o.case.must_contain]
+        metrics["n_must_contain"] = len(checked)
+        metrics["must_contain_pass"] = (
+            sum(1 for o in checked if not o.missing_substrings) / len(checked)
+            if checked
+            else None
+        )
+
         metrics["generate_ms_p50"] = percentile([o.generate_ms for o in outcomes], 0.50)
         metrics["generate_ms_p95"] = percentile([o.generate_ms for o in outcomes], 0.95)
 
@@ -284,10 +363,17 @@ def report(metrics, retrieval_only):
             ("abstention_recall", "abstained when it should"),
             ("false_abstention_rate", "refused when it should not"),
             ("citation_correctness", "cited a golden page"),
+            ("must_contain_pass", "stated the required text"),
         ]:
             value = metrics.get(key)
-            print(f"  {label:<26s} " + ("   n/a" if value is None else f"{value:6.1%}"))
+            suffix = ""
+            if key == "must_contain_pass":
+                suffix = f"   (of {metrics.get('n_must_contain', 0)} checked)"
+            print(f"  {label:<26s} " + ("   n/a" if value is None else f"{value:6.1%}") + suffix)
         print(f"  {'answers with no citation':<26s} {metrics['uncited_answers']:6d}")
+        if metrics.get("n_generation_errors"):
+            print(f"  {'GENERATION ERRORS':<26s} {metrics['n_generation_errors']:6d}"
+                  "   (excluded from the rates above)")
         print(f"  {'generate p50 / p95 (ms)':<26s} "
               f"{metrics['generate_ms_p50']:6.0f} / {metrics['generate_ms_p95']:.0f}")
 
@@ -353,6 +439,8 @@ def main():
                             "answer": o.answer,
                             "cited_ranks": o.cited_ranks,
                             "citation_correct": o.citation_correct,
+                            "missing_substrings": o.missing_substrings,
+                            "error": o.error,
                         }
                         for o in outcomes
                     ],

@@ -1,3 +1,57 @@
-question,expected_answer,source_file,page,notes
-"What is the minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY?","10 inpatient beds; 5 for hospitals in aspirational districts",empanelment_v2_0.pdf,40,"EXAMPLE ROW - verify against the PDF yourself or delete it. Shape: a specific number, stated on one page. Also a version-conflict candidate; see Docs/empanelment-diff.md"
-"What is the capital city of Australia?",ABSTAIN,,,"EXAMPLE ROW - verify or delete. Shape: out-of-corpus question, system must decline. expected_answer is the literal word ABSTAIN, source_file and page left empty. Target ~10% of the set."
+question,expected_answer,source_file,page,must_contain,notes
+What is the minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY?,10 inpatient beds,empanelment_v2_0.pdf,40,10 inpatient beds,Tests paragraph question
+What is the capital city of Australia?,ABSTAIN,,,,rogue question
+What was approach on hospital empanelment?,Actually it was based on qualification criteria and setting up process for empanelment and de-empanelment. first step was to setup existing practises of government run health insurance programmes including empanelmetn. criterial established under the clinical establishment act was used as example to establish structural and human resource requirements.state consultations were also held with practitioners of similar programs. specialty-wise sub-groups assigned to design packages reviewed the corresponding minimum qualification criteria.,empanelment_v2_0.pdf,5;6,,"Tests longer subjective answer, over multiple pages"
+When is hospital empanelment due for renewal?,once every 3 years or till expiry of validity of AB PM-JAY bronze/NABH certification (when empanelment based on AB PM-JAY bronze/NABH criterial),empanelment_v2_0.pdf,8,3 years,Tests accurate quantity answer but with separate condition
+By when should agency deploy team for the project?,Within 15 days of date of signing of agreement / receiving of LOI,fraud_analytics_rfe.pdf,23,15 days,Tests whether it is able to identify agency and with whom it is making agreement
+What is minimum experience and qualification required for data scientist role in agency?,"Bachelor's or master's degree in data science, computer science, statistics or Math. Experience is minimum 5 years out of which 3 years in developing AI/ML models.",fraud_analytics_rfe.pdf,24,5 years,Checks fraud files where only one of file contains answer for this.
+Will NHA make sure to answer every queries in pre-bid queries?,No they will try.,fraud_analytics_rfe.pdf,34,,Tests something concrete but non-numeric answer
+What is cut-off in technical evaluation for bidder?,70%,fraud_analytics_rfe.pdf,41,70%,Tests whether it can generate answer without other conditions mentioned in the file.
+What is timeline of empanelment request filed by hospital to DEC?,the application should be scrutinized by the DEC and processed completely within 15 days of receipt of application,empanelment_v2_0.pdf,22,15 days,Tests numeric answer within a sentence
+"during inspection, if it is found that hospital has applied for multiple specialties, but all do not conform to minimum requirements under AB-PMJAY, then will it get empanelment?",then the hospital will only be empanelled for specialties that conform to AB-PMJAY norms,empanelment_v2_0.pdf,23,,Tests a bit of subjective answers
+How much incentive will hospital receive with full NABH accreditation?,15%,operation_manual.pdf,7,15%,Tests data inside table format in document
+What is estimated number of beneficiaries ayushman bharat aimed to reach?,50 crore,operation_manual.pdf,7,50 crore,Tests data inside brackets as kind of optional hidden data
+By when should report be submitted when investigating for suspect claims or hospitals?,10 working days,empanelment_v2_0.pdf;empanelment_dec2021.pdf,29;20,10 working days,Tests similar answer across multiple documents
+"If original cause of suspicion or alleged mischievous activities of EHCP are not valid but other malpractices are identified, how much time EHCP have to respond?",5 working days;10 working days,empanelment_v2_0.pdf;empanelment_dec2021.pdf,32;22,working days,Tests both documents having different answers
+How many anti-fraud officers will gujarat state have?,2 officers assigned to group of 11 states in which gujarat is one of them,antifraud_guidelines.pdf,11,,Tests a bit of trick question where gujarat is not alone to have 2 officers but whole group of states combined
+How many ethical hackers NSA will hire in order to prevent fraud?,ABSTAIN,,,,Tests not available content
+Can proposal be disqualified in case of bidder increasing its quoted price after submission of the bid?,Yes,fraud_analytics_rfe.pdf,29,,Tests question involving multiple lines or over a paragraph
+What percentage of death audit needs to be for SHA at minimum?,100%,antifraud_guidelines.pdf;antifraud_guidebook_2024.pdf,17;25,100%,Tests whether it is able to identify death in one doc and mortality in other doc
+"How many days of ICU treatment blocking done without critical illness, is considered as diagnosis specific fraud trigger?",5 days,antifraud_guidelines.pdf,24,5 days,Tests normal data in annexture part of doc
+What percentage of beneficiary audit needs to be at minimum?,3% of total cases hospitalized;10% of total cases hospitalized,antifraud_guidelines.pdf;antifraud_guidebook_2024.pdf,17;25,,Tests both documents having different answers
+When was HBP 2.0 launched?,2019,operation_manual.pdf,20,2019,Tests timeline based answer
+How should hospital display director signage?,It is mandatory to display direction signage for guidance from reception to the PM-JAY desk. Either stickers or hangings are to be used for the same.,operation_manual.pdf,16,,Tests subjective answer
+How many HWCs are estimated to be setup by 2022?,"1,50,000",stg_manual.pdf,6,,Tests answer from second column in multi column page
+What is cover amount under PM JAY for family floater basis?,"5,00,000",stg_manual.pdf;hbp_2_2_manual.pdf;field_investigation_manual.pdf;antifraud_guidelines.pdf,7;6;3;3,"5,00,000",Tests same answer in many docs
+What is amount for SHA to utilize for life saving conditions but request of approval will be moved on ticketing system?,1 lakh,hbp_2_2_manual.pdf,15,,Tests conditional items
+What is per day price for bed if patient is admitted to ICU with ventilator support?,"4,500",hbp_2_2_manual.pdf,18,"4,500",Tests Different version of policies having same number
+How many urology procedures happened in HBP 2.2?,148 urology,hbp_2_2_manual.pdf,23,148,Tests numbers from table
+How many aspirational districts have been identified by NITI Aayog?,117 aspirational,hbp_2_2_manual.pdf,51,117 aspirational,Tests numbers
+"If any party to a grievance is not satisfied, then how many days it has to appeal that decision?",30 days,grievance_redressal.pdf,16,30 days,Tests numbers
+What is acceptable threshold for Grievances that needed escalation?,10% or less,grievance_redressal.pdf,19,10,Tests numbers
+What is turn around time for SOS (Emergency) Grievances?,6 working hours,grievance_redressal.pdf,20,6 working hours,Tests numbers
+Does desk Audit checklist contains need for ICU documents?,No,field_investigation_manual.pdf,21,,Negative test
+Will name of hospital will be declated in public domain in case of improper services?,ABSTAIN,,,,Tests not available content
+Does mortality report checks need for ICU for the patient?,Yes,field_investigation_manual.pdf,36,,Subjective answer
+If Number of eligible families in SECC Data is 40 lakhs and Number of families currently enrolled in RSBY is 42 lakhs then what will be Total Number of eligible families for AB PM-JAY?,42 lakhs,beneficiary_identification.pdf,8,42 lakh,Tests calculative answer
+Will PM himself be able to approve or reject any claims?,ABSTAIN,,,,Tests not available content
+How much build up area is required for Haemodialysis?,175 sq. mtr.,empanelment_v2_0.pdf;empanelment_dec2021.pdf,49;34,175,Tests multiple docs same answer
+Do hospital empanelment process need its Pan card?,Yes,empanelment_v2_0.pdf,14,,Tests answer from sentence
+What is maximum number of speciality a hospital can apply with?,All specialities for which requisite infrastructure and facilities are available with,empanelment_v2_0.pdf,16,,Tests answer from sentence
+"When paying penalty to show cause notice for hospital, what needs to be shared with SHA office after amount is deposited?",Unique transaction ID,empanelment_v2_0.pdf,59,Unique transaction ID,Tests exact words which can be important in some cases
+What rules can be overruled by president of India over SEC?,ABSTAIN,,,,Tests not available content
+How much time does hospital have to oppose rejection by SHA?,15 days,empanelment_dec2021.pdf,19,15 days,Tests numeric answer within a sentence
+"How many minimum dialysis units should be available to empanel any standalone centre not associated with any hospital?",5 dialysis units,empanelment_dec2021.pdf,34,5 dialysis units,Tests exact numbers
+"In HBP 2.2, what percentage is revised rate for ICU without ventilator?",136%,operation_manual.pdf,18,136%,Tests numeric answer within a sentence
+What should be minimum revenue of hospital to be eligible for empanelment application?,ABSTAIN,,,,Tests not available content
+What is status of pilot testing in state assam?,Cataract pilot completed,stg_manual.pdf,20,,Tests data from table
+How many procedures have reduced price in HBP 2.0 as compared to HBP 1.0,57,hbp_2_2_manual.pdf,48,57,Tests numeric answer within a sentence
+If patient has received R-CHOP- and first cycle was given on 26 feb 2020 then how soon they can give approval of second cycle at max?,17 March 2020,hbp_2_2_manual.pdf,47,,Tests calculative answer
+How can one raise grievance under AB PM-JAY using online mode?,Through online grievance redressal portal – CGRMS of AB PM-JAY (https://cgrms.pmjay.gov.in),grievance_redressal.pdf,14,,Tests direct user's query for any procedure
+Who is NGNO?,"National Grievance Nodal Officer (NGNO) is a person who is nominated by NHA to address the grievances at National level under PM-JAY",grievance_redressal.pdf,13,,Tests query for any post and acronym
+"By what timeline, mortality report section 5.1 and 5.2 has to be filled by the hospital and sent?",within 48 hours,field_investigation_manual.pdf,35,48 hours,Tests numeric answer within a sentence
+What is advised to eat by field investigation team at the time of medical audit at the hospital?,should avoid to eat anything,field_investigation_manual.pdf,19,,Tests logical answer from sentence
+Is person in state tracked when approving or recommending to reject identified beneficiaries?,Yes,beneficiary_identification.pdf,15,,Tests date based question
+When did AB PM-JAY Additional Data Collection drive at Gram Sabhas take place?,30th april 2018,beneficiary_identification.pdf,3,,Tests date based question
+What is size of TMS claims in FY 21-22?,"1,46,01,475",fraud_analytics_rfe.pdf,108,,Tests data from table
+Who is best batsman of all time in cricket?,ABSTAIN,,,,Tests not available content
