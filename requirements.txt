@@ -10,6 +10,7 @@ pymupdf==1.28.2
 rank-bm25==0.2.2
 streamlit==1.61.1
 requests==2.34.2
+pyyaml==6.0.3
 python-dotenv==1.2.2
 
 # Routes TLS verification through the Windows cert store. Several .gov.in hosts

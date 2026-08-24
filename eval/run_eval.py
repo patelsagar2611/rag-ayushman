@@ -9,6 +9,7 @@ Usage:
     python -m eval.run_eval                      # retrieval + generation
     python -m eval.run_eval --retrieval-only     # no Ollama needed
     python -m eval.run_eval --k 10
+    python -m eval.run_eval --retriever bm25 --retrieval-only
     python -m eval.run_eval --min-hit-rate 0.7   # exit 1 below threshold (CI)
 """
 
@@ -24,7 +25,7 @@ from pathlib import Path
 
 from src.chunk import OVERLAP_CHARS, TARGET_CHARS
 from src.index import EMBED_MODEL
-from src.retrieve import DEFAULT_K, search
+from src.retrieve import DEFAULT_K, DEFAULT_MODE, MODES, search
 
 GOLDEN = Path("eval/golden_set.csv")
 RESULTS_DIR = Path("eval/results")
@@ -74,6 +75,8 @@ class Outcome:
     error: str = ""
     retrieve_ms: float = 0.0
     generate_ms: float = 0.0
+    # Ollama's own breakdown of generate_ms -- see src.generate.parse_stats.
+    gen_stats: dict = field(default_factory=dict)
 
 
 def normalise(text):
@@ -207,7 +210,7 @@ def percentile(values, p):
     return ordered[lo] + (ordered[hi] - ordered[lo]) * (idx - lo)
 
 
-def evaluate(cases, k, retrieval_only):
+def evaluate(cases, k, retrieval_only, mode=DEFAULT_MODE):
     if not retrieval_only:
         from src.generate import answer_from_hits
 
@@ -216,7 +219,7 @@ def evaluate(cases, k, retrieval_only):
     # load a 7B model into RAM. Left unwarmed, both land entirely on question 1
     # and drag the reported p50/p95 far away from real per-query latency.
     print("warming up… ", end="", flush=True)
-    warm_hits = search("warmup", k=1)
+    warm_hits = search("warmup", k=1, mode=mode)
     if not retrieval_only:
         answer_from_hits("warmup", warm_hits)
     print("done")
@@ -226,7 +229,7 @@ def evaluate(cases, k, retrieval_only):
         outcome = Outcome(case=case)
 
         t0 = time.perf_counter()
-        hits = search(case.question, k=k)
+        hits = search(case.question, k=k, mode=mode)
         outcome.retrieve_ms = (time.perf_counter() - t0) * 1000
         outcome.hits = hits
 
@@ -239,7 +242,7 @@ def evaluate(cases, k, retrieval_only):
         if not retrieval_only:
             t0 = time.perf_counter()
             try:
-                text = answer_from_hits(case.question, hits)
+                text, gen_stats = answer_from_hits(case.question, hits)
             except Exception as e:
                 # A single timeout or dropped connection used to abort the whole
                 # run and lose every question before it. Record and carry on --
@@ -251,6 +254,7 @@ def evaluate(cases, k, retrieval_only):
                 print("E", end="", flush=True)
                 continue
             outcome.generate_ms = (time.perf_counter() - t0) * 1000
+            outcome.gen_stats = gen_stats
             outcome.answer = text
             outcome.cited_ranks = parse_citations(text)
 
@@ -315,14 +319,35 @@ def summarise(outcomes, k, retrieval_only):
         answerable = [o for o in answerable if not o.error]
 
         correct_abstentions = sum(1 for o in abstain_cases if abstained(o))
-        false_abstentions = sum(1 for o in answerable if abstained(o))
-
         metrics["abstention_recall"] = (
             correct_abstentions / len(abstain_cases) if abstain_cases else None
         )
+
+        # An abstention is only the model's fault when the evidence was actually in
+        # front of it. Where retrieval missed the golden page there was nothing to
+        # answer from, and declining was the CORRECT behaviour -- so those cases are
+        # conditioned out of the denominator here.
+        #
+        # The reason is attribution, not the absolute number. Unconditioned, the
+        # metric moves whenever RETRIEVAL changes: a reranker that recovers a missed
+        # page shifts that question out of the "rightly declined" bucket and into
+        # this denominator, so false_abstention_rate shifts for a reason that has
+        # nothing to do with abstention behaviour -- crediting or blaming the prompt
+        # for something the retriever did. Conditioning keeps the two separable.
+        with_evidence = [o for o in answerable if o.first_hit_rank]
+        false_abstentions = sum(1 for o in with_evidence if abstained(o))
+        metrics["n_false_abstention_denom"] = len(with_evidence)
         metrics["false_abstention_rate"] = (
-            false_abstentions / len(answerable) if answerable else None
+            false_abstentions / len(with_evidence) if with_evidence else None
         )
+
+        # Retained only so results recorded before this change stay comparable.
+        # It is the number the conditioning above exists to replace -- do not quote it.
+        all_abstentions = sum(1 for o in answerable if abstained(o))
+        metrics["false_abstention_rate_unconditioned"] = (
+            all_abstentions / len(answerable) if answerable else None
+        )
+        metrics["abstained_on_retrieval_miss"] = all_abstentions - false_abstentions
 
         answered = [o for o in answerable if not abstained(o)]
         metrics["citation_correctness"] = (
@@ -340,6 +365,27 @@ def summarise(outcomes, k, retrieval_only):
 
         metrics["generate_ms_p50"] = percentile([o.generate_ms for o in outcomes], 0.50)
         metrics["generate_ms_p95"] = percentile([o.generate_ms for o in outcomes], 0.95)
+
+        # Split that wall-clock figure into its two halves. Which one dominates
+        # decides the fix -- fewer/smaller chunks if the prompt does, a tighter
+        # num_predict or a smaller model if generation does -- and the total on
+        # its own cannot distinguish them. Measure before tuning either.
+        timed = [o for o in outcomes if o.gen_stats]
+        metrics["n_timed"] = len(timed)
+        if timed:
+            for half in ("prompt_eval", "eval", "load"):
+                metrics[f"{half}_ms_p50"] = percentile([o.gen_stats[f"{half}_ms"] for o in timed], 0.50)
+            for half in ("prompt_eval", "eval"):
+                metrics[f"{half}_tokens_p50"] = percentile(
+                    [o.gen_stats[f"{half}_tokens"] for o in timed], 0.50)
+                # Aggregate throughput -- total tokens over total seconds, not a
+                # mean of per-question rates, which short answers would skew.
+                total_tok = sum(o.gen_stats[f"{half}_tokens"] for o in timed)
+                total_ms = sum(o.gen_stats[f"{half}_ms"] for o in timed)
+                metrics[f"{half}_tps"] = total_tok / (total_ms / 1000) if total_ms else 0.0
+            # A non-zero load time after warmup means Ollama evicted the model
+            # mid-run (gotcha 6) and some question wore a cold reload.
+            metrics["n_model_reloads"] = sum(1 for o in timed if o.gen_stats["load_ms"] > 1000)
 
     return metrics
 
@@ -361,21 +407,39 @@ def report(metrics, retrieval_only):
         print("\nGENERATION")
         for key, label in [
             ("abstention_recall", "abstained when it should"),
-            ("false_abstention_rate", "refused when it should not"),
+            ("false_abstention_rate", "refused despite evidence"),
             ("citation_correctness", "cited a golden page"),
             ("must_contain_pass", "stated the required text"),
         ]:
             value = metrics.get(key)
             suffix = ""
+            if key == "false_abstention_rate":
+                suffix = f"   (of {metrics.get('n_false_abstention_denom', 0)} retrieved)"
             if key == "must_contain_pass":
                 suffix = f"   (of {metrics.get('n_must_contain', 0)} checked)"
             print(f"  {label:<26s} " + ("   n/a" if value is None else f"{value:6.1%}") + suffix)
+        # Shown separately because they are correct behaviour, not a failure:
+        # the model declined a question whose evidence retrieval never surfaced.
+        print(f"  {'  ...also declined on a':<26s} {metrics.get('abstained_on_retrieval_miss', 0):6d}"
+              "   retrieval miss (correctly)")
         print(f"  {'answers with no citation':<26s} {metrics['uncited_answers']:6d}")
         if metrics.get("n_generation_errors"):
             print(f"  {'GENERATION ERRORS':<26s} {metrics['n_generation_errors']:6d}"
                   "   (excluded from the rates above)")
         print(f"  {'generate p50 / p95 (ms)':<26s} "
               f"{metrics['generate_ms_p50']:6.0f} / {metrics['generate_ms_p95']:.0f}")
+
+        if metrics.get("n_timed"):
+            print("\n  where that time goes (Ollama's own split, p50)")
+            print(f"    {'prompt eval':<24s} {metrics['prompt_eval_ms_p50'] / 1000:6.1f}s  "
+                  f"{metrics['prompt_eval_tokens_p50']:5.0f} tok  "
+                  f"{metrics['prompt_eval_tps']:6.1f} tok/s")
+            print(f"    {'generation':<24s} {metrics['eval_ms_p50'] / 1000:6.1f}s  "
+                  f"{metrics['eval_tokens_p50']:5.0f} tok  "
+                  f"{metrics['eval_tps']:6.1f} tok/s")
+            if metrics.get("n_model_reloads"):
+                print(f"    {'MODEL RELOADS mid-run':<24s} {metrics['n_model_reloads']:6d}"
+                      "   (cold load inflated those questions)")
 
     print("\nFaithfulness is NOT measured here -- it needs a judge, and an LLM judge")
     print("scoring an LLM's answers largely measures the model agreeing with itself.")
@@ -384,6 +448,8 @@ def report(metrics, retrieval_only):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--k", type=int, default=DEFAULT_K)
+    parser.add_argument("--retriever", choices=MODES, default=DEFAULT_MODE,
+                        help="which retrieval mode to score")
     parser.add_argument("--retrieval-only", action="store_true",
                         help="skip generation; needs no Ollama, safe for CI")
     parser.add_argument("--min-hit-rate", type=float, default=None,
@@ -391,6 +457,14 @@ def main():
     parser.add_argument("--label", default="", help="tag recorded in the results file")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args()
+
+    # Recorded so a results file identifies the prompt that produced it. Only
+    # meaningful for generation runs -- a retrieval-only run never builds a prompt.
+    prompt_version = None
+    if not args.retrieval_only:
+        from src.generate import PROMPT_VERSION
+
+        prompt_version = PROMPT_VERSION
 
     cases = load_golden(GOLDEN)
     if not cases:
@@ -404,7 +478,8 @@ def main():
         print(f"NOTE: {len(cases)} questions is below the 60-80 the brief calls for.")
         print("      Numbers from a set this small are not yet meaningful.\n")
 
-    outcomes = evaluate(cases, args.k, args.retrieval_only)
+    print(f"retriever: {args.retriever}")
+    outcomes = evaluate(cases, args.k, args.retrieval_only, mode=args.retriever)
     metrics = summarise(outcomes, args.k, args.retrieval_only)
     report(metrics, args.retrieval_only)
 
@@ -421,6 +496,8 @@ def main():
                     # a metrics table is meaningless without knowing what produced it.
                     "config": {
                         "k": args.k,
+                        "retriever": args.retriever,
+                        "prompt_version": prompt_version,
                         "retrieval_only": args.retrieval_only,
                         "embed_model": EMBED_MODEL,
                         "chunk_target_chars": TARGET_CHARS,
@@ -440,6 +517,7 @@ def main():
                             "cited_ranks": o.cited_ranks,
                             "citation_correct": o.citation_correct,
                             "missing_substrings": o.missing_substrings,
+                            "gen_stats": o.gen_stats,
                             "error": o.error,
                         }
                         for o in outcomes

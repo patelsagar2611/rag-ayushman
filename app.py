@@ -49,7 +49,7 @@ question = st.text_input(
 if question:
     try:
         with st.spinner("Retrieving and generating…"):
-            text, hits = answer(question, k=k)
+            text, hits, stats = answer(question, k=k)
     except requests.exceptions.ConnectionError:
         st.error(
             "Could not reach Ollama. Check the tray icon is running, then confirm "
@@ -59,6 +59,15 @@ if question:
 
     st.markdown("### Answer")
     st.write(text)
+
+    if stats:
+        st.caption(
+            f"{stats['total_ms'] / 1000:.1f}s total — "
+            f"prompt {stats['prompt_eval_ms'] / 1000:.1f}s "
+            f"({stats['prompt_eval_tokens']} tok), "
+            f"generation {stats['eval_ms'] / 1000:.1f}s "
+            f"({stats['eval_tokens']} tok)"
+        )
 
     st.markdown(f"### Sources ({len(hits)})")
     for hit in hits:

@@ -4,8 +4,14 @@ Context for a fresh session picking this project up. Read this before touching c
 The project brief is [PMJAY-RAG-PROJECT.md](PMJAY-RAG-PROJECT.md); this file records what
 was actually built, what was discovered along the way, and what is next.
 
-**Where things stand:** Phase 1 is complete and measured. Phase 2 (hybrid retrieval +
-reranking) is next. CI/CD is deliberately deferred until after Phase 2.
+**Where things stand:** Phase 1 is complete and measured. Phase 2's **retrieval** work is
+written and measured; its **generation** work is unmeasured — no generation run has ever
+been done with Phase 2 code. Nothing from Phase 2 is committed yet. CI/CD is deferred until
+after Phase 2.
+
+**Read [§3c](#3c-phase-2-status--read-this-before-continuing) first if you are resuming
+Phase 2.** It lists exactly what is finished, what is half-finished, and the one gap that
+matters most.
 
 ---
 
@@ -30,6 +36,8 @@ python -m eval.run_eval
 - Ollama runs `qwen2.5:7b` at `http://localhost:11434`; check with `curl .../api/ps`
 - `HF_HUB_DISABLE_SYMLINKS_WARNING=1` silences cosmetic noise
 - `truststore` is required — see gotcha 2 below
+- Phase 2 added `pyyaml` to `requirements.txt`. `rank-bm25` and `sentence-transformers`
+  were already there; the cross-encoder (~90 MB) downloads on first rerank call.
 
 ## 2. Pipeline
 
@@ -45,9 +53,24 @@ streamlit run app.py
 Corpus: **11 PDFs, 629 pages, 872 chunks.** All text-native, no OCR needed at document level
 (but see gotcha 5).
 
-## 3. Baseline — Phase 1, recorded 2026-08-19
+Retrieval now has four modes, selected by `--mode` on the CLI and `--retriever` in the eval:
 
-`eval/results/20260819T102845Z.json`, 56 questions (49 answerable, 7 abstain):
+```powershell
+python -m src.retrieve "hospital empanelment criteria"        # vector (default)
+python -m src.retrieve --mode bm25 "PAN card"
+python -m src.retrieve --mode hybrid "empanelment renewal"
+python -m src.retrieve --mode rerank "annual cover per family"
+```
+
+## 3. Baseline — Phase 1, recorded 2026-08-19  *(56-question set — HISTORICAL)*
+
+> **These numbers are on the old 56-question golden set and are NOT comparable to anything
+> below.** The set is now 69 questions. Retrieval has been re-baselined (§3d); the
+> **generation** figures here have not, so there is currently no generation baseline on the
+> current golden set. Re-running it is ~2.5 h locally or ~10 min against a hosted LLM, which
+> is the strongest argument for doing the hosted swap next.
+
+`eval/results/archive-56q/20260819T102845Z.json`, 56 questions (49 answerable, 7 abstain):
 
 | Metric | Value |
 |---|---|
@@ -57,62 +80,252 @@ Corpus: **11 PDFs, 629 pages, 872 chunks.** All text-native, no OCR needed at do
 | `mrr` | 0.641 |
 | retrieve p50 / p95 | 127 ms / 260 ms |
 
-Full run (`20260819T163840Z.json`, same 56 questions, k=5):
+Full run (`eval/results/archive-56q/20260819T163840Z.json`, same 56 questions, k=5):
 
 | Metric | Value |
 |---|---|
 | `abstention_recall` | 100% (7/7) |
-| `false_abstention_rate` | 18.4% (9/49) — but see section 3a |
+| `false_abstention_rate` | **15.9% (7/44)** — corrected, see below |
 | `citation_correctness` | 72.5% |
 | `must_contain_pass` | 74.1% (of 27 checked) |
 | `uncited_answers` | 1 |
 | generate p50 / p95 | 126.9 s / 169.5 s |
 
-**The number that matters for Phase 2 is the gap between `hit_rate@1` (51%) and
-`hit_rate@5` (90%).** The right chunk is nearly always retrieved but ranked first only half
-the time. That is exactly what a cross-encoder reranker is supposed to fix, and **MRR 0.641
-is the headline number to move.** `hit_rate@5` can barely improve; MRR can.
+> **The false abstention figure in that results file says 18.4% (9/49).** That is the old,
+> unconditioned definition. The corrected figure was recomputed offline from the same file:
+> 7 of the 9 abstentions had the golden page retrieved, 2 did not. See §3a.1.
 
-## 3a. Do these BEFORE Phase 2 — they protect attribution
+## 3a. Groundwork — DONE
 
-1. **Condition `false_abstention_rate` on the target having been retrieved.** As written it
-   counts abstentions where retrieval failed and declining was *correct*. Of the 9 false
-   abstentions, **7 had the golden page retrieved** and 2 did not, so the honest figure is
-   7/44 = **15.9%**, not 18.4%.
-   This matters less for the absolute number than for attribution: when Phase 2 fixes some of
-   the 5 retrieval misses, questions leave the "correctly abstained" bucket and the metric
-   moves for reasons unrelated to abstention behaviour — crediting the reranker with a prompt
-   improvement it never made. Small change to `summarise()` in `eval/run_eval.py`.
+Both items the previous handoff demanded before Phase 2 are complete.
 
-2. **Capture Ollama's latency breakdown.** The response JSON carries `prompt_eval_duration`,
-   `prompt_eval_count`, `eval_duration` and `eval_count`; `src/generate.py` currently discards
-   them. Without the split there is no way to know whether p50 of 127 s is prompt processing
-   or token generation — and the fix differs completely. If prompt eval dominates, use fewer
-   or smaller chunks; if generation dominates, cap `num_predict` harder or use a smaller model.
-   Do not tune latency before measuring which half it is.
+**1. `false_abstention_rate` is now conditioned on the target having been retrieved.**
+Denominator is answerable questions where `first_hit_rank > 0`. Baseline moves from
+18.4% (9/49) to **15.9% (7/44)**.
 
-3. **Finalise the golden set first.** Metrics over 56 questions cannot be compared with
-   metrics over 60. If questions are added, re-record the baseline before starting Phase 2 —
-   `--retrieval-only` costs seconds, the full run about two hours.
+The point is attribution, not the number. Unconditioned, the metric moves whenever
+*retrieval* changes: a reranker that recovers a missed page shifts that question out of the
+"rightly declined" bucket and into the denominator, so the rate moves for a reason unrelated
+to abstention behaviour. `false_abstention_rate_unconditioned` and
+`abstained_on_retrieval_miss` are both still recorded so older results stay comparable.
 
-4. **Optional: a fast iteration subset.** ~15 questions covering the known failure modes, for
-   rapid iteration. **Strictly an iteration tool** — a subset chosen to cover known failures is
-   deliberately biased, so subset numbers must never appear in the metrics table or README.
-   Only full-set runs get reported.
+Validated by recomputing from the saved Phase 1 JSON rather than by re-running — the file
+already carried `first_hit_rank` and the answer text.
+
+**2. Ollama's latency breakdown is captured.** `src/generate.parse_stats` reads
+`prompt_eval_duration`, `prompt_eval_count`, `eval_duration`, `eval_count` and
+`load_duration`, and the eval records p50s and aggregate tokens/sec.
+
+**The finding is decisive:**
+
+| Sample | prompt eval (prefill) | generation (decode) | load |
+|---|---|---|---|
+| 1 (cold) | **162.9 s** · 2,456 tok · 15.1 tok/s | 7.6 s · 30 tok · 3.9 tok/s | 10.0 s |
+| 2 (warm) | **161.3 s** · 2,547 tok · 15.8 tok/s | 9.1 s · 36 tok · 3.9 tok/s | 0.9 s |
+
+**~95% of generation time is prompt prefill, not token generation.** Capping `num_predict`
+would save nothing. The lever is fewer or smaller chunks — which makes **`k` the primary
+latency parameter**, not just a quality one. Prefill is actually *faster* per token
+(15 vs 3.9 tok/s); it dominates because there are ~80× more prompt tokens than answer
+tokens.
+
+Six further cold samples (the gotcha 19 experiment) put prefill at a consistent
+**18–21 tok/s**, slightly better than the two figures above, so treat ~20 tok/s as the
+working number and the 15 tok/s samples as mildly contended. The conclusion is unchanged:
+at 20 tok/s a 2,349-token prompt costs ~117 s against ~14 s of decode, still **~90% prefill**.
+
+Two details worth knowing:
+- **Abstaining does not save time.** The out-of-corpus question still paid 130 s of prefill —
+  retrieval hands over five chunks regardless, and the model reads all of them before
+  declining. Only decode is short (10 tokens).
+- `load_ms` was 0.0 s on every timed question, confirming the warmup call absorbs the model
+  load exactly as intended (gotcha 9).
+
+Caveat: the eval-wide p50 split still needs a full generation run, which has not happened.
+
+**Still outstanding from the original §3a list:** the golden set is not finalised (see open
+questions 2 and 5), and no fast-iteration subset exists.
 
 ## 3b. Known behaviour worth reviewing by hand
 
 - **7 of 9 false abstentions had the evidence retrieved**, 4 of them at rank 1. The pattern is
   yes/no and read-the-table questions (rows 33, 35, 40) plus negation (row 53) — the model
   declines when the answer must be *inferred* rather than copied. This is prompt strictness,
-  not retrieval, and Phase 2's move of prompts into `config/prompts.yaml` is what makes it
-  A/B-testable.
+  not retrieval, and now that prompts are versioned it is A/B-testable as prompt v2.
+- **Golden rows 36 and 67 are further instances of the same failure**, deliberately kept.
+  Row 67's page states "a duration of 3 (three) years... extension... up to a maximum of two
+  (2) additional years"; the answer, 5 years, requires adding two stated figures. That is
+  reading a compound fact, not inventing one, and a system that cannot do it is a search box
+  rather than an assistant. Their `must_contain` values are legitimately absent from the
+  target page — the only two rows for which that is true, and by design.
 - **5 questions failed retrieval but only 2 abstained.** The other 3 answered with no golden
   chunk retrieved — hallucination candidates, worth reading manually.
+- **Glossary pages are systematically hard to retrieve** (§3d). An abbreviations table
+  mentions a term once, in a list, with no context, and both retrievers prefer pages that
+  *use* the term over the page that *defines* it. Rows 61 and 62 are the only two questions
+  whose golden page never enters the candidate pool at all.
 - **Use `--no-save` for exploratory runs** rather than saving unlabelled results. Always pass
   `--label` on runs worth keeping; unlabelled files become archaeology.
 
+## 3c. Phase 2 status — READ THIS BEFORE CONTINUING
+
+### What is done
+
+| Change | Code | Retrieval measured | Generation measured |
+|---|---|---|---|
+| a. BM25 via `rank-bm25` | done | done | **no** |
+| b. Reciprocal rank fusion | done | done | **no** |
+| c. Cross-encoder reranking | done | done | **no** |
+| d. `config/prompts.yaml` v1 | done | n/a | **no** |
+| e. Empanelment version conflict | **not started** | | |
+
+Four retrieval-only results files are saved and labelled:
+`phase2-baseline-vector-retrieval`, `phase2a-bm25-only-retrieval`,
+`phase2b-hybrid-rrf-retrieval`, `phase2c-rerank-retrieval`.
+
+### The gap that matters most
+
+**`src/generate.answer()` takes no retrieval mode**, so it always uses `DEFAULT_MODE`
+(`vector`):
+
+```python
+def answer(question, k=DEFAULT_K):
+    hits = search(question, k=k)          # <- no mode argument
+```
+
+Consequence: **the Streamlit app and `python -m src.generate` still use Phase 1 retrieval.**
+The four new modes are reachable *only* from the eval harness, which calls `search(...)`
+directly. The measurement uses Phase 2; the product does not.
+
+Fix next session: thread a `mode` parameter through `answer()`, add a mode selector to the
+sidebar in `app.py`, and decide whether `DEFAULT_MODE` should change (see design decision 20).
+
+### Zero generation runs exist for Phase 2
+
+Every generation metric currently on record — citation correctness, abstention,
+`must_contain`, latency — is **Phase 1 code with Phase 1 retrieval**. A full local run was
+started and deliberately stopped after ~15 minutes. Nothing was saved.
+
+`prompt_version` and `gen_stats` have therefore never been written to a *saved* results file.
+
+**Smoke-tested 2026-08-22.** Three questions (one `must_contain`, one ABSTAIN, one plain)
+were run through `evaluate -> summarise -> report` in `rerank` mode with generation enabled,
+and the save block was replicated to confirm serialisation. **The path works**: every new
+metric key is produced (`n_false_abstention_denom`, `abstained_on_retrieval_miss`,
+`false_abstention_rate_unconditioned`, `prompt_eval_ms_p50`, `eval_tps`, `n_timed`,
+`n_model_reloads`) and the payload serialises cleanly. No crash risk at the end of a long
+run.
+
+Run twice (the first run's machine slept mid-way). Between the two runs the code path behaved
+identically, but **the generation metrics did not** — see gotchas 17, 18 and 19, which came
+out of comparing them. Those three are the most consequential things learned this session and
+they all bear on how the overnight run must be done and read.
+
+Cosmetic nit to fix while you are in there: the `report()` line for
+`abstained_on_retrieval_miss` prints as `...also declined on a  0  retrieval miss
+(correctly)`, which reads badly. Reword it.
+
+### Golden set went 56 -> 69 on 2026-08-24
+
+All four retrieval baselines were re-run on the new set and §3d reflects it. What has **not**
+been redone is the **generation** baseline: the only one on record is the 2026-08-19 run over
+56 questions, which is not comparable to anything current.
+
+So the state is: retrieval is measured on 69 questions, generation is measured on 56, and the
+two cannot be put in the same table. Fixing that is ~2.5 h locally or ~10 min hosted.
+
+Also changed in that edit: `must_contain` values had their units stripped (design decision 8),
+so `must_contain_pass` from the 2026-08-19 run is not comparable to any future value either —
+it was measured under the old, stricter definition.
+
+## 3d. Phase 2 retrieval results — 69 questions, k=5
+
+Re-run 2026-08-24 on the current golden set (60 answerable, 9 abstain). Measured one change
+at a time. Results files are labelled `phase2-{vector,bm25,hybrid,rerank}-retrieval-69q`.
+
+| Retriever | hit@1 | hit@3 | hit@5 | MRR | Δ MRR | p50 |
+|---|---|---|---|---|---|---|
+| `vector` (Phase 1 baseline) | 48.3% | 71.7% | 90.0% | 0.624 | — | 26 ms |
+| `bm25` | 58.3% | 78.3% | 81.7% | 0.677 | +0.053 | 2 ms |
+| `hybrid` (RRF) | 51.7% | 81.7% | 86.7% | 0.671 | −0.006 | 29 ms |
+| `rerank` | **71.7%** | **85.0%** | **95.0%** | **0.795** | **+0.124** | 3,269 ms |
+| **vs baseline** | +23.4 | +13.3 | +5.0 | **+0.171** | | 126× |
+
+Candidate-pool recall — the ceiling a reranker of that pool can reach:
+
+| Pool | recall@5 | recall@10 | recall@20 | recall@30 |
+|---|---|---|---|---|
+| `vector` | 90.0% | 90.0% | 95.0% | 96.7% |
+| `bm25` | 81.7% | 86.7% | 95.0% | **98.3%** |
+| `hybrid` | 86.7% | 95.0% | 96.7% | 96.7% |
+
+### What changed against the 56-question set, and what it means
+
+The shape of the result survived: BM25 still beats the embeddings on hit@1 and MRR, RRF still
+costs hit@1 while buying hit@3, and reranking is still where the gain is. But three claims
+that held at 56 questions do **not** hold at 69, and two of them were load-bearing.
+
+**1. `hit@5 = 100%` is gone — it is now 95.0%.** Three golden pages are missing from the final
+top 5. The perfect score was an artefact of the smaller set, and its disappearance is a useful
+correction: it was always the number most likely to be flattering.
+
+**2. Hybrid is no longer the best candidate pool — BM25 alone is.** At depth 30 BM25 reaches
+98.3% against hybrid's 96.7%. On the old set they tied at 100%, and hybrid was chosen on a
+margin argument. **That argument has now reversed**, and open question 5 is no longer
+hypothetical — it is the single most likely improvement available.
+
+**3. RRF can push a chunk out of the candidate pool entirely, not merely demote it.** Row 61
+("What do mean by DDO?") is the clean case:
+
+```
+vector  NOT IN TOP 30
+bm25    rank 17          <- the only retriever that finds it
+hybrid  NOT IN TOP 30    <- RRF drops it below 30 chunks both retrievers agreed on
+```
+
+This is the row-39 mechanism with a fatal outcome. A demotion inside the pool is recoverable
+by the reranker; being pushed out of the pool is not. Fusion is discarding exactly the
+find that BM25 was added to contribute.
+
+### The new failure mode: glossary pages
+
+Rows 61 and 62 are the only two questions whose golden page is absent from the hybrid pool
+altogether, and they are the same kind of question — acronym lookups answered by an
+abbreviations table.
+
+- `DDO` appears on **exactly one page of the corpus** (`operation_manual.pdf` p.3, the
+  glossary) and still is not retrieved by embeddings at all. BM25 gets it to rank 17.
+- `CSC` appears on 15 pages and the question lists **five** valid golden pages. Measured
+  separately, **both retrievers find one** — vector reaches `operation_manual.pdf` p.3 at
+  rank 23, BM25 reaches `grievance_redressal.pdf` p.22 at rank 26. They are different valid
+  pages, so neither is corroborated, each gets a single RRF contribution, and **fusion drops
+  both.** Two right answers went in and nothing came out.
+
+  This generalises into a rule worth remembering: **RRF is hostile to questions with several
+  valid answers.** The more valid targets a question has, the more likely the two retrievers
+  land on different ones, and the more likely fusion discards all of them for lack of
+  agreement.
+
+**A glossary page mentions a term exactly once, in a list, with no explanatory context.** Both
+retrievers systematically prefer pages that discuss a term over the page that defines it. This
+is a real corpus-level weakness worth stating in the README failure analysis, and it is
+unlikely to be fixed by reranking — the cross-encoder never sees the page.
+
+### Reranker regressions still present
+
+Row 58 entered the pool at rank 3 and the cross-encoder pushed it below the top 5. The
+edition-confusion and adjacent-page-crowding failures recorded previously still stand.
+
+### Latency note
+
+`rerank` p50 is **3,269 ms** here against 6,075 ms on the 56-question run. Same depth, same
+model. The earlier figure was measured on a machine that was doing other things; this one was
+measured idle. Treat ~3.3 s as the real cost and see gotcha 21 — batch padding makes it vary
+with chunk length regardless.
+
 ## 4. Design decisions — do not silently reverse these
+
+Phase 1:
 
 1. **Chunks never span a page boundary.** Every chunk carries exactly one page number, so a
    citation always points at a page that genuinely contains the text. Costs cross-page
@@ -125,16 +338,87 @@ is the headline number to move.** `hit_rate@5` can barely improve; MRR can.
 4. **Page numbers are physical position in the file** (`i + 1`), matching a PDF viewer's page
    counter — not the number printed on the page.
 5. **No orchestration framework.** The retrieval loop is plain Python on purpose.
-6. **Prompts are inline in `src/generate.py`.** Moving them to a versioned
-   `config/prompts.yaml` is Phase 2 work.
+6. ~~Prompts are inline in `src/generate.py`.~~ **Superseded in Phase 2** — see 17.
 7. **The golden set is anchored to `(source_file, page)`, never chunk IDs.** This is what lets
    the eval survive re-chunking, re-embedding and model swaps — without it, no Phase 2 number
    could be compared to the Phase 1 baseline.
-8. **`must_contain` is matched against the model's answer, not against the page.**
+8. **`must_contain` holds the smallest string that carries the fact — normally a bare
+   number — and is matched against the model's answer, not against the page.**
+
+   It exists to catch exactly one failure: *the right page was retrieved and the model stated
+   the wrong figure.* It is deliberately **not** a test of phrasing, completeness or style.
+
+   That is why units are stripped. `48` passes on "48 hrs", "48 hours" and "forty-eight
+   hours"; `48 hrs` fails all but one of them. `136` passes on both "136 percent" and "136%".
+   The number is the claim; the unit wording is presentation, and the source's own wording is
+   not the only correct wording. Keeping the value bare also needs no matcher changes — it is
+   still a plain substring check.
+
+   A phrase is right only when the phrase **is** the fact: acronym expansions such as
+   `Deputy District Officer`, or proper nouns like `Aadhaar`. A model writing "District
+   Deputy Officer" is genuinely wrong, so the words carry the claim there.
+
+   Leave the field **blank** for yes/no, definitional and descriptive questions. There is no
+   load-bearing value to check, and a phrase would only manufacture false failures.
+   `citation_correctness` and the abstention metrics still cover those rows.
+
+   **`must_contain_pass` is a floor, never a target.** Optimising the prompt to raise it would
+   push the model toward reciting source text verbatim, which is worse product behaviour, not
+   better. If it ever rises because answers got more literal, that is a regression wearing a
+   metric's clothing.
 9. **Retrieval metrics need no LLM** (`--retrieval-only`). Deliberate, and what makes CI
    possible later.
 10. **Errored questions are excluded from generation metrics**, not counted as wrong. A
     network blip must never look like a quality regression.
+
+Phase 2:
+
+11. **Fusion merges ranks, never scores.** A cosine similarity (~0.69) and a BM25 score
+    (~12.55) are different scales; combining them numerically needs a normalisation step that
+    is itself a tuned parameter. Positions are comparable without one.
+12. **`RRF_K = 60` and `FUSION_DEPTH = 30` are left at their published/brief defaults, not
+    tuned.** Tuning either against the 69 evaluation questions would be fitting a constant to
+    the test set and reporting the fit as a measurement. If you ever tune them, say so in the
+    README.
+13. **The BM25 index is built from the Chroma collection, not from `chunks.jsonl`.** This makes
+    it structurally impossible for the lexical and dense sides to search different corpora.
+    Re-chunk without re-indexing and the alternative would silently diverge.
+14. **The BM25 tokenizer keeps Indian-format numbers whole.** `\d[\d.,]*\d` before
+    `[a-z0-9]+`, so `5,00,000` survives as one high-IDF token instead of becoming
+    `5`/`00`/`000`. Hyphens deliberately split, so "PM JAY" matches "PM-JAY".
+15. **Tokenisation symmetry is per-retriever and opposite.** BM25 applies `tokenize()` to
+    *both* query and corpus; BGE applies its prefix to the *query only*. Two adjacent
+    retrievers with opposite rules — each is enforced inside one function so they cannot drift.
+16. **Every ranking breaks ties on `chunk_id`.** BM25, RRF and reranking all sort by
+    `(-score, chunk_id)`. Without it, equal scores resolve by whatever order the data arrived
+    in and two runs of identical code can report different numbers.
+17. **Prompts live in `config/prompts.yaml` with a `version` field**, recorded in every
+    generation results file. v1 was verified **byte-identical** to the `phase-1` git tag
+    (872 chars), which is what keeps the Phase 2 generation run comparable to the baseline.
+    The decline string is defined once and substituted into rule 3 via `{abstain}` so the
+    instruction and the string the eval matches cannot diverge. **Bump `version` on every
+    edit.**
+18. **`false_abstention_rate` is conditioned on the golden page having been retrieved.**
+    See §3a.1. Do not revert to the unconditioned form as the headline number.
+19. **One build reaches every phase, by flag — do not create per-phase branches or builds.**
+    `--retriever vector` reproduces Phase 1 retrieval exactly, and prompts v1 is byte-identical
+    to the phase-1 prompt, so today's code scores Phase 1 and Phase 2 with the *same harness*.
+    Separate builds would be scored by different harness versions and the numbers would not be
+    comparable — the same trap the unconditioned FAR was.
+    **This property has to be actively preserved.** It holds today because `retriever` and `k`
+    are parameters. It does *not* automatically extend to prompts v2 (use the `PMJAY_PROMPTS`
+    env var to point at a second file), and it cannot extend to re-chunking or an embedding
+    model swap, which need a re-index. Anything that changes the index breaks the property and
+    forces a full re-baseline.
+20. **Results from a superseded golden set move to `eval/results/archive-56q/`, never
+    deleted.** The JSON `label` fields do not record the question count, so the folder does
+    it instead, with a README naming what changed. Any future golden-set change gets the same
+    treatment: a new `archive-<n>q/` folder and a manifest. Deleting them would destroy the
+    record of how each phase was actually measured; leaving them loose in `eval/results/`
+    would invite someone to put incomparable numbers in the same table.
+21. **`DEFAULT_MODE` stays `"vector"` until generation evidence exists.** Retrieval improved,
+    but nothing yet shows that better ranking produces better *answers*. Switching the default
+    before measuring would make the product's behaviour change for unmeasured reasons.
 
 ## 5. Gotchas discovered the hard way
 
@@ -161,10 +445,13 @@ is the headline number to move.** `hit_rate@5` can barely improve; MRR can.
    Document-level triage is not content-level coverage.
 6. **Ollama evicts an idle model after 5 minutes.** Mid-eval that meant a ~2.5 min cold CPU
    reload that blew a 300s timeout and killed a whole run. Fixed with `keep_alive: "30m"`.
+   `gen_stats["load_ms"]` now exposes this — a non-zero load after warmup means an eviction
+   happened mid-run, and `n_model_reloads` counts it.
 7. **Ollama's default `num_ctx` is 4096** — too small for 5 chunks, and it truncates from the
    front, silently dropping the sources. Set to 8192.
 8. **`num_predict: 512`** caps answer length. Uncapped, one enumerating answer can run for
-   minutes on CPU and dominate a whole eval run.
+   minutes on CPU and dominate a whole eval run. Note the latency finding in §3a.2: this cap
+   is *not* where the time goes.
 9. **Latency must be measured after a warmup call to both stages**, or the embedding-model
    load (~5s) and Ollama's model load land entirely on question 1 and distort p50/p95.
 10. **CSV values containing commas must be quoted** (`"4,500"`). One unquoted value shifted a
@@ -173,53 +460,185 @@ is the headline number to move.** `hit_rate@5` can barely improve; MRR can.
 11. **Windows console is cp1252** and crashes on non-encodable characters; `eval/find.py`
     reconfigures stdout with `errors="replace"`.
 12. **`grep` buffers when piping to a file**, so a backgrounded run appears to produce no
-    output. Use `--line-buffered`, or run it in a terminal and watch the progress marks
-    (`.` hit, `x` miss, `E` generation error).
+    output. Use `--line-buffered`, or `python -u`, or run it in a terminal and watch the
+    progress marks (`.` hit, `x` miss, `E` generation error).
+
+Phase 2:
+
+13. **The cross-encoder's input window is 512 tokens and chunks target ~600.**
+    **299 of 872 chunks (34.3%) are truncated** before scoring, so a chunk whose only relevant
+    sentence sits in its tail can be scored as irrelevant. Not the cause of any regression
+    observed so far — row 24's chunk is 358 tokens — but a live risk. Re-chunking to fit would
+    change the indexing the Phase 1 baseline was measured against.
+14. **`CrossEncoder.predict` defaults to `batch_size=32`.** Depth ≤32 is a single batch; depth
+    33–63 costs two batches, and the second is mostly padding. If you raise `FUSION_DEPTH`,
+    go to 64, not 40. Also: batches pad to the *longest* sequence present, so one 512-token
+    chunk makes every chunk in that batch cost 512 tokens.
+15. **In `hybrid` and `rerank` modes, `hit["score"]` is no longer a similarity.** It is an RRF
+    score (~0.03) or a cross-encoder logit (unbounded, often negative). Anything that
+    thresholds or compares `score` across modes will break silently. Nothing does today —
+    abstention is the model's judgement, not a threshold — but see open question 3.
+16. **`chroma/` and `data/processed/` are gitignored**, and `chroma/` is 16 MB. Nothing
+    deployable exists in the repo today; the index has to be committed or rebuilt on the host.
+    See [DEPLOYMENT.md](DEPLOYMENT.md).
+17. **A machine that sleeps mid-run silently corrupts the latency numbers.** Ollama reports
+    wall-clock elapsed time, so a suspend inflates whatever phase it slept through. In the
+    2026-08-22 smoke test one question logged **3,051 s of prompt eval for 2,317 tokens —
+    0.76 tok/s against the usual ~15** — purely because the machine slept. It dragged
+    `generate_ms_p95` to 47 minutes.
+    The tell is that **only one phase inflates**: that same question's decode ran at
+    4.03 tok/s, exactly normal, and `load_ms` stayed at 0.7 s with `n_model_reloads` at 0.
+    Genuine CPU contention would slow *both* phases; an Ollama eviction (gotcha 6) would show
+    in `load_ms`. Neither happened.
+    **Disable sleep and screen-lock before the overnight run** — `powercfg /change
+    standby-timeout-ac 0` — and sanity-check p95 against p50 afterwards. One suspended
+    question makes the whole latency table meaningless.
+18. **Re-running the same questions gives fake prefill numbers — Ollama caches prompts.**
+    The clean rerun of the same three questions reported prompt eval of **0.2 s for 2,349
+    tokens, i.e. 10,392 tok/s**, against the true ~15 tok/s. That is a KV-cache hit, not a
+    measurement: llama.cpp keeps per-slot prompt caches, retrieval is deterministic, so the
+    second run sent byte-identical prompts and paid nothing to ingest them.
+    Consequences: **prefill numbers from any repeat run are worthless**, and a `prompt_eval_tps`
+    in the thousands is the signature to look for. A first run over 69 distinct questions is
+    genuinely cold and unaffected. If you need to re-measure latency, restart Ollama first.
+    (The two diagnostic samples in §3a.2 were both first-time questions on a freshly loaded
+    model, so those numbers stand.)
+19. **Generation IS reproducible — but only from a cold model. Unload before any run you
+    will compare.** *Settled 2026-08-22.*
+
+    Two smoke runs of the same three questions produced different answers
+    (`citation_correctness` 50% → 100%, `must_contain_pass` 0% → 100%), which raised the
+    question of whether `temperature: 0` was reproducible at all. It is. The cause was the
+    prompt cache in gotcha 18, not the CPU backend.
+
+    The experiment: unload the model, run three fixed questions, unload, run them again.
+    **All three answers were byte-identical across both cold passes** — 53 / 10 / 374 answer
+    tokens both times, and identical retrieved chunks. Prefill ran at 18–21 tok/s in both
+    passes, confirming the unload really did clear the cache and the test was valid.
+
+    So the rule is a protocol one, and it is simple:
+
+    > **Unload the model before any run whose numbers will be compared to another run.**
+    > `POST /api/generate` with `{"model": ..., "prompt": "", "keep_alive": 0}`, then poll
+    > `/api/ps` until empty.
+
+    Follow it and generation metrics stay single-number and comparable — no repeats, no
+    variance reporting needed. Skip it and a re-run silently reports different quality
+    numbers for the same configuration. Note that the *first* run after a fresh Ollama start
+    is already cold, so the overnight run needs nothing special beyond not being a repeat.
+
+    The comment in `src/generate.py` calling `temperature: 0` "deterministic, so eval runs
+    are comparable" is now accurate, but should say *"deterministic from a cold model"* —
+    the qualifier is the whole finding.
+
+20. **A single-digit `must_contain` can pass on a citation marker.** The check runs against
+    the raw answer, which contains `[1]`–`[5]` citations at k=5. So `must_contain: 5` matches
+    an answer that cites `[5]` while never stating the figure — a silent false pass. Seven
+    rows currently carry a single digit (5, 7, 20, 32, 44, 58, 67) and five of those are
+    values ≤ 5.
+    **Fix when next touching `eval/run_eval.py`:** strip `CITATION_RE` matches from the answer
+    before the `must_contain` comparison. Citations are metadata, not content, so removing
+    them is unambiguously correct and does not reintroduce any sensitivity to phrasing.
+    Retrieval-only runs are unaffected, so this does not invalidate any retrieval baseline.
+21. **Reranking latency varies with chunk length, not just candidate count.** The batch pads
+    to the longest sequence in it (gotcha 14), so a pool of short chunks is cheaper than a
+    pool containing one 512-token chunk. The smoke test saw retrieve p50 of 2.6 s against the
+    full eval's 6.1 s for the same depth, purely from shorter candidates. Do not treat
+    reranking latency as a constant.
 
 ## 6. Open questions
 
 1. **Which empanelment edition is currently in force?** Unresolved. Version 2.0 declares its
    version; the other is dated December 2021. Settle against NHA circulars, not filenames —
    inferring from filenames is what produced the false pair in gotcha 3.
-   `Docs/empanelment-diff.md` lists 13 same-clause-different-number pairs.
+   `Docs/empanelment-diff.md` lists 13 same-clause-different-number pairs. Row 41 shows the
+   reranker confidently preferring the wrong edition, so this is now a measured failure, not
+   a hypothetical one.
 2. **Golden set row 25 is incomplete.** "5,00,000" appears in **7** documents; only 4 are
    listed as targets, so a correct retrieval scored as a miss. Add the missing pages
    (`operation_manual.pdf` p.17, `antifraud_guidebook_2024.pdf` p.13,
    `empanelment_dec2021.pdf` p.7) or drop the row. As written it understates hit rate.
 3. **Abstention is the model's judgement, with no similarity threshold.** Observed top scores:
    ~0.79 in-corpus vs ~0.53 out-of-corpus. A threshold looks learnable, but must be set from
-   the eval set with its false-abstention cost measured — not guessed from two examples.
-4. **`k = 5` is untuned**, and the right value may change once reranking exists.
-5. **56 questions, slightly under the brief's 60-80.** Four more would put it on spec.
+   the eval set with its false-abstention cost measured — not guessed from two examples. Note
+   that after Phase 2 the score is mode-dependent (gotcha 15), so any threshold must be
+   defined per mode.
+4. **`k = 5` is untuned**, and it is now known to be the dominant latency parameter (§3a.2).
+   Reranking makes a smaller `k` plausible for the first time: hit@3 was 73.5% in Phase 1 and
+   is 89.8% after reranking. Dropping k=5→3 would cut roughly a third of query time at a cost
+   of ~5 questions in 49 losing their evidence. Worth measuring.
+5. **Is the hybrid pool actually WORSE than a BM25-only pool for reranking?** *Evidence now
+   says probably yes — this is the top candidate for the next improvement.*
+   On the 69-question set BM25 alone reaches **98.3% recall@30** against hybrid's **96.7%**.
+   On the old 56-question set they tied at 100% and hybrid was kept on a margin argument;
+   that argument has reversed. Row 61 shows the mechanism concretely — BM25 finds the page at
+   rank 17 and RRF pushes it out of the top 30 entirely (§3d).
+   The experiment is a `bm25 → rerank` mode compared against `hybrid → rerank` on the same
+   questions. Three outcomes: bm25 wins (drop the vector retriever from the pool, simpler and
+   faster), tie (drop it anyway), hybrid wins despite lower recall (its distractors are
+   better — worth knowing and worth writing down). Recall is necessary but not sufficient:
+   two pools can have identical recall and still hand the cross-encoder different wrong
+   answers to be tempted by.
+6. **Rerank depth 30 is inherited from the brief, not derived.** On the 69-question set the
+   pool no longer saturates — hybrid recall is 96.7% at both 20 and 30, and BM25 is still
+   climbing at 30 (98.3%), so a *deeper* pool may now be the right move rather than a
+   shallower one. That reverses the earlier reading. Saves ~2 s of ~133 s, so it is not worth the test-set
+   contact today; it becomes worth doing once generation is fast (§7), where reranking would
+   be ~75% of query time instead of 4%.
+7. **Does better retrieval actually produce better answers?** Completely unmeasured, and not
+   obvious: 7 of 9 false abstentions already had the evidence at rank 1–5, so the failure is
+   the model declining to use what it was given, not the retriever failing to find it.
+   Reranking may move citation correctness very little.
 
-## 7. Next: Phase 2
+## 7. What remains in Phase 2
 
-Per the brief, and **re-running the eval after each individual change, recording the number
-every time** — the point is knowing what each change bought, not the final total.
+In order. Items 1–3 are prerequisites for any benchmark being trustworthy.
 
-1. **BM25** keyword search via `rank-bm25`, alongside the existing vector search. Expected to
-   help where embeddings are weak: exact package codes, specific figures.
-2. **Reciprocal rank fusion** to merge the BM25 and vector result lists.
-3. **Cross-encoder reranking** of the top ~30 with `cross-encoder/ms-marco-MiniLM-L-6-v2`.
-   The change most likely to move MRR.
-4. **Move prompts to `config/prompts.yaml`** with a version field.
-5. **Handle the empanelment version conflict** — metadata field vs separate collections.
+1. **Finish the golden set**, then re-run all four retrieval modes (~10 min) to re-baseline.
+   Everything in §3d is provisional until this happens.
+2. **Thread retrieval `mode` through `src/generate.answer()`** and expose it in `app.py`.
+   Until then the product cannot use any Phase 2 work (§3c).
+3. **Record the LLM model in the results `config` block.** It records `embed_model` but not
+   `OLLAMA_MODEL`. The moment a hosted model is in play, every results file is ambiguous
+   about which model produced it.
+4. **Swap in a hosted-LLM backend** — see [DEPLOYMENT.md](DEPLOYMENT.md). This turns a 2.5 h
+   generation run into ~10 minutes and unblocks everything below.
+5. **Generation runs**: hosted `--retriever vector` (Phase 1 baseline) and hosted
+   `--retriever rerank` (Phase 2). That pair is the answer to "what did Phase 2 buy?"
+   Optionally a local Phase 2 run overnight to complete the local grid.
+6. **Handle the empanelment version conflict** — metadata field vs separate collections.
    Open question 1 gates the expected answers, not the retrieval work.
+7. **Prompt v2**, targeting the inference-vs-copying weakness in §3b, A/B'd against v1 with
+   nothing else changed. The specific edit is to split what rule 2 currently conflates:
+
+   - *Do not introduce any fact not present in the sources* — keep, strictly. This is the
+     anti-hallucination rule and it is doing real work.
+   - *You may combine or compute from figures the sources state* — add, explicitly. Rule 2 as
+     written ("do not infer beyond what is written") reads as a ban on arithmetic over stated
+     values, which is not what it is for.
+
+   Rows 36 and 67 plus the four rank-1 false abstentions in §3b are the measurement for
+   whether v2 worked. Watch `abstention_recall` at the same time: the risk of loosening rule 2
+   is that the model starts answering questions it should decline, so a gain in
+   `false_abstention_rate` that comes with a drop in `abstention_recall` is not a win.
 
 Then CI/CD: `--retrieval-only --min-hit-rate` runs on the runner (no Ollama available);
 generation metrics run locally and are committed as a results file CI verifies. Retrieval
 enforced by execution, generation by attestation, tradeoff stated honestly in the README.
 
-**A real possibility to plan for:** hybrid retrieval and reranking may show little or no gain.
-The brief is explicit that reporting that honestly is more credible than assuming it helped.
-Do not tune until the numbers look good.
+**On honesty about results:** hybrid retrieval and reranking produced a large *retrieval*
+gain. That says nothing yet about answers. If the generation numbers show no improvement,
+report that — the brief is explicit that a measured null result is more credible than an
+assumed win. Do not tune until the numbers look good.
 
 ## 8. Anti-goals — from the brief
 
-- **Do not generate eval questions with an LLM.** The 56 in `eval/golden_set.csv` are
-  hand-written and hand-verified. Scoring LLM-written questions with an LLM judge measures
-  the model agreeing with itself.
+- **Do not generate eval questions with an LLM.** The golden set is hand-written and
+  hand-verified. Scoring LLM-written questions with an LLM judge measures the model agreeing
+  with itself.
 - Do not add hybrid retrieval or reranking without recording the baseline first (done).
 - Do not adopt a heavy orchestration framework.
 - Do not drop page-number tracking anywhere in the pipeline.
 - Do not start the multilingual work until English is measured and working.
+- **Do not tune hyperparameters against the golden set** without saying so. `RRF_K`, fusion
+  depth and `k` are all currently untuned, which is a claim worth being able to make.

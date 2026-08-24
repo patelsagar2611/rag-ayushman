@@ -51,7 +51,10 @@ streamlit run app.py
 Command line, without the UI:
 
 ```powershell
-python -m src.retrieve "hospital empanelment criteria"   # retrieval only
+python -m src.retrieve "hospital empanelment criteria"                  # dense, the default
+python -m src.retrieve --mode bm25 "PAN card"                          # keyword only
+python -m src.retrieve --mode hybrid "empanelment renewal"             # RRF of both
+python -m src.retrieve --mode rerank "annual cover per family"         # + cross-encoder
 python -m src.generate "What is the annual cover per family?"
 ```
 
@@ -60,6 +63,7 @@ python -m src.generate "What is the annual cover per family?"
 ```powershell
 python -m eval.run_eval --retrieval-only     # no Ollama needed; this is the CI path
 python -m eval.run_eval                      # adds generation metrics
+python -m eval.run_eval --retriever rerank   # vector | bm25 | hybrid | rerank
 python -m eval.run_eval --min-hit-rate 0.7   # exit 1 below threshold
 python -m eval.diff_editions                 # regenerate Docs/empanelment-diff.md
 ```
@@ -74,7 +78,7 @@ python -m eval.diff_editions                 # regenerate Docs/empanelment-diff.
 | `expected_answer` | Human reference for manual review, **not** auto-compared. Literal `ABSTAIN` marks an unanswerable question. |
 | `source_file` | Filename(s). `,` or `;` separated. |
 | `page` | Page number(s), same separators. |
-| `must_contain` | Substrings the answer must include. **`;` separated only** — values like `5,00,000` contain commas. |
+| `must_contain` | The bare value the answer must state — see below. **`;` separated only**, since values like `5,00,000` contain commas. Often blank. |
 | `notes` | What this row tests. |
 
 Pages are **physical position in the file**, matching your PDF viewer's page counter — not
@@ -85,9 +89,38 @@ One filename broadcasts across several pages (`empanelment_v2_0.pdf` + `5;6`). E
 lists pair positionally, which is what version-conflict rows need, since the answer sits on
 a different page in each edition.
 
-`must_contain` is a case-insensitive substring test with whitespace collapsed. Use
-**distinctive** values — `70%`, `15 days`, `5,00,000`. Short common words are useless as
-checks: `No` matches inside "notice", "cannot" and "known", so it passes unconditionally.
+### What `must_contain` is for
+
+A case-insensitive substring test against **the model's answer**, with whitespace collapsed.
+It catches exactly one failure: *the right page was retrieved and the model stated the wrong
+figure.* It is deliberately not a test of phrasing, completeness or style.
+
+So it holds **the smallest string that carries the fact — normally the bare number, with
+units stripped**:
+
+| Not this | This | Why |
+|---|---|---|
+| `48 hrs` | `48` | passes on "48 hrs", "48 hours", "forty-eight hours" |
+| `136 percent` | `136` | passes on both "136 percent" and "136%" |
+| `15 working days` | `15` | passes however the model phrases the period |
+| `5,00,000` | `5,00,000` | unchanged — the commas are formatting, not units |
+
+The source document's wording is not the only correct wording. A user-facing answer that says
+"within 48 hours" when the manual says "48 hrs" is a *better* answer, not a wrong one, and a
+metric that fails it is measuring the wrong thing.
+
+A phrase is right only when the phrase **is** the fact — acronym expansions like
+`Deputy District Officer`, or proper nouns like `Aadhaar`. Leave the field blank for yes/no,
+definitional and descriptive questions; there is no load-bearing value to check, and
+citation correctness and the abstention metrics still cover those rows.
+
+Two failure modes to avoid at the edges. Short common words pass unconditionally — `No`
+matches inside "notice", "cannot" and "known". And a bare single digit can match a citation
+marker, so `5` passes on an answer that cites `[5]` without ever stating the figure; stripping
+citations before the comparison is a pending fix.
+
+**`must_contain_pass` is a floor, never a target.** Optimising the prompt to raise it would
+push the model toward reciting source text verbatim — worse product behaviour, not better.
 
 ### Finding page numbers
 
@@ -144,6 +177,186 @@ they are the concrete case for adding OCR in a later phase.
 **The golden set is still being written** — it is not yet a real eval set, and numbers from
 it are not yet meaningful. Per the brief's anti-goals it is hand-written, never generated.
 
+## Retrieval results — what each Phase 2 change bought
+
+69 hand-written questions (60 answerable, 9 expected to abstain), k=5, one change at a
+time, each measured on its own. Retrieval metrics need no LLM, so every row here is
+reproducible in minutes with `--retrieval-only`.
+
+> **These are retrieval numbers only.** No generation run has been done with Phase 2 code,
+> and the only generation figures on record were measured on an older 56-question set with
+> Phase 1 retrieval — so they are not comparable to anything here and are not reproduced in
+> this section. Whether better ranking produces better *answers* is currently **unmeasured**.
+
+| Retriever | hit@1 | hit@3 | hit@5 | **MRR** | retrieve p50 |
+|---|---|---|---|---|---|
+| `vector` — dense only (Phase 1 baseline) | 48.3% | 71.7% | 90.0% | **0.624** | 26 ms |
+| `bm25` — keyword only | 58.3% | 78.3% | 81.7% | **0.677** | 2 ms |
+| `hybrid` — RRF of the two | 51.7% | 81.7% | 86.7% | **0.671** | 29 ms |
+| `rerank` — hybrid top-30, cross-encoder | **71.7%** | **85.0%** | **95.0%** | **0.795** | 3,269 ms |
+| **change vs baseline** | **+23.4 pts** | **+13.3 pts** | **+5.0 pts** | **+0.171** | ×126 slower |
+
+Three of those rows are more interesting than the summary line.
+
+**BM25 alone beat the embeddings.** Not the expected result. On MRR (0.677 vs 0.624) and
+hit@1 (58.3% vs 48.3%) a bag-of-words scorer with no semantics outperformed
+`bge-small-en-v1.5`, at a thirteenth of the latency. It loses on hit@5 (81.7% vs 90.0%):
+when BM25 misses it misses completely, whereas dense retrieval degrades gracefully. The
+corpus explains it — these are government manuals full of rare, exact tokens (`HWCs`,
+`PAN card`, `5,00,000`, `HBP 2.2`) that a 384-dimension embedding blurs together and an IDF
+term rewards precisely.
+
+**Fusion made hit@1 worse.** RRF dropped rank-1 accuracy to 51.7%, below BM25's 58.3%, while
+lifting hit@3 to 81.7%. That is the mechanism working as designed rather than a bug: RRF
+rewards chunks both retrievers agree on, so a chunk one retriever ranks first and the other
+never returns gets pushed down. Taken as a final ranker, fusion is a poor trade here.
+
+It was kept because it is meant to be a **candidate generator** for the reranker, not a final
+ranker — and on that job the honest current answer is that **it is losing to BM25 alone**:
+
+| Pool for reranking | recall@5 | recall@10 | recall@20 | recall@30 |
+|---|---|---|---|---|
+| `vector` | 90.0% | 90.0% | 95.0% | 96.7% |
+| `bm25` | 81.7% | 86.7% | 95.0% | **98.3%** |
+| `hybrid` | 86.7% | 95.0% | 96.7% | 96.7% |
+
+A reranker can only reorder what it is handed, so pool recall is its hard ceiling — and BM25
+alone reaches more golden pages by depth 30 than the fused pool does. On an earlier
+56-question version of this set the two tied at 100% and fusion was kept on a margin
+argument; **that argument has since reversed and the design has not yet caught up.** Testing
+a BM25-only pool is the top open item.
+
+Row 61 shows how fusion actively destroys a find:
+
+```
+question: "What do mean by DDO?"     golden page: operation_manual.pdf p.3
+
+vector   NOT IN TOP 30
+bm25     rank 17            <- the only retriever that finds it
+hybrid   NOT IN TOP 30      <- RRF drops it below 30 chunks both retrievers agreed on
+```
+
+A demotion *inside* the pool is recoverable by the reranker. Being pushed *out* of the pool
+is not — so fusion here discards precisely the contribution BM25 was added to make.
+
+**Reranking is where the gain is**, and it is the gain the baseline predicted: the Phase 1
+gap between hit@1 and hit@5 said the right chunk was nearly always retrieved and merely
+ranked badly. Closing that was the whole thesis of Phase 2, and it closed — MRR moved
+0.624 → 0.795 and hit@1 rose 23 points.
+
+### A claim that did not survive a bigger question set
+
+An earlier 56-question version of this set produced `hit@5 = 100%` and `recall@20 = 100%`
+for the fused pool. Both figures dropped when eleven questions were added — to 95.0% and
+96.7%. The perfect scores were artefacts of the smaller set, and losing them is a useful
+correction rather than a regression: they were the numbers most likely to be flattering, and
+they were being used to justify an architecture choice that the larger set now contradicts.
+
+### Where retrieval fails completely: glossary pages
+
+Two questions have their golden page absent from the candidate pool entirely, and they are
+the same kind of question — an acronym answered by an abbreviations table.
+
+- `DDO` appears on **exactly one page of the whole corpus** — the glossary — and dense
+  retrieval still does not surface it at all.
+- `CSC` appears on 15 pages. All five golden targets are glossary pages; the fifteen
+  competitors are pages that *use* the term, and they win.
+
+**A glossary entry mentions a term once, in a list, with no explanatory context.** Both
+retrievers systematically prefer pages that discuss a term over the page that defines it, and
+no amount of reranking fixes it, because the cross-encoder never sees the page.
+
+### Two predictions, tested
+
+Both were registered before the code was written.
+
+**"BM25 should fix row 39 (`PAN card`), and do nothing for row 24."** Half right. `PAN card`
+occurs in 2 of 872 chunks; dense retrieval missed it entirely at k=5 and BM25 put it at
+**rank 1**. But row 24 was also fixed (MISS → rank 3), because the prediction reasoned from
+the wrong property. Row 24 was filed as a *layout* problem — the answer sits in the second
+column of a multi-column page — but the difficulty a retriever sees is in the *query*, and
+`HWCs` occurs in only 4 of 872 chunks. It is the same rare-token case as `PAN card` wearing
+a different label.
+
+**"Reranking should fix rows 26 and 35."** Both were retrieved at rank 4–5 in Phase 1 with
+the model abstaining anyway. Row 26 now reaches **rank 1** and row 35 **rank 3**. But the
+prediction was about *abstention*, which is a generation outcome — and no generation run has
+been done on this question set, so **this one is not yet resolved**. The retrieval
+precondition improved; whether the model now answers instead of declining is unmeasured.
+
+### Where reranking still fails
+
+The cross-encoder improved 20 questions against its own input and regressed 8, and leaves 17
+of 60 short of rank 1 — three of them missing from the top 5 entirely. The failures are worth
+reading, because they are not random.
+
+**It underweights an answer phrased differently from the question.** Row 24 asks "How many
+HWCs are estimated to be setup by 2022?" The golden chunk says `1,50,000 health and wellness
+centers will be set up`. It scored **-7.987** — near the bottom of the pool — despite being
+a 358-token chunk that plainly contains the answer, well inside the model's input window.
+The sentence never uses the acronym or the date, and an MS MARCO-trained reranker keys hard
+on that surface overlap. This is the exact mirror image of BM25's strength, and the reason
+fusion is worth keeping upstream of it even though fusion alone ranks worse.
+
+**It cannot tell the two empanelment editions apart.** Row 41 asks about a show-cause
+penalty; the golden page is `empanelment_v2_0.pdf` p.59 and the reranker promoted
+`empanelment_dec2021.pdf` p.23 above it. Both editions state the rule, in near-identical
+language, with different numbers. No reranker can resolve that — it is
+[open question 1](Docs/HANDOFF.md), which edition is in force, and it needs a metadata
+answer rather than a retrieval one.
+
+**Adjacent pages of the same document crowd each other out.** Row 30's top five are
+`grievance_redressal.pdf` pages 23, 24, 22, 25 and — fifth — the golden page 16. Appeal
+timelines recur across that whole chapter.
+
+**It can demote a page the pool had ranked well.** Row 58 entered the candidate pool at
+rank 3 and came out below the top 5. Reranking is not monotone — it is a different model with
+different opinions, and sometimes the retriever was right.
+
+**Caveat, stated rather than worked around:** the cross-encoder has a 512-token input window
+and chunks target ~600 tokens, so **34.3% of chunks (299 of 872) are truncated** before it
+scores them. A chunk whose only relevant sentence sits in its tail can be scored as
+irrelevant. It is not the cause of any regression above — row 24's chunk is well inside the
+window — but it is a live risk, and re-chunking to fit would change the indexing that the
+Phase 1 baseline was measured against.
+
+### Cost
+
+Reranking takes retrieval from 26 ms to 3.3 s per query, which sounds fatal and is not:
+generation on this machine is ~127 s per question, so the reranker adds about **2.5% to
+end-to-end latency** in exchange for +0.171 MRR. On a hosted LLM that arithmetic reverses
+and 3.3 s would dominate — worth stating, since the tradeoff is a property of the deployment,
+not of the reranker.
+
+That 3.3 s is also not a constant. The cross-encoder batches its 30 candidates and pads them
+to the longest sequence present, so a pool of short chunks is genuinely cheaper than one
+containing a 512-token chunk. An earlier measurement of the same configuration on a busy
+machine read 6.1 s.
+
+### Where the time actually goes
+
+Ollama reports its own breakdown, and `src/generate.py` now captures it. Two diagnostic
+samples, consistent:
+
+| | prompt eval (prefill) | generation (decode) | model load |
+|---|---|---|---|
+| cold | **162.9 s** · 2,456 tok · 15.1 tok/s | 7.6 s · 30 tok · 3.9 tok/s | 10.0 s |
+| warm | **161.3 s** · 2,547 tok · 15.8 tok/s | 9.1 s · 36 tok · 3.9 tok/s | 0.9 s |
+
+**~95% of generation time is spent reading the prompt, before the model writes a word.**
+Prefill is the *faster* phase per token (15 vs 3.9 tok/s); it dominates because there are
+~80× more prompt tokens than answer tokens — five retrieved chunks in, one short cited
+answer out.
+
+The consequence is that **`k` is the primary latency parameter**, not just a quality one.
+Capping `num_predict` harder would save nothing. And reranking earns a second dividend here:
+hit@3 was 73.5% in Phase 1 and is 89.8% now, which makes a smaller `k` defensible for the
+first time.
+
+A query therefore costs about **2¼ minutes end to end**, which is measured, reproducible,
+and not demoable. That is a property of running a 7B model on CPU, not of the pipeline —
+[Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md) plans the hosted-LLM swap that addresses it.
+
 ## Layout
 
 ```
@@ -154,8 +367,9 @@ src/inspect_corpus.py  text-native vs scanned triage
 src/extract.py         PyMuPDF, one record per page
 src/chunk.py           ~600-token windows, ~100-token overlap
 src/index.py           BGE embeddings -> Chroma; model + query prefix live here
-src/retrieve.py        dense vector search
-src/generate.py        prompt construction + Ollama call
+src/retrieve.py        vector / bm25 / hybrid RRF / cross-encoder rerank
+src/generate.py        prompt assembly + Ollama call, with latency breakdown
+config/prompts.yaml    versioned prompts
 app.py                 Streamlit UI
 eval/golden_set.csv    hand-written questions, committed
 eval/known_gaps.csv    written but unscorable (answer lives in an image)
@@ -163,6 +377,10 @@ eval/run_eval.py       scoring harness; --retrieval-only needs no LLM
 eval/find.py           keyword lookup, for filling in page numbers
 eval/diff_editions.py  where the two empanelment editions disagree
 eval/results/          one committed JSON per run
+Docs/HANDOFF.md        authoritative status: what is done, half-done, and next
+Docs/DEPLOYMENT.md     hosted-LLM and public-demo plan (not built yet)
+Docs/PMJAY-RAG-PROJECT.md  the original brief
+Docs/empanelment-diff.md   where the two empanelment editions disagree
 ```
 
 ## Corpus provenance
@@ -247,8 +465,22 @@ Both sides import from one module so they cannot drift.
 **`num_ctx` is set to 8192 on the Ollama call.** Five chunks of ~600 tokens overruns the
 4096 default, which would silently drop the sources at the front of the prompt.
 
-**Prompts are inline in `src/generate.py` for now.** Moving them to a versioned
-`config/prompts.yaml` is Phase 2 work.
+**Prompts live in `config/prompts.yaml` with a `version` field**, which every results
+file records. Prompt edits and retrieval changes move the same generation metrics, so
+without the version there is no way to tell a reranking gain from a prompt tweak made the
+same afternoon. Version 1 is the Phase 1 prompt moved across verbatim — verified
+byte-identical to the `phase-1` tag, so the Phase 2 generation run stays comparable.
+
+**Fusion merges ranks, never scores.** A cosine similarity of 0.69 and a BM25 score of
+12.55 are numbers on different scales, and combining them directly needs a normalisation
+step that is itself a tuned parameter. Reciprocal rank fusion needs no such step. `RRF_K`
+is left at the published default of 60 rather than tuned against these 69 questions —
+fitting a constant to the test set and reporting the result as a measurement is exactly
+the failure mode this eval exists to avoid.
+
+**The cross-encoder has a 512-token window and chunks target ~600 tokens**, so the tail of
+a long chunk is truncated and invisible to the reranker. Stated rather than worked around:
+re-chunking to fit would change the indexing the Phase 1 baseline was measured against.
 
 ## Early observation to test in the eval
 
@@ -261,15 +493,42 @@ That is a concrete, falsifiable prediction for what the Phase 2 reranker should 
 writing eval questions that target it, and worth recording the baseline number before
 touching retrieval.
 
-## Not yet built
+**Resolved.** That question is golden row 25. Dense retrieval alone never surfaced the page
+stating `5,00,000` within the top 5; BM25 put it at rank 1, and after reranking it sits at
+rank 1. The prediction held: the failure was ranking *aboutness* above *answerhood*, and a
+cross-encoder — the only component that reads the question and the passage together — is
+what fixed it.
 
-- Golden eval set (60–80 hand-written QA pairs) — Phase 3, and written by hand, not generated
-- Hybrid BM25 + vector retrieval with reciprocal rank fusion — Phase 2
-- Cross-encoder reranking — Phase 2
-- Metrics table, failure analysis, CI — Phase 3
+## Status
 
-Baseline metrics must be recorded before any of the Phase 2 retrieval work, or there is
-no way to say what it bought.
+Phase 1 is complete and measured. Phase 2's retrieval work is written and measured; its
+generation work is not. [Docs/HANDOFF.md](Docs/HANDOFF.md) is the authoritative status
+document — §3c lists exactly what is finished and what is half-finished.
+
+**Done**
+
+- Hybrid BM25 + vector retrieval with reciprocal rank fusion
+- Cross-encoder reranking, measured one change at a time against a recorded baseline
+- Prompts moved to a versioned `config/prompts.yaml`
+- Generation latency broken down into prefill and decode
+
+**Not yet built**
+
+- Generation metrics for the current 69-question golden set — the only generation figures on
+  record were measured on an older 56-question set, so nothing here is comparable to them
+- Generation metrics for Phase 2 — no generation run has been done with the new retrieval
+- The retrieval modes are reachable only from the eval harness; `app.py` and
+  `python -m src.generate` still use Phase 1 dense retrieval
+- Handling of the empanelment version conflict, which reranking makes worse rather than better
+- Hosted-LLM backend and public deployment — planned in [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md)
+- CI running the eval per PR
+
+**Honest position on the headline number.** The +0.171 MRR is measured in-sample: 69
+hand-written questions serving as both development and test set, with no held-out split,
+where a single question moves the hit rate by two points. No hyperparameter was tuned
+against it — `RRF_K`, fusion depth and `k` are all at inherited defaults — but one
+architecture choice (feeding the reranker the fused pool) was made by reading test-set
+recall. Treat +0.195 as an upper bound rather than an expected production figure.
 
 ## Acknowledgment
 
