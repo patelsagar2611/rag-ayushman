@@ -11,10 +11,11 @@ or any OpenAI-compatible hosted endpoint.
 measured on a local model. 11 documents, 629 pages, 872 chunks, 69 hand-written evaluation
 questions.
 
-**The headline result is a negative one.** Reranking improved retrieval by 24% in MRR and
-that did *not* produce better answers — on the same questions, attribution got slightly
-worse. What it bought instead was coverage: the model refused fewer answerable questions.
-See [Generation results](#generation-results--did-better-retrieval-produce-better-answers).
+**The headline result: whether better retrieval produces better answers depends on the
+model.** Reranking improved retrieval by 24% in MRR. On a local 7B model that made attribution
+slightly *worse*; on a hosted model it made it better. Same retrieval, same prompt, same
+questions — opposite conclusions. See
+[Generation results](#generation-results--did-better-retrieval-produce-better-answers).
 
 [Docs/PMJAY-RAG-PROJECT.md](Docs/PMJAY-RAG-PROJECT.md) is the project brief;
 [Docs/HANDOFF.md](Docs/HANDOFF.md) is the authoritative status document.
@@ -422,26 +423,43 @@ Phase 1 baseline was measured against.
 
 ## Generation results — did better retrieval produce better answers?
 
-No. This is the result the project was built to find, and it went the other way.
+**It depends on the model, and that is the finding.**
 
-Two full runs, same 69 questions, same prompt v1, same local `qwen2.5:7b`. **Retrieval was
-the only variable.** Each run took ~3 hours on CPU.
+Four full runs: two retrievers (`vector`, `rerank`) × two models. Within each pair the model,
+the prompt and the questions are fixed, so **retrieval is the only variable**. Both pairs are
+scored against the same golden set. The arms decline different numbers of questions, so every
+figure below is restricted to the questions *both* arms of that pair answered — otherwise the
+metrics score different subsets.
 
-The two arms declined different numbers of questions (13 vs 8), so the headline metrics score
-different subsets and cannot be compared directly. Restricting to the **46 questions both
-runs answered** removes that:
+| head-to-head | `vector` | `rerank` | Δ |
+|---|---|---|---|
+| **local `qwen2.5:7b`** — 46 questions | **80.4%** | 73.9% | **−6.5 pts** |
+| **hosted `gemini-3.1-flash-lite`** — 52 questions | 90.4% | **94.2%** | **+3.8 pts** |
 
-| on identical questions | `vector` | `rerank` |
-|---|---|---|
-| retrieval quality (MRR) | 0.624 | **0.795** |
-| cited a golden page | **36/46 = 78.3%** | 33/46 = 71.7% |
-| stated a wrong figure | **1 failure** | 4 failures |
+Retrieval improved identically in both rows — MRR 0.624 → 0.795, hit@1 48.3% → 71.7%. The
+answers moved in **opposite directions**.
 
-**The retriever 24% worse by MRR produced attribution 6.6 points better and four times fewer
-wrong figures.** Not a null result — a small regression, from an intervention that improved
-retrieval substantially.
+The local pair took ~3 hours per arm on CPU; the hosted pair ~10 minutes each.
+
+### Reading it
+
+The local model attributes worse in absolute terms — 80.4% against the hosted model's 90.4%
+under identical retrieval. **The model that already attributes well converts a retrieval gain
+into an answer gain. The model that struggles with attribution is made worse by the same
+change**, because of the mechanism below.
+
+So "we added reranking and the system improved" is not a claim retrieval metrics can support.
+It has to be measured per model, and a result measured on one model does not transfer.
+
+A caution on the local pair: it also showed **4 wrong figures against `vector`'s 1** on
+`must_contain`. On the hosted pair that difference vanished — one failure each, the same
+question. Small numbers, and the honest reading is that the `must_contain` gap was noise while
+the citation gap was not.
 
 ### The mechanism: reranking makes the context window harder to attribute within
+
+This is what happens on the local model, and it does **not** appear on the hosted one — where
+the only two questions that changed were pages `vector` missed entirely and `rerank` found.
 
 Two questions had the golden page at **rank 1 in both runs**, so retrieval position was
 identical and the only difference is the other four chunks:
@@ -479,13 +497,19 @@ measured on separate axes.
 
 ### How much to trust this
 
-n = 46 head-to-head, one 7B model, one corpus, and `citation_correctness` partly measures
-golden-set completeness rather than model behaviour. A hosted run on a much stronger model
-from a different family is the intended replication and is **not yet complete** — the free
-tier caps at 200,000 tokens/day and a single 69-question arm consumes essentially all of it.
+Two models, one corpus, 46 and 52 questions head-to-head. Enough to show the effect is
+**model-dependent**, not enough to say which models fall on which side without testing them.
 
-The finding is stated here because it is what the measurement says, not because it is
-convenient. If the replication contradicts it, that will be published here too.
+The golden set was corrected mid-way — four rows gained target pages. Both local arms were
+re-scored against the corrected set before the comparison above, and the fix moved both arms
+identically (one row, for both), so it is not the source of the difference. The models are.
+
+`citation_correctness` still partly measures golden-set completeness rather than model
+behaviour, so treat every figure here as a **floor**.
+
+**This replication contradicted an earlier version of this section, which reported the local
+result alone and concluded that better retrieval does not produce better answers.** That
+claim was too strong, and it is corrected above rather than quietly removed.
 
 ### Cost
 

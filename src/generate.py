@@ -215,7 +215,43 @@ def parse_openai_stats(payload, elapsed_ms):
 # excludes errored questions from generation metrics, so an un-retried 429 silently
 # shrinks the denominator instead of showing up as a failure.
 RETRY_STATUSES = (429, 500, 502, 503, 504)
-MAX_RETRIES = 5
+# Five was too few once a provider asks for a ~60 s wait: the run gave up after
+# ~30 s of exponential backoff and recorded 52 of 69 questions as errors.
+MAX_RETRIES = 8
+
+# How long to wait, in the provider's own words. Three places to look, because no
+# two providers agree:
+#   Retry-After header      the standard, and Groq sends it
+#   retry_delay in the body some Google APIs
+#   "retry in 55.9s" prose  Google's OpenAI-compatible endpoint, which sends NO
+#                           rate-limit headers at all and buries the number in the
+#                           error message
+# Guessing instead of reading it is what turned a rate limit into a failed run:
+# retrying early adds requests, and added requests are what caused the refusal.
+_RETRY_PROSE_RE = re.compile(r"retry in ([\d.]+)s", re.IGNORECASE)
+
+# Matches both "tokens per day (TPD)" (Groq prose) and
+# "GenerateRequestsPerDayPerProjectPerModel" (Google quota id). The first version
+# of this check tested for the lowercase spaced form only and therefore never
+# fired on Google -- so a 20-per-DAY quota was retried as though it were transient,
+# eight times, waiting on a "retry in 55.9s" hint that had nothing to do with the
+# daily reset.
+_PER_DAY_RE = re.compile(r"per[\s_]*day", re.IGNORECASE)
+
+
+def retry_delay(response, fallback):
+    """Seconds to wait before retrying, preferring what the provider actually said."""
+    header = response.headers.get("retry-after")
+    if header:
+        try:
+            return float(header)
+        except ValueError:
+            pass
+    match = _RETRY_PROSE_RE.search(response.text or "")
+    if match:
+        # A second of headroom: the window boundary is not ours to measure.
+        return float(match.group(1)) + 1.0
+    return fallback
 
 # --- Proactive pacing -------------------------------------------------------
 #
@@ -269,9 +305,24 @@ def note_limits(headers):
 # is the safe direction -- it waits slightly too often rather than too rarely.
 TOKENS_PER_CALL = 3200
 
+# Floor on the gap between requests, in seconds. Needed because not every provider
+# reports its budget: Groq sends x-ratelimit-* headers, Google sends none at all,
+# and pacing that reads headers is blind against a provider that omits them. A
+# fixed floor is cruder but works everywhere, and the lesson from Groq stands --
+# every retry is itself a billed request, so waiting beforehand is strictly cheaper
+# than being refused and retrying.
+LLM_MIN_INTERVAL_S = float(os.getenv("LLM_MIN_INTERVAL_S", "0"))
+_last_call = [0.0]
+
 
 def pace():
     """Wait until the next request will not be refused."""
+    if LLM_MIN_INTERVAL_S > 0:
+        gap = time.monotonic() - _last_call[0]
+        if gap < LLM_MIN_INTERVAL_S:
+            time.sleep(LLM_MIN_INTERVAL_S - gap)
+    _last_call[0] = time.monotonic()
+
     left, reset = _rate["tokens_left"], _rate["tokens_reset_s"]
     if left is not None and left < TOKENS_PER_CALL and reset > 0:
         time.sleep(reset + 0.5)
@@ -330,7 +381,7 @@ def call_openai_compatible(prompt):
         # This limit appears in NO response header; the 429 body is the only place it
         # is ever stated, which is why pacing against the per-minute headers cannot
         # see it coming. Fail immediately and say what to do.
-        if response.status_code == 429 and "per day" in response.text:
+        if response.status_code == 429 and _PER_DAY_RE.search(response.text or ""):
             raise SystemExit(
                 f"Daily quota exhausted on {OPENAI_MODEL}. Retrying will not help: "
                 "every retry is itself a billed request and the reset is hours away. "
@@ -339,8 +390,7 @@ def call_openai_compatible(prompt):
             )
 
         if response.status_code in RETRY_STATUSES and attempt < MAX_RETRIES - 1:
-            # Honour the provider's own backoff when it sends one.
-            wait = float(response.headers.get("retry-after", delay))
+            wait = retry_delay(response, delay)
             print(f"[{response.status_code}; retry in {wait:.0f}s]", end="", flush=True)
             time.sleep(wait)
             delay *= 2

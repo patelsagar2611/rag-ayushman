@@ -14,6 +14,136 @@ Phase 2 retrieval through commit `0e38259` is committed. The work described in �
 (mode threading, LLM recording, citation stripping, the pool comparison) is **written and
 verified but NOT yet committed** — check `git status` before assuming.
 
+---
+
+# 0. START HERE — session handoff, 2026-08-26
+
+## The headline finding
+
+**Whether better retrieval produces better answers depends on the model.** Same golden set,
+same prompt v1, same questions; retrieval the only variable within each pair:
+
+| head-to-head (questions BOTH arms answered) | vector | rerank | delta |
+|---|---|---|---|
+| local `qwen2.5:7b` — 46 q | **80.4%** | 73.9% | **−6.5 pts** |
+| hosted `gemini-3.1-flash-lite` — 52 q | 90.4% | **94.2%** | **+3.8 pts** |
+
+Retrieval improved identically in both rows (MRR 0.624 → 0.795). The answers moved in
+opposite directions. On the local model the cause is **window homogeneity** — reranking
+returns five near-duplicate chunks and the model loses track of which it used. On the hosted
+model that never happened: only two questions changed, both `miss` → rank 2–3.
+
+Working hypothesis: a model that already attributes well converts a retrieval gain into an
+answer gain; a model that struggles with attribution is confused by the same change.
+**Untested on a genuinely strong model** — that is the top open question.
+
+Three methodological notes that make this trustworthy:
+- Aggregates are useless here — the arms decline different numbers of questions, so **always
+  restrict to questions both arms answered** before comparing.
+- The local pair ran on golden set v1 and the hosted on v2. The local answers were re-scored
+  against v2 before comparing; the fix moved both arms by exactly one row, so the golden set
+  is not the cause. The models are.
+- An earlier version of the README claimed "better retrieval does not produce better answers"
+  from the local pair alone. That was too strong and is corrected in place, not deleted.
+
+## State of the tree
+
+Committed through `6c623ed`. **Uncommitted:** `README.md`, `src/generate.py`, and three
+untracked results files. Commit before doing anything else.
+
+Results files worth knowing (`eval/results/`):
+- `phase2-{vector,bm25,hybrid,rerank}-retrieval-69q` — the four retrieval baselines
+- `phase2-rerank-{hybrid,bm25,union}-pool-69q` — the pool comparison (§3e)
+- `phase1-vector-` / `phase2-rerank-generation-69q-local-qwen2.5-7b` — the local pair
+- `hosted-phase{1,2}-...-gemini-3.1-flash-lite` — the hosted pair
+- `FAILED-RUN-DO-NOT-USE-...gemini-3.5-flash` — 52 of 69 errored, kept deliberately as the
+  run that looked fine and was not. Metrics cover 17 questions.
+
+**All the 69-question runs before the golden-set fix used goldenv1.** Four rows gained target
+pages (9, 28, 62, 68). Re-score rather than re-run where possible: the answers are saved.
+
+## Free tiers were the bottleneck. Pay instead.
+
+Four separate rate-limit behaviours were hit across two providers, and each cost hours:
+
+| provider | limit | how it was found |
+|---|---|---|
+| Groq `gpt-oss-120b` | **200k tokens/DAY** | only ever stated in a 429 body, never a header |
+| Groq | every retry is a billed request | retries drained the request bucket, driving `retry-after` from 15 s to 1,700 s |
+| Gemini `3.5-flash` | **20 requests/DAY** | `quotaId: GenerateRequestsPerDayPerProjectPerModel` |
+| Gemini | no rate-limit headers at all, retry hint only as prose in the body | header-based pacing is blind against it |
+
+**A full 69-question run is a few cents.** Measured token use: ~2,400 input per question and a
+**median 25–32 output tokens** (max 427; only one answer ever reached the 512 cap). So a run
+is roughly 0.17M input + 0.003M output. At any budget-tier rate that is **under $0.05**.
+
+Put $10–20 on a card and this entire class of problem disappears. That is the single highest
+-value action available and it should happen before any further benchmarking.
+
+## Next steps, in order
+
+1. **Commit the tree.**
+2. **Buy credit and re-run the pair on a capable model.** The open question is whether the
+   local model's window-homogeneity penalty is a weak-model failure mode. `flash-lite` is
+   light; the hypothesis needs a strong model to be tested properly.
+3. **Multi-model comparison table for the README.** Now that a run costs pennies, run the same
+   golden set across 3–4 models and publish: cost/run, latency p50, citation correctness,
+   false abstention rate, `must_contain` pass. This converts "I picked a model" into "I
+   measured four models against a hand-built eval set." Very few portfolio projects do this,
+   and it is ~$1 of compute.
+4. **Batch APIs** offer ~50% off and the eval is offline — a natural fit. Keep the synchronous
+   path for the demo.
+5. Then the outstanding Phase 2 / Phase 3 work below (§7): empanelment version conflict,
+   prompt v2, paraphrase experiment, CI, deployment.
+
+### Choosing a model — use the method, not a name
+
+Model names and prices move faster than any document. **Do not trust a model name from a
+document, including this one.** The procedure that worked, in order, before committing to any
+model for a benchmark:
+
+1. `GET {base_url}/models` — list what the key can actually reach.
+2. **Reject `-latest` aliases and `preview` builds.** They change underneath a benchmark and
+   break comparability (design decision 19). Pin one stable, versioned id.
+3. Send **one real corpus prompt** through `config/prompts.yaml` and check three things:
+   citations parse (`parse_citations`), the abstain string matches byte-for-byte, and
+   `must_contain` still matches. This step has caught a failure **twice**: CJK bracket
+   citations `【1】`, and a dagger form `【2†L1-L3】`. Both would have reported
+   `citation_correctness` near zero with nothing explaining why. A model's output shape is
+   **prompt-dependent** — sampling three calls is not enough.
+4. Deliberately trigger a 429 and read the body. It is the only place daily quotas appear.
+
+OpenRouter is a reasonable way to compare many models behind one key and one balance, then
+move to a direct API once chosen — the adapter already supports this via `OPENAI_BASE_URL`
+and `OPENAI_MODEL`, so switching is configuration, not code.
+
+### Before any public demo
+
+- Hard monthly spend cap in the provider dashboard
+- Per-session query limit in `st.session_state`
+- `max_tokens` capped server-side
+- Key in Hugging Face Spaces secrets, never the repo
+- Log query volume to distinguish interest from abuse
+
+## Corrections to external cost advice
+
+Guidance received from another assistant contained errors specific to this project. Recorded
+so they are not re-imported:
+
+- **"56 questions"** — the golden set is **69**.
+- **"most answers hit the 512-token cap, cut to ~200"** — false. Median output is **25–32
+  tokens**; exactly one answer in five runs reached 512. Output length is not a cost lever
+  here and shortening it would not improve citation correctness by that route.
+- **"the 72.5% citation baseline"** — stale. That is the archived 56-question Phase 1 figure.
+  Current values are 80.4% (local vector) and 90.4% (hosted vector), on goldenv2.
+- Model names and per-token prices in that advice could not be verified and have a short
+  shelf life. Use the procedure above instead.
+
+Its central claim is nonetheless **correct and worth acting on**: the amounts are trivial,
+and fighting free-tier quotas has already cost far more than the money would have.
+
+---
+
 **Read [§3c](#3c-phase-2-status--read-this-before-continuing) first if you are resuming
 Phase 2.** It lists exactly what is finished, what is half-finished, and the one gap that
 matters most.
