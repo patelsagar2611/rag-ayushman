@@ -4,10 +4,15 @@ Context for a fresh session picking this project up. Read this before touching c
 The project brief is [PMJAY-RAG-PROJECT.md](PMJAY-RAG-PROJECT.md); this file records what
 was actually built, what was discovered along the way, and what is next.
 
-**Where things stand:** Phase 1 is complete and measured. Phase 2's **retrieval** work is
-written and measured; its **generation** work is unmeasured — no generation run has ever
-been done with Phase 2 code. Nothing from Phase 2 is committed yet. CI/CD is deferred until
-after Phase 2.
+**Where things stand (updated 2026-08-25):** Phase 1 is complete and measured. Phase 2's
+**retrieval** work is finished, measured, and the candidate-pool question is settled (§3e).
+Its **generation** work is still unmeasured on the current golden set — the first full
+generation run was started 2026-08-25 and its result is not in this document yet. CI/CD is
+deferred until after Phase 2.
+
+Phase 2 retrieval through commit `0e38259` is committed. The work described in §3c.1
+(mode threading, LLM recording, citation stripping, the pool comparison) is **written and
+verified but NOT yet committed** — check `git status` before assuming.
 
 **Read [§3c](#3c-phase-2-status--read-this-before-continuing) first if you are resuming
 Phase 2.** It lists exactly what is finished, what is half-finished, and the one gap that
@@ -53,14 +58,23 @@ streamlit run app.py
 Corpus: **11 PDFs, 629 pages, 872 chunks.** All text-native, no OCR needed at document level
 (but see gotcha 5).
 
-Retrieval now has four modes, selected by `--mode` on the CLI and `--retriever` in the eval:
+Retrieval has **six** modes, selected by `--mode` on both CLIs and `--retriever` in the eval.
+The last three differ only in which candidate pool the cross-encoder is handed:
 
 ```powershell
 python -m src.retrieve "hospital empanelment criteria"        # vector (default)
 python -m src.retrieve --mode bm25 "PAN card"
 python -m src.retrieve --mode hybrid "empanelment renewal"
-python -m src.retrieve --mode rerank "annual cover per family"
+python -m src.retrieve --mode rerank "annual cover per family"        # hybrid pool
+python -m src.retrieve --mode rerank-bm25 "annual cover per family"   # bm25 pool
+python -m src.retrieve --mode rerank-union "annual cover per family"  # union pool
+
+python -m src.generate --mode rerank "your question"   # same flag, same position
+python -m eval.pool_recall                             # pool ceilings, no LLM, no reranker
 ```
+
+`--mode` reaches generation as of 2026-08-25 (§3c). Before that the four Phase 2 retrievers
+were reachable only from the eval harness, and the app was still Phase 1.
 
 ## 3. Baseline — Phase 1, recorded 2026-08-19  *(56-question set — HISTORICAL)*
 
@@ -178,14 +192,20 @@ questions 2 and 5), and no fast-iteration subset exists.
 | c. Cross-encoder reranking | done | done | **no** |
 | d. `config/prompts.yaml` v1 | done | n/a | **no** |
 | e. Empanelment version conflict | **not started** | | |
+| f. Retrieval `mode` reachable from the product | done | n/a | n/a |
+| g. LLM recorded in results `config` | done | n/a | n/a |
+| h. Citation markers stripped before `must_contain` | done | n/a | n/a |
+| i. Candidate-pool comparison (open q5) | done | done | n/a |
 
 Four retrieval-only results files are saved and labelled:
 `phase2-baseline-vector-retrieval`, `phase2a-bm25-only-retrieval`,
 `phase2b-hybrid-rrf-retrieval`, `phase2c-rerank-retrieval`.
 
-### The gap that matters most
+### The gap that mattered most — CLOSED 2026-08-25
 
-**`src/generate.answer()` takes no retrieval mode**, so it always uses `DEFAULT_MODE`
+*Kept because the reasoning still applies to any future harness/product split.*
+
+**`src/generate.answer()` took no retrieval mode**, so it always used `DEFAULT_MODE`
 (`vector`):
 
 ```python
@@ -197,12 +217,65 @@ Consequence: **the Streamlit app and `python -m src.generate` still use Phase 1 
 The four new modes are reachable *only* from the eval harness, which calls `search(...)`
 directly. The measurement uses Phase 2; the product does not.
 
-Fix next session: thread a `mode` parameter through `answer()`, add a mode selector to the
-sidebar in `app.py`, and decide whether `DEFAULT_MODE` should change (see design decision 20).
+**Fixed.** `answer(question, k, mode=DEFAULT_MODE)` now threads `mode` into `search()`;
+`python -m src.generate --mode MODE "..."` parses the flag exactly as `src.retrieve` does;
+and `app.py` has a sidebar mode selector. Verified by asserting that `answer(mode=X)` calls
+`search(mode=X)` for every mode, and that a full retrieval-only run still reproduces §3d
+exactly (MRR 0.624 for vector), which is what proves nothing in retrieval moved.
 
-### Zero generation runs exist for Phase 2
+`DEFAULT_MODE` deliberately stays `"vector"` — design decision 21 holds until the generation
+evidence exists. **The 2026-08-25 generation run is that evidence**; if `rerank` holds up,
+flip `DEFAULT_MODE` to `"rerank"` then, and the app default follows it automatically.
 
-Every generation metric currently on record — citation correctness, abstention,
+Three things surfaced while doing this and are worth knowing:
+
+- **`hit["score"]` means something different per mode** (gotcha 15), which only became a
+  user-visible problem once modes were selectable. `SCORE_LABELS` in `src/retrieve.py` is
+  now the single definition, read by the two CLIs and the app so the three cannot drift.
+  A bare "score" of `0.86` (cosine), `7.73` (bm25) and `0.032` (RRF) invites a comparison
+  that is meaningless.
+- **Both CLIs crashed on cp1252** when a chunk contained a private-use PDF glyph (gotcha 11).
+  Fixed with the `eval/find.py` remedy, but applied *inside* `main()` — these modules are
+  imported by `app.py` and the eval, and reconfiguring their stdout from an import would be
+  a side effect neither asked for.
+- **`src.retrieve`'s CLI prints only `hit["text"][:400]`** of a chunk that runs to ~2,400
+  characters. This makes correct retrieval look wrong: a question about "Arogya Shiksha"
+  returned the right chunk at rank 1 from both retrievers, and the term sits at character
+  451 — 51 characters past the preview. **Not yet fixed.** Print the chunk length and the
+  region around the query terms instead of the head.
+
+### Generation — the first Phase 2 run is IN FLIGHT
+
+**Started 2026-08-25**, hybrid pool, local `qwen2.5:7b`:
+
+```powershell
+python -m eval.run_eval --retriever rerank --label "phase2-rerank-generation-69q-local-qwen2.5-7b"
+```
+
+Expect **~3 hours**, not the 2.5 h quoted elsewhere in this file: the 2026-08-24 smoke test
+measured generate p50 at 161.5 s, and 69 × 161.5 s ≈ 3.1 h. **If that results file exists,
+it is the first generation run on the 69-question golden set and the first ever to carry
+`prompt_version`, `llm_model` and `gen_stats`.** If it does not exist, the run did not
+finish — check for a sleep (gotcha 17) before trusting anything partial.
+
+Read it against these, from the 3-question smoke test on 2026-08-24 (n=3, so watch for the
+pattern, do not quote the numbers):
+
+- **Citation correctness was 33.3% while hit@1 was 100%.** All three answers were factually
+  right and the golden page was at rank 1 every time, yet two cited `[4]` and `[2]` instead.
+  The model answers from a chunk other than the golden one — plausibly the same fact on
+  several pages, which is row 25's situation generalised. If that holds at 69 questions,
+  `citation_correctness` is partly measuring golden-set completeness rather than the model.
+- **Row 67 succeeded at the inference it is documented as failing.** §3b keeps rows 36 and 67
+  as cases where the answer must be *inferred* (3 + 2 = 5 years). Under prompt **v1**, with
+  rerank retrieval, the model produced it correctly and showed its working. That complicates
+  the motivation for prompt v2 (§7.7) — if it holds up, part of the problem v2 targets may
+  already be a retrieval problem rather than a prompt one.
+- Prefill was **152.0 s / 2,608 tok / 17.6 tok/s** against 7.4 s of decode — ~95% prefill,
+  inside gotcha 19's cold 18–21 tok/s band, and Ollama was confirmed empty beforehand so
+  these are not gotcha 18 cache hits.
+
+Every generation metric on record BEFORE that run — citation correctness, abstention,
 `must_contain`, latency — is **Phase 1 code with Phase 1 retrieval**. A full local run was
 started and deliberately stopped after ~15 minutes. Nothing was saved.
 
@@ -221,9 +294,9 @@ identically, but **the generation metrics did not** — see gotchas 17, 18 and 1
 out of comparing them. Those three are the most consequential things learned this session and
 they all bear on how the overnight run must be done and read.
 
-Cosmetic nit to fix while you are in there: the `report()` line for
-`abstained_on_retrieval_miss` prints as `...also declined on a  0  retrieval miss
-(correctly)`, which reads badly. Reword it.
+Cosmetic nit, still unfixed (deliberately left out of the 2026-08-25 changes to keep that
+diff to its three items): the `report()` line for `abstained_on_retrieval_miss` prints as
+`...also declined on a  0  retrieval miss (correctly)`, which reads badly. Reword it.
 
 ### Golden set went 56 -> 69 on 2026-08-24
 
@@ -323,6 +396,100 @@ model. The earlier figure was measured on a machine that was doing other things;
 measured idle. Treat ~3.3 s as the real cost and see gotcha 21 — batch padding makes it vary
 with chunk length regardless.
 
+## 3e. The candidate-pool question — SETTLED 2026-08-25
+
+This is open question 5, and it is now answered with measurements rather than argument.
+All three arms are k=5, depth 30, same cross-encoder, same 69 questions, retrieval-only.
+
+| arm | pool | hit@1 | hit@3 | hit@5 | MRR | p50 | k=5 misses |
+|---|---|---|---|---|---|---|---|
+| `rerank` | hybrid (RRF, cut to 30) | 71.7% | 85.0% | 95.0% | 0.795 | 2,012 ms | 58, 61, 62 |
+| `rerank-bm25` | bm25 top 30 | **73.3%** | 86.7% | 95.0% | **0.808** | 3,732 ms | 58, 62, 66 |
+| `rerank-union` | both lists, deduped (~50) | 71.7% | 86.7% | **98.3%** | 0.806 | 6,741 ms | **58** |
+
+Results files: `phase2-rerank-hybrid-pool-69q`, `phase2-rerank-bm25-pool-69q`,
+`phase2-rerank-union-pool-69q-measured-not-adopted`.
+
+**The hybrid arm reproduced the saved `phase2-rerank-retrieval-69q` baseline exactly**
+(0.795 / 71.7 / 85.0 / 95.0), which is what proves making the pool a parameter changed
+nothing about the existing measurement.
+
+### Decision: hybrid stays, chosen on latency, NOT on quality
+
+Recorded plainly because the numbers say the opposite of what "we kept hybrid" implies:
+**hybrid loses the coverage comparison** (95.0% vs the union's 98.3% hit@5) and wins the
+latency one. The target is a public demo on free hosting, where §4 of DEPLOYMENT.md projects
+the cross-encoder running ~4× slower than locally. Do not read this table as hybrid winning.
+
+### Why pool recall did not decide it
+
+`eval/pool_recall.py` (new; the §3d recall table was previously ad hoc and could not be
+reproduced from the repo) reports pool ceilings at depth 30:
+
+| pool | recall@30 | misses |
+|---|---|---|
+| vector | 96.7% | rows 39, 61 |
+| bm25 | 98.3% | row 66 |
+| hybrid | 96.7% | rows 61, 62 |
+| **union** | **100.0%** | none |
+
+BM25's recall lead over hybrid is **+2 questions and −1 question**, not a strict improvement:
+the pools are not nested. And the net +1 converted to net 0 in the reranked result, because
+**a pool gain is optional while a pool loss is mandatory**. Row 61 was in the BM25 pool at 17
+and the cross-encoder promoted it to rank 1; row 62 was in the same pool at 26 and the
+cross-encoder declined to promote it at all; row 66 was absent and therefore unrecoverable.
+Two soft gains and one hard loss cancel.
+
+**Recall is a ceiling, not a score.** Comparing pools by the recall scalar assumes the extra
+recall converts and the missing recall does not matter. Here both assumptions failed, in
+opposite directions.
+
+### Why the union is the better pool, and what it costs
+
+RRF is a ranking **and truncation** step: it merges up to 60 distinct chunks and cuts back to
+30, and that cut is the only place a page can be lost. `rerank()` then re-sorts entirely by
+cross-encoder score, **discarding RRF's ordering completely**. So in a reranking pipeline
+fusion contributes nothing downstream while its truncation still costs pages — it keeps only
+its downside. Fusion earns its keep when its output *is* the answer.
+
+The union recovered rows 61 and 62 (miss → ranks 2 and 3) and cost only two one-rank
+demotions, rows 4 (3→4) and 24 (4→5), both still inside the window. **The distractor-pressure
+risk did not materialise**: hit@1 was identical to hybrid despite ~20 more candidates. That
+is worth knowing — it was the main argument against a union.
+
+Its single remaining miss, row 58, **is not a retrieval failure**: the page is in the pool and
+the cross-encoder demotes it (the §3d regression), and the question sits on gotcha 4's
+self-contradiction. After a union, retrieval stops being what loses answers anywhere.
+
+The cost is structural, not incidental. `CrossEncoder.predict` uses `batch_size=32`
+(gotcha 14), so hybrid and bm25 at depth 30 fit **one** batch by construction while the
+union's ~50 needs **two**, the second mostly padding. That is why 1.66× the candidates costs
+3.3× the time.
+
+### Depth, if the union is ever revisited
+
+Measured union pool recall by per-retriever depth:
+
+| depth | union size | CE batches | pool recall |
+|---|---|---|---|
+| 5–16 | 8–26 | **1** | 96.7% |
+| 20 | 33.2 | 2 | 98.3% |
+| **25** | **41.4** | 2 | **100.0%** |
+| 30 (current) | 49.9 | 2 | 100.0% |
+
+Two conclusions. **Depth 25 is free** — same 100% ceiling as 30 with ~17% fewer candidates.
+And **you cannot have the union's recall and a single batch**: rows 61 and 62 sit at ranks 17
+and 23/26, so reaching them requires depth ≥ 26, which puts the pool over 32. Every one-batch
+configuration falls back to 96.7% — losing exactly what the union exists to recover.
+
+Note that choosing depth 25 by reading golden-set recall **is** test-set contact under design
+decision 12. It is the mild form — the smallest depth preserving an already-measured ceiling,
+not tuning for a score — but it is disclosed, and it must reach the README.
+
+If int8 ONNX quantisation (DEPLOYMENT §4) makes reranking cheap enough, revisit this. Rough
+arithmetic, stacked estimates and not measurements: union at depth 25 ≈ 5.8–6.1 s local,
+÷3–4 for int8 ≈ 1.5–2.0 s, ×4 for a weak free-tier vCPU ≈ 6–8 s, plus ~2 s of hosted LLM.
+
 ## 4. Design decisions — do not silently reverse these
 
 Phase 1:
@@ -419,6 +586,34 @@ Phase 2:
 21. **`DEFAULT_MODE` stays `"vector"` until generation evidence exists.** Retrieval improved,
     but nothing yet shows that better ranking produces better *answers*. Switching the default
     before measuring would make the product's behaviour change for unmeasured reasons.
+
+Added 2026-08-25:
+
+22. **The rerank candidate pool is a parameter, and `hybrid` was chosen on LATENCY, not
+    quality.** See §3e. The union pool measures strictly better on evidence coverage
+    (98.3% vs 95.0% hit@5) and reduces retrieval to a single failing question; hybrid was
+    kept because the target is a public demo on free hosting where the cross-encoder is
+    projected to run ~4× slower. **Anyone reversing this should reverse it on latency
+    evidence, not because they think hybrid retrieves better — it does not.**
+23. **Losing arms stay reachable by flag, never deleted.** `rerank-bm25` and `rerank-union`
+    both lost and both remain modes. This is design decision 19 applied to experiments: the
+    results files that justify the choice name a `config.retriever`, and a results file
+    naming a mode that no longer exists is unreproducible archaeology. Keeping the code is
+    cheaper than losing the evidence.
+24. **`hit["score"]` is labelled with what it actually is, from one definition.**
+    `SCORE_LABELS` in `src/retrieve.py` maps mode to `cosine` / `bm25` / `rrf` / `ce logit`,
+    and both CLIs plus the app read it. Gotcha 15 was a latent trap while modes were only
+    reachable from the eval; it became a user-visible one the moment the app got a selector.
+    A bare "score" of 0.86, 7.73 and 0.032 invites a comparison that means nothing.
+25. **Citation markers are stripped before the `must_contain` comparison, and only there.**
+    After `parse_citations`, which needs them; substituting a SPACE rather than nothing, so
+    "the fee [3] is 48" cannot fuse into one token. The raw answer is still what gets saved
+    to the results file — the strip is a comparison detail, not an edit to the record.
+26. **The results `config` block records the LLM, and records `null` for it on
+    retrieval-only runs.** Naming a model that had no influence on the numbers would be
+    worse than naming none. `llm_provider` exists with one possible value today so that the
+    field predates the second provider rather than arriving with it — a field that appears
+    late leaves every earlier file ambiguous about something it never stated.
 
 ## 5. Gotchas discovered the hard way
 
@@ -531,20 +726,40 @@ Phase 2:
     are comparable" is now accurate, but should say *"deterministic from a cold model"* —
     the qualifier is the whole finding.
 
-20. **A single-digit `must_contain` can pass on a citation marker.** The check runs against
+20. **A single-digit `must_contain` can pass on a citation marker.** *FIXED 2026-08-25 —
+    see design decision 25. Kept because the reasoning explains why the fix is safe.* The check runs against
     the raw answer, which contains `[1]`–`[5]` citations at k=5. So `must_contain: 5` matches
     an answer that cites `[5]` while never stating the figure — a silent false pass. Seven
     rows currently carry a single digit (5, 7, 20, 32, 44, 58, 67) and five of those are
     values ≤ 5.
-    **Fix when next touching `eval/run_eval.py`:** strip `CITATION_RE` matches from the answer
-    before the `must_contain` comparison. Citations are metadata, not content, so removing
-    them is unambiguously correct and does not reintroduce any sensitivity to phrasing.
-    Retrieval-only runs are unaffected, so this does not invalidate any retrieval baseline.
+    **Fixed** by stripping `CITATION_RE` matches from the answer before the `must_contain`
+    comparison. Citations are metadata, not content, so removing them is unambiguously
+    correct and does not reintroduce any sensitivity to phrasing. Retrieval-only runs are
+    unaffected, so no retrieval baseline was invalidated.
+
+    Verified both directions: `must_contain: 5` against "described in the guidelines [5]"
+    now fails (it previously passed), while "the cover is 5 lakh per family [3]" still
+    passes. The seven bare-digit rows are 5, 7, 20, 32, 44, 58 and 67; five carry values
+    ≤ 5 and were therefore reachable as citation markers at k=5.
+
+    The change can only LOWER `must_contain_pass`, never raise it. Per design decision 8
+    that metric is a floor rather than a target, so a lower honest number is the correct
+    outcome. It landed before the first generation run on the 69-question set, which is the
+    point — fixing it afterwards would have meant either discarding that baseline or
+    carrying a known-inflated number forward indefinitely.
 21. **Reranking latency varies with chunk length, not just candidate count.** The batch pads
     to the longest sequence in it (gotcha 14), so a pool of short chunks is cheaper than a
     pool containing one 512-token chunk. The smoke test saw retrieve p50 of 2.6 s against the
     full eval's 6.1 s for the same depth, purely from shorter candidates. Do not treat
     reranking latency as a constant.
+
+22. **`src.retrieve`'s CLI shows only the first 400 characters of a ~2,400-character chunk,
+    which makes correct retrieval look wrong.** A question about "Arogya Shiksha" returned
+    the right chunk at rank 1 from *both* retrievers (`{'vector': 1, 'bm25': 1}`) and the
+    preview cut off at character 400 — the term sits at character 451. The reviewer's
+    reasonable conclusion was that chunking had gone wrong. It had not.
+    **Not yet fixed.** Print the chunk length, and the region around the query terms rather
+    than the head. `app.py` is unaffected — it renders the whole chunk.
 
 ## 6. Open questions
 
@@ -554,10 +769,14 @@ Phase 2:
    `Docs/empanelment-diff.md` lists 13 same-clause-different-number pairs. Row 41 shows the
    reranker confidently preferring the wrong edition, so this is now a measured failure, not
    a hypothetical one.
-2. **Golden set row 25 is incomplete.** "5,00,000" appears in **7** documents; only 4 are
-   listed as targets, so a correct retrieval scored as a miss. Add the missing pages
-   (`operation_manual.pdf` p.17, `antifraud_guidebook_2024.pdf` p.13,
-   `empanelment_dec2021.pdf` p.7) or drop the row. As written it understates hit rate.
+2. ~~**Golden set row 25 is incomplete.**~~ **CLOSED.** All seven target pages were added to
+   the CSV on 2026-08-24 at 07:27Z, four minutes before the four retrieval baselines ran at
+   07:31Z — every results file records `n_targets: 7` for that row, so **§3d already includes
+   the fix** and no re-run was needed.
+   Row 25 is now the corpus's strongest multi-target question, and it behaves exactly as the
+   RRF analysis predicts: vector, bm25 and rerank all hit it at rank 1 while **hybrid alone
+   demotes it to rank 2** — a third instance of fusion penalising questions with several
+   valid answers, alongside rows 61 and 62.
 3. **Abstention is the model's judgement, with no similarity threshold.** Observed top scores:
    ~0.79 in-corpus vs ~0.53 out-of-corpus. A threshold looks learnable, but must be set from
    the eval set with its false-abstention cost measured — not guessed from two examples. Note
@@ -567,8 +786,15 @@ Phase 2:
    Reranking makes a smaller `k` plausible for the first time: hit@3 was 73.5% in Phase 1 and
    is 89.8% after reranking. Dropping k=5→3 would cut roughly a third of query time at a cost
    of ~5 questions in 49 losing their evidence. Worth measuring.
-5. **Is the hybrid pool actually WORSE than a BM25-only pool for reranking?** *Evidence now
-   says probably yes — this is the top candidate for the next improvement.*
+5. ~~**Is the hybrid pool actually WORSE than a BM25-only pool for reranking?**~~
+   **ANSWERED 2026-08-25 — see §3e.** Short version: BM25's higher pool recall did not
+   convert (net +1 question of recall became net 0 of result), the *union* pool is the one
+   that measures better (98.3% vs 95.0% hit@5, and it reduces retrieval to a single failing
+   question), and **hybrid was nonetheless kept — on latency for the public demo, not on
+   quality.** The original text is preserved below because its reasoning was sound and its
+   prediction about row 61 was exactly right.
+
+   *Original entry:*
    On the 69-question set BM25 alone reaches **98.3% recall@30** against hybrid's **96.7%**.
    On the old 56-question set they tied at 100% and hybrid was kept on a margin argument;
    that argument has reversed. Row 61 shows the mechanism concretely — BM25 finds the page at
@@ -579,7 +805,10 @@ Phase 2:
    better — worth knowing and worth writing down). Recall is necessary but not sufficient:
    two pools can have identical recall and still hand the cross-encoder different wrong
    answers to be tempted by.
-6. **Rerank depth 30 is inherited from the brief, not derived.** On the 69-question set the
+6. **Rerank depth 30 is inherited from the brief, not derived.** *Partially measured
+   2026-08-25 — §3e has union pool recall by depth, and the finding is that depth 25 gives
+   the same 100% ceiling as 30. The `CrossEncoder` batch_size=32 boundary matters more than
+   depth itself: hybrid at 30 fits one batch, a union does not. Untested for the hybrid pool.* On the 69-question set the
    pool no longer saturates — hybrid recall is 96.7% at both 20 and 30, and BM25 is still
    climbing at 30 (98.3%), so a *deeper* pool may now be the right move rather than a
    shallower one. That reverses the earlier reading. Saves ~2 s of ~133 s, so it is not worth the test-set
@@ -594,13 +823,58 @@ Phase 2:
 
 In order. Items 1–3 are prerequisites for any benchmark being trustworthy.
 
-1. **Finish the golden set**, then re-run all four retrieval modes (~10 min) to re-baseline.
-   Everything in §3d is provisional until this happens.
-2. **Thread retrieval `mode` through `src/generate.answer()`** and expose it in `app.py`.
-   Until then the product cannot use any Phase 2 work (§3c).
-3. **Record the LLM model in the results `config` block.** It records `embed_model` but not
-   `OLLAMA_MODEL`. The moment a hosted model is in play, every results file is ambiguous
-   about which model produced it.
+1. ~~**Finish the golden set**, re-run all four retrieval modes.~~ **DONE** — 69 questions,
+   §3d. Row 25 closed (open question 2).
+2. ~~**Thread retrieval `mode` through `src/generate.answer()`** and expose it in `app.py`.~~
+   **DONE 2026-08-25** — §3c.
+3. ~~**Record the LLM model in the results `config` block.**~~ **DONE 2026-08-25** —
+   `llm_provider` and `llm_model`, null on retrieval-only runs. Design decision 26.
+3b. ~~**Settle the rerank candidate pool** (open question 5).~~ **DONE 2026-08-25** — §3e.
+   Hybrid kept, on latency.
+3c. **Commit the above.** Nothing from this session is committed. `eval/pool_recall.py` is
+   untracked.
+3d. **The README still owes three disclosures**: the depth-25 test-set contact note (§3e);
+   the fact that the union arm was post-hoc, suggested by failure analysis rather than
+   pre-registered; and the golden-set vocabulary bias below. Design decision 12 and the
+   anti-goals require the first two.
+
+3e. **The paraphrase experiment -- the biggest open threat to every retrieval number here.**
+   The golden set was written by someone reading the documents, so the questions reuse the
+   documents' own vocabulary ("cover amount on family floater basis" rather than "how much
+   money do I get for an operation"). **Lexical overlap between question and document is
+   exactly what BM25 scores**, so BM25's win over the embeddings may be partly an artefact of
+   authorship rather than a property of the corpus. Every retrieval figure in §3d and §3e
+   inherits that bias.
+
+   Cheap to test: 15-20 questions phrased the way a real user would, re-run all four
+   retrievers (~10 min, no LLM). If BM25's lead shrinks, the evaluation has a real
+   limitation. If it holds, the finding is much stronger and can be claimed as such.
+
+   **The phrasings must not come from anyone who has read the corpus** -- which rules out the
+   project author, and is the whole difficulty. In preference order: (1) real public PM-JAY
+   FAQ and forum questions, which are actual user language and involve no LLM; (2) a person
+   given the topic but not the documents; (3) LLM paraphrase of existing verified questions,
+   which does NOT breach the anti-goal (there is no LLM judge, and the fact plus target pages
+   stay human-verified) but is a proxy for user language rather than user language, and must
+   be disclosed as one.
+
+3f. **Golden-set target completeness -- confirmed incomplete in at least one row.**
+   Row 9 ("What is cut-off in technical evaluation for bidder?") lists only
+   `fraud_analytics_rfe.pdf` p.41, but **p.39 states the same 70% threshold** in more detail,
+   and the model answered from p.39 almost verbatim and cited it. It scored as a citation
+   failure. **The model was right and the golden set was wrong.**
+
+   Two detectors for the rest, both run 2026-08-25:
+   - *The model cited an unlisted page.* Better signal -- it surfaces pages the model treated
+     as its source. 14 citation failures to review.
+   - *A distinctive `must_contain` value appears on unlisted pages.* Six candidates: rows 28,
+     29, 38, 45, 62, 68. **Candidates only** -- a number on a page does not mean the page
+     answers the question. Hand-verify, per the project's own rule.
+
+   Do this in ONE edit, after the local generation pair finishes, then re-run the four
+   retrieval baselines and pool recall (~10 min) plus the hosted generation pair (~5 min).
+   **Adding targets moves numbers upward, and that is a measurement change, not an
+   improvement** -- the same trap as the `must_contain` unit-stripping. Say so in the README.
 4. **Swap in a hosted-LLM backend** — see [DEPLOYMENT.md](DEPLOYMENT.md). This turns a 2.5 h
    generation run into ~10 minutes and unblocks everything below.
 5. **Generation runs**: hosted `--retriever vector` (Phase 1 baseline) and hosted

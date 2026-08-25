@@ -6,7 +6,7 @@ When is hospital empanelment due for renewal?,once every 3 years or till expiry 
 By when should agency deploy team for the project?,Within 15 days of date of signing of agreement / receiving of LOI,fraud_analytics_rfe.pdf,23,,Tests whether it is able to identify agency and with whom it is making agreement
 What is minimum experience and qualification required for data scientist role in agency?,"Bachelor's or master's degree in data science, computer science, statistics or Math. Experience is minimum 5 years out of which 3 years in developing AI/ML models.",fraud_analytics_rfe.pdf,24,5,Checks fraud files where only one of file contains answer for this.
 Will NHA make sure to answer every queries in pre-bid queries?,No they will try.,fraud_analytics_rfe.pdf,34,,Tests something concrete but non-numeric answer
-What is cut-off in technical evaluation for bidder?,70%,fraud_analytics_rfe.pdf,41,70,Tests whether it can generate answer without other conditions mentioned in the file.
+What is cut-off in technical evaluation for bidder?,70%,fraud_analytics_rfe.pdf,39;41,70,Tests whether it can generate answer without other conditions mentioned in the file.
 What is timeline of empanelment request filed by hospital to DEC?,the application should be scrutinized by the DEC and processed completely within 15 days of receipt of application,empanelment_v2_0.pdf,22,15,Tests numeric answer within a sentence
 "during inspection, if it is found that hospital has applied for multiple specialties, but all do not conform to minimum requirements under AB-PMJAY, then will it get empanelment?",then the hospital will only be empanelled for specialties that conform to AB-PMJAY norms,empanelment_v2_0.pdf,23,,Tests a bit of subjective answers
 How much incentive will hospital receive with full NABH accreditation?,15%,operation_manual.pdf,7,15,Tests data inside table format in document
@@ -25,7 +25,7 @@ How many HWCs are estimated to be setup by 2022?,"1,50,000",stg_manual.pdf,6,,Te
 What is cover amount under PM JAY for family floater basis?,"5,00,000",stg_manual.pdf;hbp_2_2_manual.pdf;field_investigation_manual.pdf;antifraud_guidelines.pdf;operation_manual.pdf;antifraud_guidebook_2024.pdf;empanelment_dec2021.pdf,7;6;3;3;17;13;7,"5,00,000",Tests same answer in many docs
 What is amount for SHA to utilize for life saving conditions but request of approval will be moved on ticketing system?,1 lakh,hbp_2_2_manual.pdf,15,,Tests conditional items
 What is per day price for bed if patient is admitted to ICU with ventilator support?,"4,500",hbp_2_2_manual.pdf,18,"4,500",Tests Different version of policies having same number
-How many urology procedures happened in HBP 2.2?,148 urology,hbp_2_2_manual.pdf,23,148,Tests numbers from table
+How many urology procedures happened in HBP 2.2?,148 urology,hbp_2_2_manual.pdf,23;33,148,Tests numbers from table
 How many aspirational districts have been identified by NITI Aayog?,117 aspirational,hbp_2_2_manual.pdf,51,117,Tests numbers
 "If any party to a grievance is not satisfied, then how many days it has to appeal that decision?",30 days,grievance_redressal.pdf,16,30,Tests numbers
 What is acceptable threshold for Grievances that needed escalation?,10% or less,grievance_redressal.pdf,19,10,Tests numbers
@@ -59,12 +59,12 @@ Who is best batsman of all time in cricket?,ABSTAIN,,,,Tests not available conte
 Which cities are classified for grant of house rent allowance to central government employees in Gujarat?,"Ahmedabad, Rajkot, Jamnagar, Bhavnagar, Vadodara, Surat",empanelment_dec2021.pdf,37,,Tests text in tabular form
 Around how many people got killed due to COVID-19 in india?,ABSTAIN,,,,Tests word available but not data about question
 What do mean by DDO?,Deputy District Officer,operation_manual.pdf,3,Deputy District Officer,Tests full form from single doc
-What do mean by CSC?,Common Service Centres,operation_manual.pdf;empanelment_v2_0.pdf;empanelment_dec2021.pdf;grievance_redressal.pdf;antifraud_guidebook_2024.pdf,3;4;6;22;10,Common Service Centres,Tests full form from many docs
+What do mean by CSC?,Common Service Centres,operation_manual.pdf;operation_manual.pdf;empanelment_v2_0.pdf;empanelment_dec2021.pdf;grievance_redressal.pdf;antifraud_guidebook_2024.pdf,3;20;4;6;22;10,Common Service Centres,Tests full form from many docs
 Who is dr indu bhusan?,former CEO of NHA,stg_manual.pdf;stg_manual.pdf;hbp_2_2_manual.pdf;field_investigation_manual.pdf;antifraud_guidebook_2024.pdf,2;21;3;3;11,,Tests similar name in multiple formats
 "In a case of patient doing self-discharge after surgery, how much payment will be done to hospital?",75%,hbp_2_2_manual.pdf;hbp_2_2_manual.pdf,10;12,75,Tests numerical answer
 What is primary identity document for family member under PM-JAY?,Aadhaar,beneficiary_identification.pdf,12,Aadhaar,Tests common question where answer might be laying at multiple places
 Does showing inflated medical bills considered as fraud?,Yes,fraud_analytics_rfe.pdf,14,,Tests answer from sentence
 How much is maximum duration can be allowed by NHA to agency for fraud analytics services?,5 years,fraud_analytics_rfe.pdf,20,5,Tests calculative answer
-What is validity of bids submitted to NHA?,180 days,fraud_analytics_rfe.pdf,29,180,Tests answer from sentence
+What is validity of bids submitted to NHA?,180 days,fraud_analytics_rfe.pdf,8;29;77,180,Tests answer from sentence
 How many common types of fraud that may occur under AB PM-JAY?,32,antifraud_guidebook_2024.pdf,47,32,Tests answer from sentence
 What is ideal owner of POK?,ABSTAIN,,,,Tests not available content

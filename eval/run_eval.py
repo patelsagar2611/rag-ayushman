@@ -35,8 +35,20 @@ PAGES = Path("data/processed/pages.jsonl")
 # not be able to answer.
 ABSTAIN_MARKER = "ABSTAIN"
 
-# Matches "[2]" and "[2, 4]" in a generated answer.
-CITATION_RE = re.compile(r"\[([\d,\s]+)\]")
+# Matches "[2]" and "[2, 4]" in a generated answer, in either bracket glyph.
+#
+# ASCII [n] is what the prompt asks for and what every local qwen2.5:7b answer
+# used. Some hosted models cite with the CJK brackets U+3010/U+3011 instead --
+# and openai/gpt-oss-120b does it on SOME prompts and not others, so it cannot be
+# screened out by checking one answer. The failure it causes is silent and total:
+# every answer parses as uncited, citation_correctness reads 0%, and nothing says
+# why.
+#
+# Accepting both is the right fix rather than rewriting the model's output. The
+# model is citing correctly; the glyph is presentation, the rank is the claim --
+# the same reasoning as design decision 8. Widening is also safe for existing
+# results: no [n]-only answer can match differently, so no recorded number moves.
+CITATION_RE = re.compile(r"[\[【]\s*([\d,\s]+)(?:†[^\]】]*)?[\]】]")
 
 # source_file and page accept either separator, since a semicolon is the natural
 # thing to reach for and silently dropping the row would look like a miss.
@@ -268,7 +280,20 @@ def evaluate(cases, k, retrieval_only, mode=DEFAULT_MODE):
 
             # Plain substring check, no judge involved. Catches the failure that
             # matters most on numeric questions: right page found, wrong figure stated.
-            normalised = normalise(text)
+            #
+            # Citation markers are stripped FIRST, because they are metadata rather
+            # than content and leaving them in lets a must_contain pass on a citation
+            # instead of on the answer. `must_contain: 5` matched "...as set out in
+            # [5]" while the answer never stated the figure -- a silent false pass.
+            # Seven rows carry a bare digit and five of those values are <= k, so the
+            # bug was reachable by a third of the checked rows.
+            #
+            # Two details are load-bearing. This runs AFTER parse_citations above,
+            # which needs the markers intact. And the substitution is a SPACE, not an
+            # empty string, so "the fee [3] is 48" cannot collapse into "is48" once
+            # normalise() squeezes the whitespace and manufacture a different false
+            # result in the other direction.
+            normalised = normalise(CITATION_RE.sub(" ", text))
             outcome.missing_substrings = [
                 s for s in case.must_contain if normalise(s) not in normalised
             ]
@@ -458,13 +483,26 @@ def main():
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args()
 
-    # Recorded so a results file identifies the prompt that produced it. Only
-    # meaningful for generation runs -- a retrieval-only run never builds a prompt.
+    # Recorded so a results file identifies the prompt AND the model behind its
+    # numbers. Only meaningful for generation runs -- a retrieval-only run builds no
+    # prompt and calls no LLM, so these stay null there rather than naming a model
+    # that had no influence on the metrics.
+    #
+    # The LLM was previously not recorded at all: config named embed_model but never
+    # the generator. That was survivable while exactly one model existed and fatal
+    # the moment a second one did, since every existing file would then be ambiguous
+    # about which produced it. Recorded before the hosted backend lands, not after.
     prompt_version = None
+    llm_provider = None
+    llm_model = None
     if not args.retrieval_only:
-        from src.generate import PROMPT_VERSION
+        from src.generate import LLM_MODEL, LLM_PROVIDER, PROMPT_VERSION
 
         prompt_version = PROMPT_VERSION
+        llm_provider = LLM_PROVIDER
+        # LLM_MODEL, not OLLAMA_MODEL -- the latter would mislabel every hosted run
+        # with the name of a model that never saw the prompt.
+        llm_model = LLM_MODEL
 
     cases = load_golden(GOLDEN)
     if not cases:
@@ -498,6 +536,8 @@ def main():
                         "k": args.k,
                         "retriever": args.retriever,
                         "prompt_version": prompt_version,
+                        "llm_provider": llm_provider,
+                        "llm_model": llm_model,
                         "retrieval_only": args.retrieval_only,
                         "embed_model": EMBED_MODEL,
                         "chunk_target_chars": TARGET_CHARS,

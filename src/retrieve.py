@@ -9,6 +9,13 @@ Modes:
     bm25     lexical keyword scoring via rank-bm25
     hybrid   the two merged by reciprocal rank fusion
     rerank   hybrid candidates re-scored by a cross-encoder
+
+    rerank-bm25   BM25 candidates re-scored by a cross-encoder
+
+The last two differ only in which pool the cross-encoder is handed, which is the
+whole experiment: a reranker can only reorder what it is given, so the pool sets
+its ceiling. See rerank_search for why that is an open question rather than a
+settled choice.
 """
 
 import re
@@ -18,7 +25,22 @@ from src.index import embed_query, get_collection
 
 DEFAULT_K = 5
 DEFAULT_MODE = "vector"
-MODES = ("vector", "bm25", "hybrid", "rerank")
+MODES = ("vector", "bm25", "hybrid", "rerank", "rerank-bm25", "rerank-union")
+
+# What hit["score"] actually MEANS, per mode. It is a similarity only in vector
+# mode: bm25 returns an unbounded lexical score, hybrid an RRF score (~0.03), and
+# rerank a cross-encoder logit that is frequently negative. Any display that prints
+# a bare "score" invites a reader to compare two numbers that are not on the same
+# scale, so every display site labels it -- and they all read the label from here
+# so the three cannot drift apart.
+SCORE_LABELS = {
+    "vector": "cosine",
+    "bm25": "bm25",
+    "hybrid": "rrf",
+    "rerank": "ce logit",
+    "rerank-bm25": "ce logit",
+    "rerank-union": "ce logit",
+}
 
 # How deep to read each list before fusing. 30 is the brief's reranking depth, so
 # the reranker later scores exactly the candidate set fusion produced.
@@ -245,15 +267,83 @@ def rerank(query, hits, k=DEFAULT_K):
     return reranked
 
 
-def rerank_search(query, k=DEFAULT_K, depth=RERANK_DEPTH):
-    """Hybrid retrieval narrowed to `depth` candidates, then reranked to k.
+# Candidate pools a reranker can be handed. The pool is a parameter rather than a
+# constant because which one is best is an open question with evidence on both
+# sides -- see rerank_search.
+RERANK_POOLS = ("hybrid", "bm25", "union")
 
-    The candidate pool comes from fusion rather than from either retriever alone
-    because fusion is what reaches every golden target: on this corpus hybrid
-    recall@20 is 100%, against 98% for each component on its own. A reranker can
-    only reorder what it is given, so pool recall is its hard ceiling.
+
+def union_pool(query, depth=FUSION_DEPTH):
+    """Both retrievers' top-`depth` lists, deduplicated. Nothing is discarded.
+
+    The contrast with hybrid_search is the point. RRF is a ranking AND TRUNCATION
+    step: it merges up to 2*depth distinct chunks and cuts back to depth, and that
+    cut is the only place a page can be lost. A union performs no cut.
+
+    In a reranking pipeline that trade is one-sided, because rerank() re-sorts
+    entirely by cross-encoder score and discards the incoming order. RRF's ordering
+    therefore contributes nothing downstream while its truncation still costs
+    pages. Fusion earns its keep when its output IS the answer; as a candidate
+    generator it keeps only the downside.
+
+    Measured at depth 30 this reaches 100% pool recall on the 69-question set,
+    against 96.7% for hybrid -- see HANDOFF section 3e. It is not the default: the
+    pool is ~50 chunks rather than 30, which crosses CrossEncoder's batch_size=32
+    boundary into a second, mostly-padded batch (gotcha 14) and roughly triples
+    reranking latency.
     """
-    return rerank(query, hybrid_search(query, k=depth), k=k)
+    seen, out = set(), []
+    for hit in vector_search(query, k=depth) + bm25_search(query, k=depth):
+        if hit["chunk_id"] not in seen:
+            seen.add(hit["chunk_id"])
+            merged = dict(hit)
+            # Renumbered over the merged list so downstream sees a normal ranked
+            # list. The reranker overwrites these anyway.
+            merged["rank"] = len(out) + 1
+            out.append(merged)
+    return out
+
+
+def rerank_search(query, k=DEFAULT_K, depth=RERANK_DEPTH, pool="hybrid"):
+    """Retrieve `depth` candidates, rerank them to k. `pool` picks the retriever.
+
+    A reranker can only reorder what it is handed, so the pool's recall at `depth`
+    is a hard ceiling on the reranked result. That makes the choice of pool a real
+    decision rather than plumbing.
+
+    It was settled once and has since come undone. On the 56-question golden set
+    hybrid and BM25 both reached 100% recall@20, and hybrid was kept on a margin
+    argument. On the 69-question set that argument reverses:
+
+        pool     recall@5  recall@10  recall@20  recall@30
+        vector      90.0%      90.0%      95.0%      96.7%
+        bm25        81.7%      86.7%      95.0%      98.3%
+        hybrid      86.7%      95.0%      96.7%      96.7%
+
+    BM25 alone now reaches a HIGHER ceiling at the depth actually used (30) than
+    the fusion of BM25 with the vector retriever does. That is not a rounding
+    artefact -- it has a mechanism. RRF rewards chunks both retrievers agree on, so
+    a page only one retriever finds can be pushed out of the pool entirely rather
+    than merely demoted. Golden row 61 ("What do mean by DDO?") is the clean case:
+    BM25 ranks it 17, the vector retriever never returns it, and fusion drops it
+    below 30 chunks the two agreed on. A demotion inside the pool is recoverable by
+    the reranker; ejection from the pool is not.
+
+    Recall is necessary but not sufficient, which is why this is measured rather
+    than reasoned about: two pools can have identical recall and still hand the
+    cross-encoder different wrong answers to be tempted by. eval/pool_recall.py
+    reproduces the table above; the reranked comparison is the two modes `rerank`
+    and `rerank-bm25` scored by eval/run_eval.py.
+    """
+    if pool not in RERANK_POOLS:
+        raise ValueError(f"unknown rerank pool {pool!r} -- expected one of {RERANK_POOLS}")
+    builder = {
+        "bm25": bm25_search,
+        "hybrid": hybrid_search,
+        "union": union_pool,
+    }[pool]
+    candidates = builder(query, depth)
+    return rerank(query, candidates, k=k)
 
 
 def search(query, k=DEFAULT_K, mode=DEFAULT_MODE):
@@ -268,11 +358,23 @@ def search(query, k=DEFAULT_K, mode=DEFAULT_MODE):
     if mode == "hybrid":
         return hybrid_search(query, k=k)
     if mode == "rerank":
-        return rerank_search(query, k=k)
+        return rerank_search(query, k=k, pool="hybrid")
+    if mode == "rerank-bm25":
+        return rerank_search(query, k=k, pool="bm25")
+    if mode == "rerank-union":
+        return rerank_search(query, k=k, pool="union")
     raise ValueError(f"unknown retrieval mode {mode!r} -- expected one of {MODES}")
 
 
 def main():
+    # The Windows console is cp1252 and cannot encode the private-use glyphs PDF
+    # extraction leaves behind -- printing one killed this command mid-output. Same
+    # remedy as eval/find.py, but applied inside main() rather than at import: this
+    # module is imported by app.py and the eval, and reconfiguring their stdout as a
+    # side effect of an import is not this function's business.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
     if len(sys.argv) < 2:
         raise SystemExit('usage: python -m src.retrieve [--mode MODE] "your question"')
 
@@ -284,11 +386,12 @@ def main():
 
     query = " ".join(args)
     print(f"mode: {mode}")
+    label = SCORE_LABELS[mode]
     for hit in search(query, mode=mode):
         parts = hit.get("component_ranks")
         detail = f"  {parts}" if parts else ""
         print(f"\n[{hit['rank']}] {hit['source_file']} p.{hit['page']}  "
-              f"(score {hit['score']:.4f}){detail}")
+              f"({label} {hit['score']:.4f}){detail}")
         print(hit["text"][:400].replace("\n", " "))
 
 

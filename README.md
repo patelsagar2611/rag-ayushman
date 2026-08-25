@@ -4,12 +4,20 @@ Retrieval Augmented Generation over the National Health Authority's Ayushman Bha
 (PM-JAY) corpus. Answers carry a filename and page number for every claim, and the
 system declines to answer when the retrieved evidence does not support one.
 
-Fully local, zero-cost stack: PyMuPDF, BGE embeddings, Chroma, Ollama, Streamlit.
+Zero-cost stack: PyMuPDF, BGE embeddings, Chroma, Streamlit, and either a local Ollama model
+or any OpenAI-compatible hosted endpoint.
 
-**Status:** Phase 1 complete and running end to end — 11 documents, 629 pages, 872 chunks
-indexed. Cited answers, citation correctness and abstention all verified by hand. See
-[Docs/PMJAY-RAG-PROJECT.md](Docs/PMJAY-RAG-PROJECT.md) for the full project brief and
-phase plan.
+**Status:** Phase 1 complete. Phase 2 retrieval complete and measured; Phase 2 generation
+measured on a local model. 11 documents, 629 pages, 872 chunks, 69 hand-written evaluation
+questions.
+
+**The headline result is a negative one.** Reranking improved retrieval by 24% in MRR and
+that did *not* produce better answers — on the same questions, attribution got slightly
+worse. What it bought instead was coverage: the model refused fewer answerable questions.
+See [Generation results](#generation-results--did-better-retrieval-produce-better-answers).
+
+[Docs/PMJAY-RAG-PROJECT.md](Docs/PMJAY-RAG-PROJECT.md) is the project brief;
+[Docs/HANDOFF.md](Docs/HANDOFF.md) is the authoritative status document.
 
 ---
 
@@ -51,12 +59,43 @@ streamlit run app.py
 Command line, without the UI:
 
 ```powershell
-python -m src.retrieve "hospital empanelment criteria"                  # dense, the default
-python -m src.retrieve --mode bm25 "PAN card"                          # keyword only
-python -m src.retrieve --mode hybrid "empanelment renewal"             # RRF of both
-python -m src.retrieve --mode rerank "annual cover per family"         # + cross-encoder
-python -m src.generate "What is the annual cover per family?"
+python -m src.retrieve "hospital empanelment criteria"            # dense, the default
+python -m src.retrieve --mode bm25 "PAN card"                     # keyword only
+python -m src.retrieve --mode hybrid "empanelment renewal"        # RRF of both
+python -m src.retrieve --mode rerank "annual cover per family"    # + cross-encoder, hybrid pool
+python -m src.retrieve --mode rerank-bm25 "annual cover"          # + cross-encoder, bm25 pool
+python -m src.retrieve --mode rerank-union "annual cover"         # + cross-encoder, union pool
+
+python -m src.generate --mode rerank "What is the annual cover per family?"
+python -m eval.pool_recall                                        # pool ceilings, no LLM
 ```
+
+The same `--mode` flag reaches generation and the Streamlit sidebar, so the product can use
+every retriever the eval can score. `DEFAULT_MODE` stays `vector` — reranking is a large
+retrieval win with no measured answer-quality benefit, and the default is not the place for an
+unmeasured bet.
+
+### Choosing an LLM backend
+
+Generation runs against a local Ollama model by default, or any OpenAI-compatible endpoint.
+Copy `.env.example` to `.env` (gitignored) and fill it in:
+
+```powershell
+# local, the default and the baseline
+LLM_PROVIDER=ollama
+OLLAMA_MODEL=qwen2.5:7b
+
+# or any OpenAI-compatible endpoint
+LLM_PROVIDER=openai
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+OPENAI_MODEL=openai/gpt-oss-120b
+GROQ_API_KEY=...
+```
+
+Only the base URL and model name change between providers, so switching is configuration
+rather than code. **A hosted model is a different model** — never compare a hosted number
+against a local one and attribute the difference to retrieval. Every results file records
+`llm_provider` and `llm_model` so no run is ambiguous about what produced it.
 
 ## Evaluation
 
@@ -174,8 +213,22 @@ retrieval failures — capping hit rate for a reason unrelated to retrieval qual
 immune to anything Phase 2 reranking does. Deleted, the finding would be lost. Kept aside,
 they are the concrete case for adding OCR in a later phase.
 
-**The golden set is still being written** — it is not yet a real eval set, and numbers from
-it are not yet meaningful. Per the brief's anti-goals it is hand-written, never generated.
+**The golden set is 69 questions** (60 answerable, 9 expected to abstain). Per the brief's
+anti-goals it is hand-written and hand-verified, never generated.
+
+**Its biggest known limitation is who wrote it.** The questions were written by someone
+reading the documents, so they reuse the documents' vocabulary — "cover amount on family
+floater basis" rather than "how much money do I get for an operation". Lexical overlap
+between question and document is exactly what BM25 scores, so **BM25's win below may be
+partly an artefact of authorship rather than a property of the corpus.** Every retrieval
+figure in this README inherits that bias. The test is to re-run with questions phrased by
+someone who has not read the corpus; it is not yet done, and it is the single largest open
+threat to these numbers.
+
+**It is also known to be incomplete in places.** One row listed a single page for a fact
+stated on two; the model answered from the unlisted page, cited it, and scored as a citation
+failure — the model was right and the golden set was wrong. Four rows have since gained
+targets. `citation_correctness` below should therefore be read as a **floor**.
 
 ## Retrieval results — what each Phase 2 change bought
 
@@ -183,10 +236,10 @@ it are not yet meaningful. Per the brief's anti-goals it is hand-written, never 
 time, each measured on its own. Retrieval metrics need no LLM, so every row here is
 reproducible in minutes with `--retrieval-only`.
 
-> **These are retrieval numbers only.** No generation run has been done with Phase 2 code,
-> and the only generation figures on record were measured on an older 56-question set with
-> Phase 1 retrieval — so they are not comparable to anything here and are not reproduced in
-> this section. Whether better ranking produces better *answers* is currently **unmeasured**.
+> **These are retrieval numbers only** — they say nothing about answer quality, which is
+> measured separately in [Generation results](#generation-results--did-better-retrieval-produce-better-answers)
+> and does **not** follow the same direction. Retrieval metrics need no LLM, so every row
+> here reproduces in minutes with `--retrieval-only`.
 
 | Retriever | hit@1 | hit@3 | hit@5 | **MRR** | retrieve p50 |
 |---|---|---|---|---|---|
@@ -197,6 +250,45 @@ reproducible in minutes with `--retrieval-only`.
 | **change vs baseline** | **+23.4 pts** | **+13.3 pts** | **+5.0 pts** | **+0.171** | ×126 slower |
 
 Three of those rows are more interesting than the summary line.
+
+### Which candidate pool should the reranker get?
+
+A reranker can only reorder what it is handed, so the candidate pool sets its ceiling. Three
+pools measured at depth 30, everything else identical:
+
+| pool fed to the cross-encoder | hit@1 | hit@3 | hit@5 | MRR | p50 | pool recall@30 |
+|---|---|---|---|---|---|---|
+| `hybrid` — RRF of both, cut to 30 | 71.7% | 85.0% | 95.0% | 0.795 | 2.0 s | 96.7% |
+| `bm25` — BM25 top 30 | **73.3%** | 86.7% | 95.0% | **0.808** | 3.7 s | 98.3% |
+| `union` — both lists, deduped (~50) | 71.7% | 86.7% | **98.3%** | 0.806 | 6.7 s | **100%** |
+
+**`hybrid` was kept, on latency, not on quality.** It loses the coverage comparison — 95.0%
+against the union's 98.3% hit@5 — and the target is a public demo on free hosting where the
+cross-encoder is projected to run ~4× slower than locally. Anyone reversing this should
+reverse it on latency evidence, not because they believe hybrid retrieves better. It does not.
+
+Two things that comparison taught, neither visible in the aggregate:
+
+**Recall is a ceiling, not a score.** BM25's recall lead over hybrid is **+2 questions and −1
+question**, not a strict improvement — the pools are not nested. And that net +1 became net
+**zero** after reranking, because a pool *gain* is optional while a pool *loss* is mandatory:
+one recovered question the cross-encoder promoted to rank 1, another it declined to promote at
+all, and the lost one was simply unrecoverable.
+
+**Fusion ranks *and truncates*, and only the truncation costs anything here.** RRF merges up
+to 60 chunks and cuts back to 30; that cut is the only place a page can be lost. The reranker
+then re-sorts entirely by its own score, discarding RRF's ordering. So in a reranking pipeline
+fusion contributes nothing downstream while its truncation still costs pages. Row 61 (`DDO`)
+is the clean case: BM25 finds the glossary page at rank 17, dense retrieval never does, and
+fusion pushes it out of the pool entirely. Row 62 (`CSC`) is worse — both retrievers find a
+*different* valid page, neither corroborates the other, and fusion returns neither.
+
+**Disclosures on this comparison.** The `union` arm was **post-hoc** — suggested by the
+failure analysis above, not pre-registered like the other two. A decision rule for the
+hybrid-vs-bm25 comparison *was* fixed in advance. And the union's depth-25 operating point
+(same 100% ceiling as depth 30, ~17% fewer candidates) was chosen by reading golden-set
+recall, which is test-set contact under the project's own rule against tuning on the eval
+set. `RRF_K`, fusion depth and `k` remain at inherited defaults.
 
 **BM25 alone beat the embeddings.** Not the expected result. On MRR (0.677 vs 0.624) and
 hit@1 (58.3% vs 48.3%) a bag-of-words scorer with no semantics outperformed
@@ -278,6 +370,14 @@ column of a multi-column page — but the difficulty a retriever sees is in the 
 `HWCs` occurs in only 4 of 872 chunks. It is the same rare-token case as `PAN card` wearing
 a different label.
 
+**"Vector retrieval should cite worse than reranking."** *Wrong.* Registered after the
+reranked generation run, from the observation that questions whose golden page lands at rank 1
+cite correctly 79% of the time against ~55% deeper. Vector retrieval has hit@1 of 48% against
+rerank's 72%, so it should have scored around 68%. It scored **78.3%** head-to-head — better
+than reranking. The correlation between rank and citation accuracy was real *within* a run and
+did not survive as a causal prediction *across* runs, because changing the retriever changes
+the whole window composition, not just where the golden chunk sits in it.
+
 **"Reranking should fix rows 26 and 35."** Both were retrieved at rank 4–5 in Phase 1 with
 the model abstaining anyway. Row 26 now reaches **rank 1** and row 35 **rank 3**. But the
 prediction was about *abstention*, which is a generation outcome — and no generation run has
@@ -320,6 +420,73 @@ irrelevant. It is not the cause of any regression above — row 24's chunk is we
 window — but it is a live risk, and re-chunking to fit would change the indexing that the
 Phase 1 baseline was measured against.
 
+## Generation results — did better retrieval produce better answers?
+
+No. This is the result the project was built to find, and it went the other way.
+
+Two full runs, same 69 questions, same prompt v1, same local `qwen2.5:7b`. **Retrieval was
+the only variable.** Each run took ~3 hours on CPU.
+
+The two arms declined different numbers of questions (13 vs 8), so the headline metrics score
+different subsets and cannot be compared directly. Restricting to the **46 questions both
+runs answered** removes that:
+
+| on identical questions | `vector` | `rerank` |
+|---|---|---|
+| retrieval quality (MRR) | 0.624 | **0.795** |
+| cited a golden page | **36/46 = 78.3%** | 33/46 = 71.7% |
+| stated a wrong figure | **1 failure** | 4 failures |
+
+**The retriever 24% worse by MRR produced attribution 6.6 points better and four times fewer
+wrong figures.** Not a null result — a small regression, from an intervention that improved
+retrieval substantially.
+
+### The mechanism: reranking makes the context window harder to attribute within
+
+Two questions had the golden page at **rank 1 in both runs**, so retrieval position was
+identical and the only difference is the other four chunks:
+
+```
+row 44   vector: p.34* p.40  p.49  p.44  p.33   -> cited [1] = p.34*   CORRECT
+         rerank: p.34* p.40  p.27  p.33  p.30   -> cited [4] = p.33    WRONG
+
+row 25   vector: 1 golden page  + 4 unrelated   -> cited the golden one
+         rerank: 4 golden pages + 1 non-golden  -> cited the NON-golden one
+```
+
+**A reranker makes the window homogeneous by construction.** It returns the five most
+relevant chunks, and the most relevant chunks tend to be near-duplicates of each other:
+adjacent pages of one section, restating one fact. Dense retrieval returns a scattered window
+in which the right chunk stands out; reranking returns a tight cluster in which five chunks
+all look like plausible sources. Row 25 is the sharpest case — reranking filled four of five
+slots with *correct* pages and the model cited the one that was not.
+
+So reranking raised the probability that evidence is present, and lowered the model's ability
+to say which chunk it used.
+
+### What reranking did buy: coverage
+
+| | `vector` | `rerank` |
+|---|---|---|
+| questions answered | 47 | **52** |
+| false abstention rate | 14.8% | **10.5%** |
+| abstention recall (out-of-corpus) | **100%** | **100%** |
+
+More evidence in the window means the model refuses less often, while still never answering
+a question the corpus cannot support. That is a real improvement — it is simply **not the one
+anyone would have predicted**, and it is only visible because retrieval and generation were
+measured on separate axes.
+
+### How much to trust this
+
+n = 46 head-to-head, one 7B model, one corpus, and `citation_correctness` partly measures
+golden-set completeness rather than model behaviour. A hosted run on a much stronger model
+from a different family is the intended replication and is **not yet complete** — the free
+tier caps at 200,000 tokens/day and a single 69-question arm consumes essentially all of it.
+
+The finding is stated here because it is what the measurement says, not because it is
+convenient. If the replication contradicts it, that will be published here too.
+
 ### Cost
 
 Reranking takes retrieval from 26 ms to 3.3 s per query, which sounds fatal and is not:
@@ -353,9 +520,24 @@ Capping `num_predict` harder would save nothing. And reranking earns a second di
 hit@3 was 73.5% in Phase 1 and is 89.8% now, which makes a smaller `k` defensible for the
 first time.
 
-A query therefore costs about **2¼ minutes end to end**, which is measured, reproducible,
-and not demoable. That is a property of running a 7B model on CPU, not of the pipeline —
-[Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md) plans the hosted-LLM swap that addresses it.
+A query therefore costs about **2¼ minutes end to end** locally, which is measured,
+reproducible, and not demoable. That is a property of running a 7B model on CPU, not of the
+pipeline.
+
+**The hosted backend confirms it.** Against an OpenAI-compatible endpoint the same call takes
+**~0.5 s** — 0.1 s prefill plus 0.4 s decode, measured. Generation stops being the bottleneck
+entirely and the cross-encoder becomes the slowest component, which inverts every latency
+argument above. Set `LLM_PROVIDER=openai` to switch; Ollama stays the default and remains the
+only source of the prefill/decode split on identical hardware.
+
+Two things learned running it that are not in the provider documentation:
+
+- **The daily token cap is invisible.** Per-minute limits appear in response headers; the
+  200,000 tokens/day cap appears **only in a 429 body**. Pacing against the headers cannot see
+  it coming.
+- **Every retry is a billed request**, so retrying through a rate limit burns several times a
+  run's question count and drives `retry-after` from ~15 s to *hundreds* of seconds. Pacing
+  proactively against the reported budget is strictly better than retrying reactively.
 
 ## Layout
 
@@ -501,34 +683,58 @@ what fixed it.
 
 ## Status
 
-Phase 1 is complete and measured. Phase 2's retrieval work is written and measured; its
-generation work is not. [Docs/HANDOFF.md](Docs/HANDOFF.md) is the authoritative status
-document — §3c lists exactly what is finished and what is half-finished.
+Phase 1 complete. Phase 2 retrieval complete and measured; Phase 2 generation measured on a
+local model, with a hosted replication outstanding. [Docs/HANDOFF.md](Docs/HANDOFF.md) is the
+authoritative status document.
 
 **Done**
 
 - Hybrid BM25 + vector retrieval with reciprocal rank fusion
 - Cross-encoder reranking, measured one change at a time against a recorded baseline
-- Prompts moved to a versioned `config/prompts.yaml`
+- Candidate-pool comparison — three pools measured, choice made on latency and disclosed
+- `eval/pool_recall.py`, so the pool-recall claims are reproducible rather than ad hoc
+- Prompts in a versioned `config/prompts.yaml`
+- All six retrieval modes reachable from `app.py` and `python -m src.generate`, not just the
+  eval harness
+- Generation runs on the 69-question set for both `vector` and `rerank`, local model
 - Generation latency broken down into prefill and decode
+- Provider abstraction: local Ollama or any OpenAI-compatible endpoint, by env var
 
 **Not yet built**
 
-- Generation metrics for the current 69-question golden set — the only generation figures on
-  record were measured on an older 56-question set, so nothing here is comparable to them
-- Generation metrics for Phase 2 — no generation run has been done with the new retrieval
-- The retrieval modes are reachable only from the eval harness; `app.py` and
-  `python -m src.generate` still use Phase 1 dense retrieval
+- **Hosted generation replication** — the free tier caps at 200,000 tokens/day and one
+  69-question arm consumes essentially all of it
 - Handling of the empanelment version conflict, which reranking makes worse rather than better
-- Hosted-LLM backend and public deployment — planned in [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md)
+- Faithfulness measurement — see the note under [Why these metrics](#why-these-metrics);
+  it is deliberately unscored, which leaves a brief deliverable consciously open
+- The paraphrase experiment on golden-set vocabulary bias
+- Public deployment — planned in [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md)
 - CI running the eval per PR
+
+**Three times the measurement was the bug, not the system**
+
+Each would have produced a confident, plausible, wrong number:
+
+- A `must_contain` check for the figure `5` **passed** on an answer that only cited `[5]` and
+  never stated the value. Citation markers are now stripped before the comparison.
+- A hosted model cited with the CJK brackets `【1】` and later with `【1†L1-L3】`; the citation
+  regex matched neither, so **every answer parsed as uncited and citation correctness would
+  have read 0%**. The same model used ASCII brackets on some prompts, so sampling a few calls
+  would not have caught it.
+- "13 of 14 citation failures had the evidence retrieved" was reported as a finding. It is the
+  base rate — 51 of 52 answered questions had the evidence retrieved. Always compare a rate
+  against its base rate before calling it a result.
 
 **Honest position on the headline number.** The +0.171 MRR is measured in-sample: 69
 hand-written questions serving as both development and test set, with no held-out split,
 where a single question moves the hit rate by two points. No hyperparameter was tuned
 against it — `RRF_K`, fusion depth and `k` are all at inherited defaults — but one
 architecture choice (feeding the reranker the fused pool) was made by reading test-set
-recall. Treat +0.195 as an upper bound rather than an expected production figure.
+recall. Treat **+0.171** as an upper bound rather than an expected production figure.
+
+And note what the generation runs did to that number's significance: **the +0.171 did not
+translate into better answers at all.** A retrieval gain is not a system gain, and this README
+would have claimed one if the generation runs had never been done.
 
 ## Acknowledgment
 
