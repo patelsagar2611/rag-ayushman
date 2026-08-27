@@ -11,14 +11,90 @@ or any OpenAI-compatible hosted endpoint.
 measured on a local model. 11 documents, 629 pages, 872 chunks, 69 hand-written evaluation
 questions.
 
-**The headline result: whether better retrieval produces better answers depends on the
-model.** Reranking improved retrieval by 24% in MRR. On a local 7B model that made attribution
-slightly *worse*; on a hosted model it made it better. Same retrieval, same prompt, same
-questions — opposite conclusions. See
-[Generation results](#generation-results--did-better-retrieval-produce-better-answers).
+**The headline result: a large retrieval gain bought almost no answer gain.** Reranking
+improved retrieval by 24% in MRR. It reduced false refusals on every model tested — and
+improved citation *precision* on none, while actively harming it on a local 7B model. An
+earlier version of this README reported a +3.8 point attribution gain on a hosted model; that
+turned out to be an artifact of a metric that passes when *any* citation is correct, rewarding
+the fact that reranking makes models cite more sources. See
+[Generation results](#generation-results--did-better-retrieval-produce-better-answers), which
+keeps the superseded claim visible alongside the correction.
 
-[Docs/PMJAY-RAG-PROJECT.md](Docs/PMJAY-RAG-PROJECT.md) is the project brief;
-[Docs/HANDOFF.md](Docs/HANDOFF.md) is the authoritative status document.
+### Which document is which
+
+| doc | scope | lifetime |
+|---|---|---|
+| **README.md** (this file) | **The permanent record.** Results, design decisions, gotchas, anti-goals, corpus provenance. Everything durable lives here and nowhere else. | Whole project |
+| [Docs/HANDOFF.md](Docs/HANDOFF.md) | **The next session only.** Current state, what is in flight, what to do next. Nothing that belongs in the README. | Replaced each session |
+| [Docs/INTERVIEW-ANGLES.md](Docs/INTERVIEW-ANGLES.md) | The engineering journal — each problem with its reasoning and how to defend it. May overlap the README by design. | Whole project |
+| [Docs/PMJAY-RAG-PROJECT.md](Docs/PMJAY-RAG-PROJECT.md) | The original brief. | Fixed |
+| [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md) | Hosting plan. | Whole project |
+
+**Start every session by reading this README, then the handoff.** When a session's work is
+stable, its findings are promoted here and the handoff is rewritten from scratch for the next
+one. A handoff that has grown a history section has drifted from its purpose.
+
+---
+
+## How this project is worked on
+
+Parts of this project were built with an AI assistant. The rules below are binding on every
+working session and are recorded here rather than left implicit, because they shaped what
+got built. The full version is [§00 of the handoff](Docs/HANDOFF.md).
+
+1. **Explain the reasoning, not just the outcome.** Every decision is recorded with what it
+   was chosen *over* and what evidence decided it. A decision without its alternative is an
+   assertion, and it cannot be defended later by someone who was not present when it was made.
+2. **Small batches, with the reasoning surfaced as it happens** — never a long unattended
+   run of steps followed by a summary. Judgement calls are put to the owner at the point
+   they arise, with the trade-offs, because reviewing them afterwards is not the same as
+   making them.
+3. **Nothing is executed without asking first** — including single-question smoke tests, not
+   only full evaluation runs.
+4. **Any message sent while a run is in progress ends by saying so**, warning that a system
+   sleep will corrupt it, and giving an estimated duration. See gotcha 17: a suspended
+   machine silently invalidates timing numbers, and on hosted models it leaves no detectable
+   signature afterwards.
+5. **The development machine is not always on.** Runs are planned around that.
+
+The underlying standard: this is a portfolio project, so the deliverable is not a working
+pipeline but a working pipeline its author can **explain**. Speed of completion is worth
+nothing against that, and pursuing it destroys the thing being built.
+
+### IMPORTANT — the engineering journal is a required deliverable
+
+**[Docs/INTERVIEW-ANGLES.md](Docs/INTERVIEW-ANGLES.md) is not optional documentation and not a
+by-product. It is a deliverable of every working session, on the same footing as the code.**
+
+**The motive.** Findings are lost at the moment they are made, not later. The reasoning behind
+a decision is vivid while it is being made and gone within days, leaving only the outcome —
+and an outcome without its reasoning cannot be defended by anyone, including the person who
+chose it. This project's value is the judgement it demonstrates, and judgement is only visible
+in the *rejected* alternatives. Capturing those as they happen is the only time it is cheap.
+
+**The process, binding on every session.** Whenever a problem is hit, a trap avoided, a
+metric found wanting, or a decision made where a reasonable engineer could have gone the other
+way — **it gets an entry, in that session, before the work is called done.** Not at the end of
+the phase, not before an interview. A finding that survives only in a chat transcript has been
+lost.
+
+**The format.** Every entry has four parts, and an entry missing any of them is incomplete:
+
+| part | what it must contain |
+|---|---|
+| **The scenario** | the problem, optimisation, or trap, stated concretely |
+| **How we got to the answer** | the reasoning — including what was rejected, and why |
+| **Defensive argument** | the answer when an interviewer challenges this directly |
+| **Show-off argument** | how to raise it *unprompted*, and the opening that gets you there |
+
+The last two are why this file exists rather than being folded into the handoff. The handoff
+records what the state is, for someone continuing the work. This records why the state is what
+it is, for someone defending it. Same events, different question.
+
+**The payoff.** Read end to end, the journal reconstructs the entire project — every problem,
+every trade-off, every thing that went wrong and what it taught — in one pass, without
+re-reading the code. That is its test: if it cannot be used as a single-document recap of the
+whole journey, it is not being maintained properly.
 
 ---
 
@@ -423,38 +499,141 @@ Phase 1 baseline was measured against.
 
 ## Generation results — did better retrieval produce better answers?
 
-**It depends on the model, and that is the finding.**
+**Partly — and not in the way the earlier version of this section claimed.** Reranking
+reduced false refusals on every model tested, and improved citation *precision* on none.
 
-Four full runs: two retrievers (`vector`, `rerank`) × two models. Within each pair the model,
-the prompt and the questions are fixed, so **retrieval is the only variable**. Both pairs are
-scored against the same golden set. The arms decline different numbers of questions, so every
-figure below is restricted to the questions *both* arms of that pair answered — otherwise the
-metrics score different subsets.
+Six full runs: two retrievers (`vector`, `rerank`) × three model/endpoint combinations. Within
+each pair the model, the prompt and the questions are fixed, so **retrieval is the only
+variable**. Every figure is restricted to the questions *both* arms of that pair answered —
+the arms decline different numbers, so an unrestricted comparison would score different
+subsets — and re-scored against the current golden set. Reproduce with
+`python -m eval.citation_companions`.
 
-| head-to-head | `vector` | `rerank` | Δ |
+| head-to-head, `vector` → `rerank` | n | cited a golden page | **citation precision** | citations/answer |
+|---|---|---|---|---|
+| local `qwen2.5:7b` | 47 | 78.7% → 72.3% (**−6.4**) | 65.3% → 56.7% (**−8.6**) | 1.52 → 1.68 |
+| hosted `gemini-3.1-flash-lite`, Google endpoint | 52 | 90.4% → 94.2% (**+3.8**) | 76.3% → 76.5% (**+0.2**) | 1.56 → 1.63 |
+| hosted `gemini-3.1-flash-lite`, OpenRouter **pinned** | 52 | 90.4% → 94.2% (**+3.8**) | 76.3% → 76.5% (**+0.2**) | 1.56 → 1.63 |
+| hosted `qwen-2.5-7b-instruct`, unquantised | 48 | 77.1% → 72.9% (**−4.2**) | 63.3% → 61.2% (**−2.1**) | 1.43 → 1.62 |
+
+Row 2 is not a typo: pinned to Google AI Studio through OpenRouter, `flash-lite` reproduces the
+direct-endpoint run **to the digit**, and a repeat of it was byte-identical across all 69
+answers in both arms. An unpinned OpenRouter run of the same model gave 76.3% → 76.5% as
+77.3% → 76.5%, because it was blended across deployments — that difference was routing, not
+measurement error (gotcha 16).
+
+Row 3 settles a confound in the local result. The local `qwen2.5:7b` runs through Ollama, which
+serves a *quantised* copy — so "the model is weak" and "the compression hurt it" predicted the
+same observation. Running the **same model family unquantised** reproduces the penalty in both
+metrics, so the cause is the model, not Ollama. The magnitudes are smaller, especially precision
+(−2.1 against −8.6), which suggests quantisation *amplifies* the effect without causing it.
+
+Retrieval improved identically in every row — MRR 0.624 → 0.795, hit@1 48.3% → 71.7%.
+
+### Why the two citation columns disagree
+
+`cited a golden page` passes if **any** cited page is a golden one. So a model that cites more
+sources gets more chances to pass it, and **reranking measurably makes models cite more**
+(right-hand column, every row). The metric rewards that behaviour change whether or not
+attribution improved.
+
+Citation precision — *what fraction of the pages it cited were right* — removes that tailwind.
+Applied to the hosted model, the entire +3.8 point gain goes with it, twice, on two independent
+serving paths. Applied to the local model, the damage is **larger** than the headline number
+said, because it degraded *despite* the same tailwind.
+
+> **A confound that was checked and turned out small.** Reranking also changes how many golden
+> pages are in the window, not just where they rank — row 25 below goes from 1-of-5 golden to
+> 4-of-5, and a model citing blindly from a 4-of-5 window scores ~80% precision on chance
+> alone. Measured across all questions rather than that one, the window holds **1.10 → 1.19
+> golden pages** on average, moving the chance baseline by **~1.7 points**. Real, and not
+> material to the deltas above.
+>
+> Recorded because the check was worth running, and because an earlier version of this section
+> reported it as a serious open defect on the strength of row 25 alone — which was generalising
+> from one vivid example. Note also that this base rate is a property of the **retriever**, not
+> the model: every model sees identical windows, so it cancels entirely from the multi-model
+> comparison below and applies only to `vector`-vs-`rerank`.
+
+> **Correction, 2026-08-27.** This section previously read *"It depends on the model, and that
+> is the finding"*, reporting **−6.5 pts** for the local model and **+3.8 pts** for the hosted
+> one, and concluded that a model which already attributes well converts a retrieval gain into
+> an answer gain. The negative half of that survives and is slightly understated. **The
+> positive half does not survive**: measured by precision, reranking did not improve the
+> hosted model's attribution. The superseded numbers are kept visible rather than deleted,
+> because how a result was corrected is part of the result.
+>
+> Two further caveats on the old figures. They were reported over **46** questions; the
+> intersection of the two arms is verifiably **47**, and the 46 could not be reproduced from
+> the repo — which is why the recomputation now lives in a script. And the hosted `+3.8` was
+> only ever **two questions out of 52**, which the precision column is what makes visible.
+
+### What reranking actually bought
+
+Not attribution — refusals. The model declines less often when the evidence is genuinely
+there, and this replicates on **every** pair:
+
+| pair | refused despite evidence | denominator |
+|---|---|---|
+| local `qwen2.5:7b` | 14.8% → **10.5%** | 54 → 57 |
+| hosted, Google endpoint | 7.4% → **5.3%** | 54 → 57 |
+| hosted, via OpenRouter | 7.4% → **5.3%** | 54 → 57 |
+
+The denominator grows in every row because that rate is conditioned on the golden page having
+been retrieved at all (design decision 18), and reranking retrieves three more of them. So the
+improvement is real on both counts: more questions have their evidence present, **and** a
+smaller share of those get refused anyway.
+
+`must_contain` moved only on the local model, and downward — 93.3% → 86.2%, against 96.8% →
+96.8% on both hosted pairs. Consistent with the citation result: the local model handles the
+reranked window worse, the hosted model is indifferent to it.
+
+### The sharpest version: reranking's gain is the retriever's, not the model's
+
+Compare each model against a baseline you could ship in ten lines — **ignore the model's
+citations entirely and always cite chunk `[1]`**. Its precision is just the rate at which
+rank 1 is a golden page.
+
+| | always-cite-`[1]` | model's precision | **model's lift** |
 |---|---|---|---|
-| **local `qwen2.5:7b`** — 46 questions | **80.4%** | 73.9% | **−6.5 pts** |
-| **hosted `gemini-3.1-flash-lite`** — 52 questions | 90.4% | **94.2%** | **+3.8 pts** |
+| local `qwen2.5:7b` — vector | 54.3% | 65.3% | **+10.9** |
+| local `qwen2.5:7b` — rerank | 76.6% | 56.7% | **−19.9** |
+| hosted `flash-lite` — vector | 51.9% | 76.3% | **+24.4** |
+| hosted `flash-lite` — rerank | 75.0% | 76.5% | **+1.5** |
 
-Retrieval improved identically in both rows — MRR 0.624 → 0.795, hit@1 48.3% → 71.7%. The
-answers moved in **opposite directions**.
+Under dense retrieval both models beat the trivial baseline clearly. **Under reranking that
+added value collapses on both** — to +1.5 on the hosted model, and to *negative* on the local
+one, where you would have gotten better citations by discarding its output and citing the first
+chunk.
 
-The local pair took ~3 hours per arm on CPU; the hosted pair ~10 minutes each.
+The mechanism is in the left column: it jumps ~23 points in both pairs, because reranking's
+achievement is putting the right chunk first (hit@1 48.3% → 71.7%). **Reranking's benefit is
+realised by the retriever; the generator adds nothing on top of it,** and the weaker generator
+gives some back.
 
-### Reading it
+Two caveats, both load-bearing:
 
-The local model attributes worse in absolute terms — 80.4% against the hosted model's 90.4%
-under identical retrieval. **The model that already attributes well converts a retrieval gain
-into an answer gain. The model that struggles with attribution is made worse by the same
-change**, because of the mechanism below.
+- **This is precision only, and precision ignores coverage.** The local rerank model cites
+  1.68 pages at 56.7% precision — 0.95 golden pages per answer — against the baseline's 0.77.
+  It surfaces *more* correct pages, more noisily. Whether that is worse depends on whether a
+  spurious citation costs more than a missing one, which is a product question, not a metric.
+- **A shrinking lift can mean the baseline got good, not that the model got worse.** If
+  reranking puts the right chunk at rank 1, a model citing rank 1 is being correct rather than
+  lazy. These numbers cannot separate the two readings.
 
-So "we added reranking and the system improved" is not a claim retrieval metrics can support.
-It has to be measured per model, and a result measured on one model does not transfer.
+Comparing against a trivial baseline is standard practice rather than anything novel here — the
+lead-3 baseline in summarization and popularity baselines in recommender systems are the same
+discipline, and both exposed years of apparent progress that a ten-line heuristic matched.
 
-A caution on the local pair: it also showed **4 wrong figures against `vector`'s 1** on
-`must_contain`. On the hosted pair that difference vanished — one failure each, the same
-question. Small numbers, and the honest reading is that the `must_contain` gap was noise while
-the citation gap was not.
+### So the honest summary
+
+Reranking is a large **retrieval** win (MRR +0.171) that converts into exactly one **answer**
+win — fewer false refusals — and no measurable attribution win on either model. It actively
+harms attribution on a small local model. "We added reranking and the system improved" remains
+unsupportable; so, now, does "better retrieval helps models that already attribute well."
+
+Whether a genuinely frontier model behaves differently is **untested** — `flash-lite` is a
+light model, and that is the next measurement.
 
 ### The mechanism: reranking makes the context window harder to attribute within
 
@@ -654,39 +833,199 @@ Retrieval does surface both editions: "minimum bed requirements for empanelment"
 All 11 PDFs are text-native — 1,184 to 2,627 characters per page. **No OCR is needed**,
 which closes open question #1 in the brief. Verify with `python -m src.inspect_corpus`.
 
-## Design notes
+## Design decisions — do not silently reverse these
 
-**Page numbers are captured at extraction and carried by every stage.** Citations are
-the point of the project and retrofitting page tracking is painful.
+The permanent record of choices where a reasonable engineer could have gone the other way.
+Each states what was chosen *over* what, because a decision without its alternative is an
+assertion.
 
-**Chunks never span a page boundary.** Every chunk carries exactly one page number, so
-a citation always points at a page that genuinely contains the text. The cost: a short
-page yields a short chunk, and a paragraph running across a page break is split in the
-index too. Worth revisiting if the eval shows answers cut in half at page boundaries.
+**Phase 1**
 
-**The BGE query prefix is applied query-side only**, in `src/index.py:embed_query`.
-Applying it to documents too — or omitting it from queries — degrades retrieval silently.
-Both sides import from one module so they cannot drift.
+1. **Page numbers are captured at extraction and carried by every stage.** Citations are the
+   point of the project and retrofitting page tracking is painful.
+2. **Chunks never span a page boundary.** Every chunk carries exactly one page number, so a
+   citation always points at a page that genuinely contains the text. Costs cross-page
+   context — a paragraph running across a break is split in the index too — and buys
+   guaranteed citation accuracy. Revisit only with evidence from the eval.
+3. **The BGE query prefix is applied query-side only**, in `src/index.py:embed_query`.
+   Applying it to documents too, or omitting it from queries, degrades retrieval *silently*.
+   `retrieve.py` imports from `index.py` so the two sides cannot drift.
+4. **Embeddings are L2-normalised and the Chroma space is cosine.** Chroma defaults to `l2`;
+   mismatching them changes ranking with no error.
+5. **Page numbers are physical position in the file** (`i + 1`), matching a PDF viewer's page
+   counter — not the number printed on the page.
+6. **No orchestration framework.** The retrieval loop is plain Python on purpose.
+7. **`num_ctx` is 8192 on the Ollama call.** Five chunks of ~600 tokens overruns the 4096
+   default, which truncates from the *front* and silently drops the sources.
+8. **The golden set is anchored to `(source_file, page)`, never chunk IDs.** This is what lets
+   the eval survive re-chunking, re-embedding and model swaps — without it, no Phase 2 number
+   could be compared to the Phase 1 baseline.
+9. **`must_contain` holds the smallest string that carries the fact** and is matched against
+   the model's answer, not the page. See [What `must_contain` is for](#what-must_contain-is-for).
+   **It is a floor, never a target** — optimising the prompt to raise it would push the model
+   toward reciting source text verbatim, which is worse product behaviour.
+10. **Retrieval metrics need no LLM** (`--retrieval-only`). Deliberate, and what makes CI
+    possible later.
+11. **Errored questions are excluded from generation metrics**, not counted as wrong. A network
+    blip must never look like a quality regression.
 
-**`num_ctx` is set to 8192 on the Ollama call.** Five chunks of ~600 tokens overruns the
-4096 default, which would silently drop the sources at the front of the prompt.
+**Phase 2**
 
-**Prompts live in `config/prompts.yaml` with a `version` field**, which every results
-file records. Prompt edits and retrieval changes move the same generation metrics, so
-without the version there is no way to tell a reranking gain from a prompt tweak made the
-same afternoon. Version 1 is the Phase 1 prompt moved across verbatim — verified
-byte-identical to the `phase-1` tag, so the Phase 2 generation run stays comparable.
+12. **Fusion merges ranks, never scores.** A cosine similarity of 0.69 and a BM25 score of
+    12.55 are on different scales; combining them numerically needs a normalisation step that
+    is itself a tuned parameter. Positions are comparable without one.
+13. **`RRF_K = 60` and `FUSION_DEPTH = 30` are left at published defaults, not tuned.** Tuning
+    either against the 69 evaluation questions would be fitting a constant to the test set and
+    reporting the fit as a measurement. If you ever tune them, say so here.
+14. **The BM25 index is built from the Chroma collection, not from `chunks.jsonl`.** Makes it
+    structurally impossible for the lexical and dense sides to search different corpora.
+15. **The BM25 tokenizer keeps Indian-format numbers whole.** `\d[\d.,]*\d` before `[a-z0-9]+`,
+    so `5,00,000` survives as one high-IDF token. Hyphens deliberately split, so "PM JAY"
+    matches "PM-JAY".
+16. **Tokenisation symmetry is per-retriever and opposite.** BM25 applies `tokenize()` to both
+    query and corpus; BGE applies its prefix to the query only. Each is enforced inside one
+    function so they cannot drift.
+17. **Every ranking breaks ties on `chunk_id`.** BM25, RRF and reranking all sort by
+    `(-score, chunk_id)`. Without it, two runs of identical code can report different numbers.
+18. **Prompts live in `config/prompts.yaml` with a `version` field**, recorded in every
+    generation results file. v1 is byte-identical to the `phase-1` tag, which is what keeps
+    Phase 2 comparable to the baseline. The decline string is defined once and substituted into
+    rule 3 via `{abstain}`, so the instruction and the string the eval matches cannot diverge.
+    **Bump `version` on every edit.**
+19. **`false_abstention_rate` is conditioned on the golden page having been retrieved.** Do not
+    revert to the unconditioned form as the headline number.
+20. **One build reaches every phase, by flag — no per-phase branches.** `--retriever vector`
+    reproduces Phase 1 exactly, so today's code scores both phases with the *same harness*.
+    This has to be actively preserved: it does not extend to prompts v2 (use `PMJAY_PROMPTS`),
+    and cannot extend to re-chunking or an embedding swap, which force a full re-baseline.
+21. **Results from a superseded golden set move to `eval/results/archive-<n>q/`, never
+    deleted.** The JSON `label` does not record question count, so the folder does it, with a
+    README naming what changed.
+22. **`DEFAULT_MODE` stays `vector`** until generation evidence justifies changing it.
+    Switching the product's default for unmeasured reasons is what this rules out.
+23. **The rerank candidate pool is a parameter, and `hybrid` was chosen on LATENCY, not
+    quality.** The union pool measures strictly better on coverage (98.3% vs 95.0% hit@5).
+    Anyone reversing this should reverse it on latency evidence, not because they think hybrid
+    retrieves better — it does not.
+24. **Losing arms stay reachable by flag, never deleted.** `rerank-bm25` and `rerank-union` both
+    lost and both remain modes. A results file naming a mode that no longer exists is
+    unreproducible archaeology.
+25. **`hit["score"]` is labelled with what it actually is, from one definition.** `SCORE_LABELS`
+    in `src/retrieve.py` maps mode to `cosine` / `bm25` / `rrf` / `ce logit`. A bare "score" of
+    0.86, 7.73 and 0.032 invites a comparison that means nothing.
+26. **Citation markers are stripped before the `must_contain` comparison, and only there** —
+    after `parse_citations`, substituting a SPACE so "the fee [3] is 48" cannot fuse. The raw
+    answer is still what gets saved.
+27. **The results `config` block records the LLM, and `null` on retrieval-only runs.** Naming a
+    model that had no influence would be worse than naming none.
+28. **The serving provider is recorded on every hosted run (`served_by`), and pinning is
+    optional.** An aggregator resolves one model id to several deployments and picks per
+    request. Recording is unconditional; pinning is opt-in, because a pinned provider going
+    down should fail the run loudly rather than swap deployments mid-benchmark.
+29. **Results are saved BEFORE the report is printed.** A formatting bug in the report once
+    destroyed two completed, paid-for 69-question runs. Answers are expensive and
+    unrecoverable; a printed table can be regenerated from the file at any time.
+30. **The cross-encoder has a 512-token window and chunks target ~600 tokens**, so the tail of
+    a long chunk is invisible to the reranker. Stated rather than worked around: re-chunking to
+    fit would change the indexing the Phase 1 baseline was measured against.
 
-**Fusion merges ranks, never scores.** A cosine similarity of 0.69 and a BM25 score of
-12.55 are numbers on different scales, and combining them directly needs a normalisation
-step that is itself a tuned parameter. Reciprocal rank fusion needs no such step. `RRF_K`
-is left at the published default of 60 rather than tuned against these 69 questions —
-fitting a constant to the test set and reporting the result as a measurement is exactly
-the failure mode this eval exists to avoid.
+## Gotchas — each of these cost hours
 
-**The cross-encoder has a 512-token window and chunks target ~600 tokens**, so the tail of
-a long chunk is truncated and invisible to the reranker. Stated rather than worked around:
-re-chunking to fit would change the indexing the Phase 1 baseline was measured against.
+**Corpus and environment**
+
+1. **The brief's `nha.gov.in` URLs are dead.** The portal became a single-page app; those paths
+   return the app shell as `HTTP 200 text/html`. The `%PDF` magic-byte check in
+   `src/download.py` is what caught it.
+2. **TLS:** `nha.gov.in` presents a chain Windows trusts but `certifi` does not. Fixed with
+   `truststore`, which uses the OS trust store — **not** `verify=False`.
+3. **The brief's "two conflicting empanelment editions" are byte-identical** — one document
+   under two filenames, same sha256. See [the version-conflict pair](#the-version-conflict-pair-was-not-a-pair).
+4. **`empanelment_v2_0.pdf` contradicts itself** — show-cause response is 5 working days on
+   p.29 and 3 on p.34. Genuine test material.
+5. **`field_investigation_manual.pdf` also contradicts itself** — the mortality report is
+   "within 48 hrs" on p.35 and "within 7 days" on p.17. Found because two stronger models
+   flagged it unprompted while a lighter one did not.
+6. **Some values live inside images.** Four questions moved to `eval/known_gaps.csv` because the
+   answer is not in the extracted text at all. `src/inspect_corpus.py` cleared all 11 PDFs as
+   text-native because it measures *average characters per page*, which cannot see an image
+   table on a text-heavy page. **Document-level triage is not content-level coverage.**
+7. **Use `.venv\Scripts\python.exe` explicitly.** System `python` is 3.13 and has none of the
+   dependencies. `ModuleNotFoundError: chromadb` always means the wrong interpreter.
+8. **Windows console is cp1252** and crashes on non-encodable characters; entry points
+   reconfigure stdout with `errors="replace"`.
+9. **CSV values containing commas must be quoted** (`"4,500"`). One unquoted value shifted a
+   whole row and put the filename in the `page` column.
+10. **`grep` buffers when piping to a file**, so a backgrounded run appears to produce no output.
+    Use `python -u`. Piping also **replaces the exit code with grep's**, which once masked a
+    hard crash as `exit 0`.
+
+**Measurement**
+
+11. **Latency must be measured after a warmup call to both stages**, or the embedding load (~5s)
+    and the model load land entirely on question 1.
+12. **Ollama evicts an idle model after 5 minutes.** Mid-eval that meant a ~2.5 min cold reload
+    that blew a 300s timeout. Fixed with `keep_alive: "30m"`; `gen_stats["load_ms"]` exposes it.
+13. **A machine that sleeps mid-run silently corrupts latency numbers.** One question logged
+    3,051 s of prompt eval at 0.76 tok/s against the usual ~15, purely from a suspend. Locally
+    the tell is that only *one* phase inflates. **Hosted endpoints report no phase split, so a
+    suspend leaves no signature at all** — prevention, not detection: `powercfg /change
+    standby-timeout-ac 0`.
+14. **Re-running the same questions gives fake prefill numbers — Ollama caches prompts.** A
+    repeat run reported 10,392 tok/s against the true ~15. **Prefill numbers from any repeat run
+    are worthless.**
+15. **Local generation IS reproducible — but only from a cold model.** Unload before any run you
+    will compare; three fixed questions produced byte-identical answers across two cold passes.
+16. **Hosted reproducibility is PROVIDER-DEPENDENT — measure it, do not assume it either way.**
+    Measured 2026-08-27 by running the same configuration twice:
+
+    | setup | result |
+    |---|---|
+    | `gemini-3.1-flash-lite` pinned to Google AI Studio | **0 of 69 answers differ** — byte-identical, both arms |
+    | `qwen-2.5-7b-instruct` pinned to Phala | ~2 pts drift on citation metrics, 6.7 on `must_contain` |
+    | `gemini-3.1-flash-lite` **unpinned** | **19 of 69 answers differ** from the pinned run |
+
+    So `temperature: 0` *can* give byte-identical hosted output — but only on a provider whose
+    serving stack is deterministic, and only when pinned. **The dominant source of variance is
+    provider blending, not floating-point nondeterminism**: unpinned, one model id is served by
+    several deployments picked per request (decision 28).
+
+    An earlier version of this entry claimed hosted runs are never reproducible and quoted a
+    ~2-point noise floor. That generalised one provider's behaviour to all of them. The right
+    procedure is to **pin, then run the same configuration twice and diff the answers** before
+    trusting any small delta.
+17. **A single-digit `must_contain` can pass on a citation marker.** `must_contain: 5` matched an
+    answer citing `[5]` that never stated the figure. Fixed by design decision 26.
+18. **`citation_correctness` is an ANY-match and rewards citing broadly.** It cancels when
+    comparing one model against itself and does *not* cancel across models. Read
+    `citations_per_answer` and `citation_precision` beside it — see
+    [Why the two citation columns disagree](#why-the-two-citation-columns-disagree).
+19. **Errors shrink the sample silently.** Excluded questions (decision 11) mean a run over 61
+    questions looks like a run over 69. One archived file has metrics computed over 17 of 69 and
+    looked entirely normal. Always report the denominator.
+
+**Retrieval**
+
+20. **In `hybrid` and `rerank` modes, `hit["score"]` is no longer a similarity.** It is an RRF
+    score (~0.03) or a cross-encoder logit (unbounded, often negative). Anything thresholding or
+    comparing `score` across modes breaks silently.
+21. **`CrossEncoder.predict` defaults to `batch_size=32`.** Depth ≤32 is one batch; 33–63 costs
+    two, the second mostly padding. If you raise `FUSION_DEPTH`, go to 64, not 40.
+22. **Reranking latency varies with chunk length, not just candidate count** — batches pad to the
+    longest sequence present, so one 512-token chunk makes every chunk in that batch cost 512.
+23. **`src.retrieve`'s CLI shows only the first 400 characters of a ~2,400-character chunk**,
+    which makes correct retrieval look wrong. Not yet fixed.
+
+## Anti-goals — from the brief
+
+- **Do not generate eval questions with an LLM.** The golden set is hand-written and
+  hand-verified. Scoring LLM-written questions with an LLM judge measures the model agreeing
+  with itself.
+- Do not add hybrid retrieval or reranking without recording the baseline first (done).
+- Do not adopt a heavy orchestration framework.
+- Do not drop page-number tracking anywhere in the pipeline.
+- Do not start multilingual work until English is measured and working.
+- **Do not tune hyperparameters against the golden set** without saying so. `RRF_K`, fusion
+  depth and `k` are all currently untuned, which is a claim worth being able to make.
 
 ## Early observation to test in the eval
 
@@ -707,9 +1046,9 @@ what fixed it.
 
 ## Status
 
-Phase 1 complete. Phase 2 retrieval complete and measured; Phase 2 generation measured on a
-local model, with a hosted replication outstanding. [Docs/HANDOFF.md](Docs/HANDOFF.md) is the
-authoritative status document.
+Phase 1 complete. Phase 2 retrieval complete and measured. Phase 2 generation measured on
+**three models** — local `qwen2.5:7b`, hosted `gemini-3.1-flash-lite`, and hosted
+`qwen-2.5-7b-instruct` — across both retrieval arms.
 
 **Done**
 
@@ -726,8 +1065,15 @@ authoritative status document.
 
 **Not yet built**
 
-- **Hosted generation replication** — the free tier caps at 200,000 tokens/day and one
-  69-question arm consumes essentially all of it
+- **The paraphrase experiment** — the largest open threat to every retrieval number here. The
+  golden set was written by someone reading the documents, so questions reuse document
+  vocabulary, and lexical overlap is exactly what BM25 scores. **BM25's lead may be an
+  authorship artifact.** Cheap to test and not yet done.
+- **Golden-set target completeness** — confirmed incomplete in at least one row. Row 9 lists
+  only p.41 while p.39 states the same threshold; the model answered from p.39, cited it, and
+  scored as a *citation failure*. The model was right and the golden set was wrong. 14 citation
+  failures remain unreviewed.
+- Prompt v2, targeting the false-abstention weakness, A/B'd against v1 with nothing else changed
 - Handling of the empanelment version conflict, which reranking makes worse rather than better
 - Faithfulness measurement — see the note under [Why these metrics](#why-these-metrics);
   it is deliberately unscored, which leaves a brief deliverable consciously open

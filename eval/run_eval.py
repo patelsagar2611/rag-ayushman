@@ -19,6 +19,7 @@ import json
 import re
 import sys
 import time
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -83,6 +84,11 @@ class Outcome:
     answer: str = ""
     cited_ranks: list = field(default_factory=list)
     citation_correct: bool = False
+    # The subset of cited_ranks that actually point at a golden page. citation_correct
+    # is `any of these`; keeping the full list is what makes the companion metrics
+    # (see citation_precision below) computable and auditable per question rather
+    # than only in aggregate.
+    cited_golden_ranks: list = field(default_factory=list)
     missing_substrings: list = field(default_factory=list)
     error: str = ""
     retrieve_ms: float = 0.0
@@ -127,6 +133,34 @@ def build_targets(files, pages, row):
 
     print(f"  row {row}: {len(files)} file(s) cannot be paired with {len(numbers)} page(s)")
     return []
+
+
+def parse_rows(spec):
+    """'5,12,40-42' -> {5, 12, 40, 41, 42}. Empty spec -> None, meaning every row.
+
+    None rather than an empty set, because "no filter" and "a filter that matches
+    nothing" must not be the same value: the second should run zero questions and
+    say so, not silently run all 69.
+    """
+    if not spec.strip():
+        return None
+    rows = set()
+    for part in (p.strip() for p in spec.split(",") if p.strip()):
+        if "-" in part.lstrip("-"):
+            lo, _, hi = part.partition("-")
+            try:
+                lo, hi = int(lo), int(hi)
+            except ValueError:
+                raise SystemExit(f"--only-rows: '{part}' is not a range like 40-42")
+            if hi < lo:
+                raise SystemExit(f"--only-rows: range '{part}' runs backwards")
+            rows.update(range(lo, hi + 1))
+        else:
+            try:
+                rows.add(int(part))
+            except ValueError:
+                raise SystemExit(f"--only-rows: '{part}' is not a row number")
+    return rows
 
 
 def load_golden(path):
@@ -271,12 +305,27 @@ def evaluate(cases, k, retrieval_only, mode=DEFAULT_MODE):
             outcome.cited_ranks = parse_citations(text)
 
             # A citation is correct if some chunk the model cited is a golden target.
+            #
+            # This is an ANY-match, and it is left that way deliberately: every
+            # archived Phase 1 and Phase 2 number was computed under this definition,
+            # and redefining it would make old and new results incomparable while
+            # still LOOKING comparable -- the same trap design decision 18 records
+            # for the unconditioned false-abstention rate.
+            #
+            # Its known bias: a model that cites every chunk cannot fail while any
+            # golden page sits in the window. That bias cancels when comparing one
+            # model against itself across retrieval modes (citation habits are
+            # constant), which is every comparison made before 2026-08-26. It does
+            # NOT cancel across models, which is exactly what the multi-model table
+            # does. Hence the companions below rather than a new definition.
             by_rank = {h["rank"]: h for h in hits}
-            for rank in outcome.cited_ranks:
-                hit = by_rank.get(rank)
-                if hit and (hit["source_file"], hit["page"]) in case.targets:
-                    outcome.citation_correct = True
-                    break
+            outcome.cited_golden_ranks = [
+                rank
+                for rank in outcome.cited_ranks
+                if (hit := by_rank.get(rank))
+                and (hit["source_file"], hit["page"]) in case.targets
+            ]
+            outcome.citation_correct = bool(outcome.cited_golden_ranks)
 
             # Plain substring check, no judge involved. Catches the failure that
             # matters most on numeric questions: right page found, wrong figure stated.
@@ -380,6 +429,50 @@ def summarise(outcomes, k, retrieval_only):
         )
         metrics["uncited_answers"] = sum(1 for o in answered if not o.cited_ranks)
 
+        # WHO actually answered, counted. Computed HERE rather than in report(),
+        # which receives only `metrics` -- and computed into `metrics` rather than
+        # printed, so it survives into the results file instead of living for one
+        # line of stdout. More than one key means the run is a BLEND: one model id
+        # resolving to several deployments, mixed question by question, whose
+        # composition changes on re-run.
+        metrics["served_by"] = dict(
+            Counter(
+                o.gen_stats["served_by"] for o in outcomes
+                if o.gen_stats.get("served_by")
+            ).most_common()
+        )
+
+        # --- companions to citation_correctness (added 2026-08-26) ---
+        #
+        # citation_correctness is an any-match and therefore rewards citing broadly:
+        # a model that cites all k chunks scores ~100% almost regardless of whether it
+        # located the evidence. These two numbers exist to be READ NEXT TO IT so that
+        # a cross-model table shows the metric alongside the thing that would inflate
+        # it. Neither replaces it -- see the note at the scoring site.
+        #
+        # If citations_per_answer differs materially between two models, their
+        # citation_correctness figures are not directly comparable and the README
+        # must say so rather than tabling them side by side unqualified.
+        cited = [o for o in answered if o.cited_ranks]
+        metrics["citations_per_answer"] = (
+            sum(len(o.cited_ranks) for o in cited) / len(cited) if cited else None
+        )
+        # Macro average: each ANSWER contributes equally, regardless of how many
+        # sources it cited. Chosen over a micro average (total golden cites / total
+        # cites) because citation_correctness is itself a per-answer rate, and a
+        # companion computed over a different unit would not be readable beside it --
+        # one verbose answer could otherwise dominate the whole figure.
+        #
+        # Denominator is answers that cited SOMETHING: precision is undefined with no
+        # citations, and scoring those as 0.0 would conflate "cited the wrong page"
+        # with "cited nothing at all". The latter is already counted, separately, as
+        # uncited_answers -- which must be read alongside this to see the full picture.
+        metrics["citation_precision"] = (
+            sum(len(o.cited_golden_ranks) / len(o.cited_ranks) for o in cited) / len(cited)
+            if cited
+            else None
+        )
+
         checked = [o for o in answered if o.case.must_contain]
         metrics["n_must_contain"] = len(checked)
         metrics["must_contain_pass"] = (
@@ -434,20 +527,41 @@ def report(metrics, retrieval_only):
             ("abstention_recall", "abstained when it should"),
             ("false_abstention_rate", "refused despite evidence"),
             ("citation_correctness", "cited a golden page"),
+            # Printed immediately under citation_correctness, never elsewhere: it is
+            # the number that says whether that one can be compared across models.
+            ("citation_precision", "  ...of its citations"),
             ("must_contain_pass", "stated the required text"),
         ]:
             value = metrics.get(key)
             suffix = ""
             if key == "false_abstention_rate":
                 suffix = f"   (of {metrics.get('n_false_abstention_denom', 0)} retrieved)"
+            if key == "citation_precision":
+                suffix = "   (any-match above is biased toward citing broadly)"
             if key == "must_contain_pass":
                 suffix = f"   (of {metrics.get('n_must_contain', 0)} checked)"
             print(f"  {label:<26s} " + ("   n/a" if value is None else f"{value:6.1%}") + suffix)
+        per_answer = metrics.get("citations_per_answer")
+        print(f"  {'citations per answer':<26s} "
+              + ("   n/a" if per_answer is None else f"{per_answer:6.2f}")
+              + "   (compare across models BEFORE comparing the rates above)")
         # Shown separately because they are correct behaviour, not a failure:
         # the model declined a question whose evidence retrieval never surfaced.
         print(f"  {'  ...also declined on a':<26s} {metrics.get('abstained_on_retrieval_miss', 0):6d}"
               "   retrieval miss (correctly)")
         print(f"  {'answers with no citation':<26s} {metrics['uncited_answers']:6d}")
+
+        # Printed unconditionally rather than only when it looks wrong, because the
+        # failure this catches is one where nothing looks wrong. Local runs print
+        # nothing -- there is no router. Read from metrics, because report() does not
+        # receive the outcomes.
+        served = metrics.get("served_by") or {}
+        if served:
+            # dict, not Counter -- metrics is JSON-serialised, and it is already
+            # ordered most-common-first by the Counter that built it.
+            print(f"  {'served by':<26s} "
+                  + ("  ".join(f"{name} {n}" for name, n in served.items()))
+                  + ("" if len(served) == 1 else "   <- BLEND, not one deployment"))
         if metrics.get("n_generation_errors"):
             print(f"  {'GENERATION ERRORS':<26s} {metrics['n_generation_errors']:6d}"
                   "   (excluded from the rates above)")
@@ -480,6 +594,10 @@ def main():
     parser.add_argument("--min-hit-rate", type=float, default=None,
                         help="exit 1 if hit_rate@k falls below this")
     parser.add_argument("--label", default="", help="tag recorded in the results file")
+    parser.add_argument("--only-rows", default="",
+                        help="re-run just these golden-set rows, e.g. 5,12,40-42. "
+                             "Row numbers are CSV line numbers, as printed in results "
+                             "files and as shown by eval/find.py")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args()
 
@@ -495,18 +613,64 @@ def main():
     prompt_version = None
     llm_provider = None
     llm_model = None
+    llm_upstream_pin = None
     if not args.retrieval_only:
-        from src.generate import LLM_MODEL, LLM_PROVIDER, PROMPT_VERSION
+        from src.generate import (
+            LLM_MODEL, LLM_PROVIDER, OPENAI_PROVIDER, PROMPT_VERSION,
+        )
 
         prompt_version = PROMPT_VERSION
         llm_provider = LLM_PROVIDER
         # LLM_MODEL, not OLLAMA_MODEL -- the latter would mislabel every hosted run
         # with the name of a model that never saw the prompt.
         llm_model = LLM_MODEL
+        # Which UPSTREAM was pinned, which is a different question from
+        # llm_provider (the adapter: "ollama" or "openai"). An aggregator resolves
+        # one model id to several real deployments and picks PER REQUEST, so an
+        # unpinned run is a blend and its composition changes on re-run. Empty
+        # string means "deliberately not pinned"; None means the question did not
+        # apply, i.e. a retrieval-only or local run.
+        llm_upstream_pin = OPENAI_PROVIDER if LLM_PROVIDER == "openai" else None
+
+        # Said before the run rather than discovered in the results file. This is
+        # the variable that was silently uncontrolled in every hosted run before
+        # 2026-08-26: gemini-3.1-flash-lite arrived as a ~55/45 blend of two
+        # different Google endpoints WITHIN a single 69-question run.
+        if LLM_PROVIDER == "openai" and not OPENAI_PROVIDER:
+            print("NOTE: upstream provider is NOT pinned. The aggregator may route\n"
+                  "      different questions to different deployments, and the blend\n"
+                  "      will differ on re-run. Set OPENAI_PROVIDER to pin it.\n")
 
     cases = load_golden(GOLDEN)
     if not cases:
         raise SystemExit(f"{GOLDEN} has no questions")
+
+    only_rows = parse_rows(args.only_rows)
+    if only_rows is not None:
+        known = {c.row for c in cases}
+        missing = sorted(only_rows - known)
+        if missing:
+            # Refuse rather than quietly run the subset that does exist. A typo'd
+            # row number would otherwise produce a patch file silently missing the
+            # question it was created to recover.
+            raise SystemExit(
+                f"--only-rows: {missing} not in {GOLDEN} "
+                f"(rows run {min(known)}-{max(known)})"
+            )
+        cases = [c for c in cases if c.row in only_rows]
+        # Loud, and stated before anything runs. A partial results file has the same
+        # shape as a full one and its `metrics` block is computed over the subset --
+        # so it is a file that LOOKS comparable to a full run and is not. The label
+        # is the only durable place that distinction survives, hence the nag.
+        print(f"\n*** PARTIAL RUN: {len(cases)} of {len(known)} rows "
+              f"({args.only_rows}) ***")
+        print("    Every metric below is computed over this SUBSET and is NOT")
+        print("    comparable to a full-set run. Intended for re-running questions")
+        print("    that errored; merge into the parent run rather than reporting")
+        print("    these rates on their own.")
+        if "partial" not in args.label.lower():
+            print("    NOTE: consider putting 'partial' in --label.")
+        print()
 
     print(f"loaded {len(cases)} questions from {GOLDEN}")
     problems = validate(cases)
@@ -519,8 +683,16 @@ def main():
     print(f"retriever: {args.retriever}")
     outcomes = evaluate(cases, args.k, args.retrieval_only, mode=args.retriever)
     metrics = summarise(outcomes, args.k, args.retrieval_only)
-    report(metrics, args.retrieval_only)
 
+    # SAVE BEFORE REPORTING. Reversed on 2026-08-27 after a formatting bug in
+    # report() raised, killed the process, and destroyed two completed 69-question
+    # runs that had already been generated and PAID FOR. Answers are expensive and
+    # unrecoverable; a printed table is neither -- it can be regenerated from the
+    # file at any time, and eval/citation_companions.py already does exactly that.
+    #
+    # Ordering the cheap, fragile step ahead of the durable one put every run's data
+    # behind a print statement. Anything that can fail after the money is spent must
+    # come after the write.
     if not args.no_save:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -538,6 +710,11 @@ def main():
                         "prompt_version": prompt_version,
                         "llm_provider": llm_provider,
                         "llm_model": llm_model,
+                        "llm_upstream_pin": llm_upstream_pin,
+                        # Present and null on a full run, so a reader never has to
+                        # infer partialness from n_questions -- which would require
+                        # knowing how many rows the golden set had at the time.
+                        "only_rows": args.only_rows or None,
                         "retrieval_only": args.retrieval_only,
                         "embed_model": EMBED_MODEL,
                         "chunk_target_chars": TARGET_CHARS,
@@ -556,6 +733,7 @@ def main():
                             "answer": o.answer,
                             "cited_ranks": o.cited_ranks,
                             "citation_correct": o.citation_correct,
+                            "cited_golden_ranks": o.cited_golden_ranks,
                             "missing_substrings": o.missing_substrings,
                             "gen_stats": o.gen_stats,
                             "error": o.error,
@@ -569,6 +747,9 @@ def main():
             encoding="utf-8",
         )
         print(f"\nwrote {dest}")
+
+    # Now that the data is durable, print the table.
+    report(metrics, args.retrieval_only)
 
     if args.min_hit_rate is not None:
         actual = metrics.get(f"hit_rate@{args.k}", 0.0)

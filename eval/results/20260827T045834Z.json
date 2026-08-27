@@ -1,0 +1,4246 @@
+{
+  "timestamp": "20260827T045834Z",
+  "label": "noise-rep1-rerank-69q-goldenv2-gemini-3.1-flash-lite-pinned",
+  "config": {
+    "k": 5,
+    "retriever": "rerank",
+    "prompt_version": 1,
+    "llm_provider": "openai",
+    "llm_model": "google/gemini-3.1-flash-lite-20260507",
+    "llm_upstream_pin": "Google AI Studio",
+    "only_rows": null,
+    "retrieval_only": false,
+    "embed_model": "BAAI/bge-small-en-v1.5",
+    "chunk_target_chars": 2400,
+    "chunk_overlap_chars": 400,
+    "n_questions": 69
+  },
+  "metrics": {
+    "n_total": 69,
+    "n_answerable": 60,
+    "n_abstain": 9,
+    "hit_rate@1": 0.7166666666666667,
+    "hit_rate@3": 0.85,
+    "hit_rate@5": 0.95,
+    "mrr": 0.7947222222222222,
+    "retrieve_ms_p50": 2198.1516999999258,
+    "retrieve_ms_p95": 3710.05755999995,
+    "n_generation_errors": 0,
+    "abstention_recall": 1.0,
+    "n_false_abstention_denom": 57,
+    "false_abstention_rate": 0.05263157894736842,
+    "false_abstention_rate_unconditioned": 0.08333333333333333,
+    "abstained_on_retrieval_miss": 2,
+    "citation_correctness": 0.9454545454545454,
+    "uncited_answers": 0,
+    "served_by": {
+      "Google AI Studio": 69
+    },
+    "citations_per_answer": 1.6363636363636365,
+    "citation_precision": 0.7718181818181818,
+    "n_must_contain": 31,
+    "must_contain_pass": 0.967741935483871,
+    "generate_ms_p50": 1231.155899999976,
+    "generate_ms_p95": 1777.9894400002372,
+    "n_timed": 69,
+    "prompt_eval_ms_p50": 0.0,
+    "eval_ms_p50": 0.0,
+    "load_ms_p50": 0.0,
+    "prompt_eval_tokens_p50": 2533.0,
+    "prompt_eval_tps": 0.0,
+    "eval_tokens_p50": 30.0,
+    "eval_tps": 0.0,
+    "n_model_reloads": 0
+  },
+  "cases": [
+    {
+      "row": 2,
+      "question": "What is the minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          40
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          6.7026
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          6.1757
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          27,
+          5.1013
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          2.4371
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          6,
+          2.3389
+        ]
+      ],
+      "answer": "For a hospital to be empanelled under PM-JAY, the minimum requirement is at least 10 inpatient beds [1, 3]. However, for hospitals located in Aspirational Districts, the minimum requirement is 5 inpatient beds, unless the hospital is providing day-care packages covered under PM-JAY [2].",
+      "cited_ranks": [
+        1,
+        2,
+        3
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1016.1810000004152,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2496,
+        "eval_ms": 0.0,
+        "eval_tokens": 68,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 3,
+      "question": "What is the capital city of Australia?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          37,
+          -9.9689
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          38,
+          -9.9943
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          110,
+          -10.7132
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          62,
+          -10.7245
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          41,
+          -10.9186
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1059.5298000002913,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2526,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 4,
+      "question": "What was approach on hospital empanelment?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          5
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          6
+        ]
+      ],
+      "first_hit_rank": 3,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          9,
+          3.8829
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          8,
+          3.0575
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          5,
+          3.018
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          5,
+          2.3243
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          3,
+          2.1942
+        ]
+      ],
+      "answer": "The approach to hospital empanelment under AB PM-JAY includes the following:\n\n*   **General Approach:** States and Union Territories can generally only empanel healthcare providers within their own jurisdiction [1]. If a State Health Agency (SHA) determines a need to empanel providers outside its own state, it must approach the National Health Authority (NHA) with a rationale; the NHA will then review the request with the hospital's state and may request that state to empanel the hospital [1]. If the hospital's state is a non-PM-JAY implementing state, the NHA may directly empanel the provider or designate specific SHAs to do so [1].\n*   **Public Facilities:** SHAs must ensure the empanelment of all public facilities that provide inpatient services or cover daycare packages under the scheme [1]. Public hospitals under other government bodies, such as CGHS or ESIC, are eligible for empanelment if they meet the minimum requirements [1]. If a public facility is below the Community Health Centre (CHC) level, it must raise \"atleast 1 preauthorization within 6 months of empanelment\" or it will be moved to an \"invalid public hospital bucket\" [1].\n*   **Quality and Standards:** The empanelment process is designed to balance adequate access with patient safety and quality [3]. Healthcare providers are encouraged to attain PM-JAY quality certifications (Bronze, Silver, and Gold), which provide incentives in the form of higher prices for health benefit packages [1].\n*   **Registration and Identification:** All empaneled providers must mandatorily adhere to the registration process on the web portal [1]. Private hospitals are encouraged to provide a ROHINI ID, and public hospitals are encouraged to have a National Identification Number (NIN) [1].\n*   **Flexibility:** States have the flexibility to adapt empanelment guidelines based on local contextual variations and applicable state laws [2].",
+      "cited_ranks": [
+        1,
+        2,
+        3
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        3
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1976.7761000002793,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2448,
+        "eval_ms": 0.0,
+        "eval_tokens": 404,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 5,
+      "question": "When is hospital empanelment due for renewal?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          8
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          8,
+          5.8804
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          10,
+          4.5167
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          3,
+          3.0024
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          24,
+          1.4789
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          19,
+          0.8687
+        ]
+      ],
+      "answer": "Hospitals will undergo a renewal process for empanelment once every 3 years or till the expiry of validity of AB PM-JAY Bronze/NABH certification (when empaneled based on AB PM-JAY Bronze/NABH criteria) to determine compliance to minimum standards [1]. \n\nAnother source states that for healthcare service providers empanelled based on Quality Certification/accreditation, the renewal process occurs once every 3 years or till the expiry of validity of PM-JAY Bronze/NABH certification, whichever is earlier, to determine compliance to minimum standards [2].",
+      "cited_ranks": [
+        1,
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1357.2896000000583,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2168,
+        "eval_ms": 0.0,
+        "eval_tokens": 121,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 6,
+      "question": "By when should agency deploy team for the project?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          23,
+          5.5016
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          22,
+          0.2012
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          55,
+          -2.0204
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          20,
+          -2.3589
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          32,
+          -2.9919
+        ]
+      ],
+      "answer": "The agency shall deploy the team for the project within fifteen (15) days of the date of signing the agreement or receiving the Letter of Intent (LOI) [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1012.7672000003258,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2855,
+        "eval_ms": 0.0,
+        "eval_tokens": 36,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 7,
+      "question": "What is minimum experience and qualification required for data scientist role in agency?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          24
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          24,
+          4.4316
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          23,
+          4.4098
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          22,
+          -4.7563
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          67,
+          -4.8063
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          6,
+          -5.7176
+        ]
+      ],
+      "answer": "The minimum qualification for a Data Scientist/Analyst Consultant is a Bachelor’s or Master’s degree in Data Science, Computer Science, Statistics, Mathematics, or a related field [1]. The required experience is a minimum of 5 years, of which at least 3 years must be in developing AI/ML models, along with demonstrable credentials of having worked/developed AI/ML models on their own [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1342.2616000002563,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2789,
+        "eval_ms": 0.0,
+        "eval_tokens": 85,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 8,
+      "question": "Will NHA make sure to answer every queries in pre-bid queries?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          34,
+          6.6848
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          52,
+          4.3638
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          51,
+          4.1129
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          34,
+          3.0985
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          8,
+          1.4288
+        ]
+      ],
+      "answer": "No. NHA \"makes no representation or warranty as to the completeness or accuracy of any response made in good faith, nor does it undertake to answer all the queries that have been posed by the Bidders\" [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1191.3807000000816,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2178,
+        "eval_ms": 0.0,
+        "eval_tokens": 45,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 9,
+      "question": "What is cut-off in technical evaluation for bidder?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          39
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          41
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          41,
+          4.8943
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          39,
+          1.3508
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          42,
+          0.791
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          40,
+          0.1133
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          54,
+          -0.2358
+        ]
+      ],
+      "answer": "The overall technical cut-off is 70% [1]. To technically qualify, bidders must secure an aggregate technical score of 70% or more and score at least 70% in individual sections and sub-sections of the technical evaluation [2]. If a bidder does not qualify in any section or sub-sectional criteria, they will be disqualified [1].",
+      "cited_ranks": [
+        1,
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1,
+        2
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1723.6792000003334,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2433,
+        "eval_ms": 0.0,
+        "eval_tokens": 76,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 10,
+      "question": "What is timeline of empanelment request filed by hospital to DEC?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          22
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          22,
+          6.2923
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          3.799
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          3.7974
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          3.5049
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          11,
+          2.6548
+        ]
+      ],
+      "answer": "The provided sources contain conflicting information regarding the timeline for a hospital to apply for missing specialties if found during inspection:\n\n*   One source states the hospital must apply for missing specialties within \"7 days from the inspection date\" [1].\n*   Another source states the hospital must apply for missing specialties within \"15 working days from the inspection date\" [2].\n\nRegarding the processing of the application by the District Empanelment Committee (DEC):\n*   The application should be processed completely within \"15 days of receipt of application\" [1].\n*   The DEC must submit its final inspection report to the State Health Agency (SHA) within \"15 working days from receipt of the application request\" [3].",
+      "cited_ranks": [
+        1,
+        2,
+        3
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1228.3895999999004,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2639,
+        "eval_ms": 0.0,
+        "eval_tokens": 148,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 11,
+      "question": "during inspection, if it is found that hospital has applied for multiple specialties, but all do not conform to minimum requirements under AB-PMJAY, then will it get empanelment?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          7.7009
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          7.4995
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          6.9473
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          22,
+          3.5616
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          6,
+          -0.1101
+        ]
+      ],
+      "answer": "Yes, the hospital will be empanelled, but only for the specialties that conform to AB-PMJAY norms [1], [2], [3].",
+      "cited_ranks": [
+        1,
+        2,
+        3
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1053.6885999999868,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2533,
+        "eval_ms": 0.0,
+        "eval_tokens": 33,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 12,
+      "question": "How much incentive will hospital receive with full NABH accreditation?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          7
+        ]
+      ],
+      "first_hit_rank": 4,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          51,
+          6.4129
+        ],
+        [
+          "operation_manual.pdf",
+          17,
+          1.2413
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          10,
+          0.5938
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          -0.5254
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          8,
+          -2.2054
+        ]
+      ],
+      "answer": "A hospital with full NABH accreditation will receive a 15% incentive [1], [4].",
+      "cited_ranks": [
+        1,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        4
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1600.7715999999164,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2684,
+        "eval_ms": 0.0,
+        "eval_tokens": 21,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 13,
+      "question": "What is estimated number of beneficiaries ayushman bharat aimed to reach?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          7
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          7,
+          2.0974
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          0.9896
+        ],
+        [
+          "grievance_redressal.pdf",
+          6,
+          0.8751
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          66,
+          0.3457
+        ],
+        [
+          "operation_manual.pdf",
+          20,
+          -0.2547
+        ]
+      ],
+      "answer": "Ayushman Bharat PM-JAY aims to reach over 10.74 crore poor and vulnerable families, which equates to approximately 50 crore beneficiaries [2].",
+      "cited_ranks": [
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        2
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1028.124299999945,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2325,
+        "eval_ms": 0.0,
+        "eval_tokens": 35,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 14,
+      "question": "By when should report be submitted when investigating for suspect claims or hospitals?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          29
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          14,
+          1.3309
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          29,
+          1.301
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          20,
+          0.8891
+        ],
+        [
+          "field_investigation_manual.pdf",
+          35,
+          0.7598
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31,
+          0.3279
+        ]
+      ],
+      "answer": "Investigation of the case including submission of report shall be done within 10 working days of flagging the case [2], [3]. Additionally, all attempts shall be made to complete the detailed investigation and submit the report within 10 working days of a show-cause notice being issued [5]. In case of any delay, a report must be submitted to the CEO SHA, citing the reasons for the same [2], [3], [5].",
+      "cited_ranks": [
+        2,
+        3,
+        5
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        2,
+        3
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1126.2424999999894,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2684,
+        "eval_ms": 0.0,
+        "eval_tokens": 91,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 15,
+      "question": "If original cause of suspicion or alleged mischievous activities of EHCP are not valid but other malpractices are identified, how much time EHCP have to respond?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          32
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          22,
+          7.7172
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          32,
+          7.3815
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31,
+          6.2353
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22,
+          5.403
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31,
+          4.1622
+        ]
+      ],
+      "answer": "The provided sources contain conflicting information regarding the time allowed for an EHCP to respond:\n\n*   According to one source, the EHCP will not be allowed more than \"10 working days\" to respond [1], [4].\n*   According to another source, the EHCP shall be allowed \"5 working days\" to respond [2].",
+      "cited_ranks": [
+        1,
+        2,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1,
+        2,
+        4
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1140.0867000002108,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2314,
+        "eval_ms": 0.0,
+        "eval_tokens": 72,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 16,
+      "question": "How many anti-fraud officers will gujarat state have?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          11
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          3.41
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          0.1139
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          28,
+          -1.1621
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          -2.5143
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          12,
+          -3.2363
+        ]
+      ],
+      "answer": "Gujarat is categorized as a \"Non-HFS (large)\" state and will have 2 full-time anti-fraud officers [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1093.4335000001738,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2664,
+        "eval_ms": 0.0,
+        "eval_tokens": 29,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 17,
+      "question": "How many ethical hackers NSA will hire in order to prevent fraud?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          -5.8114
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          13,
+          -6.9287
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          60,
+          -7.2433
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          17,
+          -7.4297
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          126,
+          -8.6283
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1446.498899999824,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3084,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 18,
+      "question": "Can proposal be disqualified in case of bidder increasing its quoted price after submission of the bid?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29,
+          6.4749
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          36,
+          2.6138
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          31,
+          1.8102
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          39,
+          1.5869
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          77,
+          1.4547
+        ]
+      ],
+      "answer": "Yes, the proposal is liable to be disqualified if, during the validity of the bid or its extended period, the bidder increases its quoted price after the submission of the bid [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1205.8594000000085,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3003,
+        "eval_ms": 0.0,
+        "eval_tokens": 37,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 19,
+      "question": "What percentage of death audit needs to be for SHA at minimum?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          17
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          25
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          17,
+          4.4103
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17,
+          2.0432
+        ],
+        [
+          "field_investigation_manual.pdf",
+          8,
+          0.7579
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          9,
+          0.7394
+        ],
+        [
+          "field_investigation_manual.pdf",
+          9,
+          0.6242
+        ]
+      ],
+      "answer": "The minimum percentage for a death audit (or mortality audit) for the SHA is 100% [1], [2], [5].",
+      "cited_ranks": [
+        1,
+        2,
+        5
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1143.1127000000743,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2347,
+        "eval_ms": 0.0,
+        "eval_tokens": 30,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 20,
+      "question": "How many days of ICU treatment blocking done without critical illness, is considered as diagnosis specific fraud trigger?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          24
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          24,
+          2.8929
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          23,
+          1.9753
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          70,
+          0.3184
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          23,
+          -0.1269
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          52,
+          -3.1943
+        ]
+      ],
+      "answer": "ICU/ Medical Treatment blocking done for more than 5 days of stay, other than in the case of critical illnesses, is considered a fraud trigger [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1135.407799999939,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2781,
+        "eval_ms": 0.0,
+        "eval_tokens": 33,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 21,
+      "question": "What percentage of beneficiary audit needs to be at minimum?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          17
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          25
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          17,
+          4.5602
+        ],
+        [
+          "field_investigation_manual.pdf",
+          9,
+          1.4414
+        ],
+        [
+          "field_investigation_manual.pdf",
+          8,
+          1.3703
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          25,
+          -0.5294
+        ],
+        [
+          "field_investigation_manual.pdf",
+          18,
+          -3.0556
+        ]
+      ],
+      "answer": "The provided sources contain conflicting information regarding the minimum percentage for beneficiary audits:\n\n*   **Antifraud Guidelines:** For beneficiary audits conducted during hospitalization, the minimum sample is \"10% of total cases hospitalised\" for Insurer/TPA audits and \"5% direct audits + 10% of audits done by the Insurer/TPA /ISA\" for SHA audits [1]. For post-discharge beneficiary audits conducted through telephone, the minimum is \"10% of total cases hospitalised\" for Insurer/TPA audits and \"5% direct audits + 10% of audits done by the Insurer/TPA /ISA\" for SHA audits [1]. For post-discharge beneficiary audits conducted through home visits, the minimum is \"5% total cases hospitalised\" for Insurer/TPA audits and \"2% direct audits + 2% of audits done by the Insurer /TPA /ISA\" for SHA audits [1].\n*   **Field Investigation and Medical Audit Manual / Antifraud Guidebook 2024:** These sources state that for beneficiary audits (at hospital/at home), the minimum sample is \"3% of total cases hospitalised\" for Insurer/TPA/ISA/SHA Trust (without TPA) audits and \"2% direct audit +2% of audit done by the Insurer/TPA/ISA\" for SHA audits (only in case of states with Insurer/TPA) [3, 4].",
+      "cited_ranks": [
+        1,
+        3,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1,
+        4
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1812.3319999999694,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2621,
+        "eval_ms": 0.0,
+        "eval_tokens": 309,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 22,
+      "question": "When was HBP 2.0 launched?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "operation_manual.pdf",
+          20,
+          2.8656
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          48,
+          0.6277
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          20,
+          -0.3347
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          53,
+          -0.5977
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          44,
+          -0.6657
+        ]
+      ],
+      "answer": "HBP 2.0 was launched in Nov. 2019 [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1133.2611000002544,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2943,
+        "eval_ms": 0.0,
+        "eval_tokens": 19,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 23,
+      "question": "How should hospital display director signage?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          16
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "operation_manual.pdf",
+          16,
+          2.9771
+        ],
+        [
+          "operation_manual.pdf",
+          15,
+          0.2539
+        ],
+        [
+          "field_investigation_manual.pdf",
+          19,
+          -2.9064
+        ],
+        [
+          "operation_manual.pdf",
+          31,
+          -5.0735
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          29,
+          -5.0945
+        ]
+      ],
+      "answer": "It is mandatory to display direction signage for guidance from the reception to the PM-JAY desk [1]. Either stickers or hangings are to be used for this purpose [1]. While these are the specified methods, the hospital should identify other spots that best suit their requirements, as the display location is not limited to those mentioned [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1106.9030999997267,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2545,
+        "eval_ms": 0.0,
+        "eval_tokens": 69,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 24,
+      "question": "How many HWCs are estimated to be setup by 2022?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          6
+        ]
+      ],
+      "first_hit_rank": 4,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          7,
+          -0.2188
+        ],
+        [
+          "operation_manual.pdf",
+          20,
+          -5.1939
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          47,
+          -7.3176
+        ],
+        [
+          "stg_manual.pdf",
+          6,
+          -7.9872
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          -8.5101
+        ]
+      ],
+      "answer": "1,50,000 health and wellness centers will be set up [4].",
+      "cited_ranks": [
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        4
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1099.67800000004,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2740,
+        "eval_ms": 0.0,
+        "eval_tokens": 19,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 25,
+      "question": "What is cover amount under PM JAY for family floater basis?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          7
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          6
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3
+        ],
+        [
+          "operation_manual.pdf",
+          17
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          13
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          7
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          7,
+          3.0386
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          1.4532
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          13,
+          1.215
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          7,
+          0.9943
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3,
+          0.1137
+        ]
+      ],
+      "answer": "The benefit cover under the scheme is INR 5,00,000 on a family floater basis [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1109.8062000000937,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2711,
+        "eval_ms": 0.0,
+        "eval_tokens": 26,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 26,
+      "question": "What is amount for SHA to utilize for life saving conditions but request of approval will be moved on ticketing system?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          15
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          15,
+          4.2459
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          58,
+          -3.0695
+        ],
+        [
+          "operation_manual.pdf",
+          19,
+          -3.2175
+        ],
+        [
+          "operation_manual.pdf",
+          25,
+          -3.9681
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          7,
+          -4.1674
+        ]
+      ],
+      "answer": "For any SHA to utilize the unspecified package above ₹1 lakh for life saving conditions, the request for approval of unspecified surgical packages must be moved on the ticketing system [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1286.5074999999706,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2054,
+        "eval_ms": 0.0,
+        "eval_tokens": 35,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 27,
+      "question": "What is per day price for bed if patient is admitted to ICU with ventilator support?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          18
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          18,
+          1.0765
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          28,
+          -3.2272
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          42,
+          -3.3435
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          41,
+          -3.4625
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          10,
+          -3.8247
+        ]
+      ],
+      "answer": "The per day price for a bed in an Intensive care requiring ventilator support is ₹ 4,500 [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1515.1483999998163,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2911,
+        "eval_ms": 0.0,
+        "eval_tokens": 25,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 28,
+      "question": "How many urology procedures happened in HBP 2.2?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          23
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          33
+        ]
+      ],
+      "first_hit_rank": 3,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          48,
+          4.2085
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          3.328
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          23,
+          2.8411
+        ],
+        [
+          "stg_manual.pdf",
+          29,
+          2.2175
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          52,
+          1.9665
+        ]
+      ],
+      "answer": "In HBP 2.2, there are 148 urology procedures [3].",
+      "cited_ranks": [
+        3
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        3
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1012.508799999523,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3192,
+        "eval_ms": 0.0,
+        "eval_tokens": 20,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 29,
+      "question": "How many aspirational districts have been identified by NITI Aayog?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          51
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          5.5806
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51,
+          3.306
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          2.347
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          35,
+          -0.4659
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          -3.844
+        ]
+      ],
+      "answer": "The provided sources contain conflicting information regarding the number of aspirational districts identified by NITI Aayog:\n\n*   One source states that \"117 Aspirational districts have been identified by NITI Aayog\" [2].\n*   Another source lists \"112 aspirational districts as of September 2021\" [1].",
+      "cited_ranks": [
+        1,
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        2
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1885.9953999999561,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2658,
+        "eval_ms": 0.0,
+        "eval_tokens": 71,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 30,
+      "question": "If any party to a grievance is not satisfied, then how many days it has to appeal that decision?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          16
+        ]
+      ],
+      "first_hit_rank": 5,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          23,
+          7.3525
+        ],
+        [
+          "grievance_redressal.pdf",
+          24,
+          6.3579
+        ],
+        [
+          "grievance_redressal.pdf",
+          22,
+          5.3068
+        ],
+        [
+          "grievance_redressal.pdf",
+          25,
+          4.5378
+        ],
+        [
+          "grievance_redressal.pdf",
+          16,
+          3.8949
+        ]
+      ],
+      "answer": "If any party to a grievance is not satisfied with the decision of the relevant Grievance Redressal Committee, it may appeal against the decision within 30 days to the higher Grievance Redressal Committee or other authority having powers of appeal [5]. \n\nAdditionally, the provided sources specify the following regarding appeals:\n* If either party is not satisfied with a DGNO’s decision, they can appeal to the DGRC within 30 days of the DGNO order [2, 3, 4].\n* If either party is not satisfied with a DGRC decision, they can appeal to the SGRC within 30 days [1, 2, 3, 4].\n* If either party is not satisfied with an SGRC order, they shall approach the SAA within 30 days of the SGRC order [4]. \n\nIf an appeal is not filed within the 30-day period, the aggrieved party loses its right to appeal [5].",
+      "cited_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        5
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1892.5815999991755,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2167,
+        "eval_ms": 0.0,
+        "eval_tokens": 213,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 31,
+      "question": "What is acceptable threshold for Grievances that needed escalation?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          19
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          19,
+          5.487
+        ],
+        [
+          "grievance_redressal.pdf",
+          18,
+          0.5157
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          -2.063
+        ],
+        [
+          "grievance_redressal.pdf",
+          12,
+          -5.8878
+        ],
+        [
+          "grievance_redressal.pdf",
+          4,
+          -5.8931
+        ]
+      ],
+      "answer": "The acceptable threshold (benchmark) for the escalation ratio, which measures grievances that needed escalation, is \"10 % or less\" [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1480.9100000002218,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2112,
+        "eval_ms": 0.0,
+        "eval_tokens": 29,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 32,
+      "question": "What is turn around time for SOS (Emergency) Grievances?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          20,
+          5.8767
+        ],
+        [
+          "grievance_redressal.pdf",
+          18,
+          3.1341
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          2.0874
+        ],
+        [
+          "grievance_redressal.pdf",
+          21,
+          -0.8828
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          -1.2993
+        ]
+      ],
+      "answer": "The turn-around time for SOS (Emergency) Grievances is 6 working hours [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1367.3759000002974,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 1952,
+        "eval_ms": 0.0,
+        "eval_tokens": 21,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 33,
+      "question": "Does desk Audit checklist contains need for ICU documents?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          21
+        ]
+      ],
+      "first_hit_rank": 3,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          70,
+          1.0694
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          75,
+          0.8038
+        ],
+        [
+          "field_investigation_manual.pdf",
+          21,
+          0.742
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          71,
+          -0.9175
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          69,
+          -1.245
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1272.084299999733,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3065,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 34,
+      "question": "Will name of hospital will be declated in public domain in case of improper services?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          -1.6872
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          -2.4472
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          57,
+          -3.2482
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          99,
+          -3.5393
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          67,
+          -3.5566
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1198.9541000002646,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2533,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 35,
+      "question": "Does mortality report checks need for ICU for the patient?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          36
+        ]
+      ],
+      "first_hit_rank": 3,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          37,
+          0.1842
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17,
+          -1.0126
+        ],
+        [
+          "field_investigation_manual.pdf",
+          36,
+          -1.7085
+        ],
+        [
+          "field_investigation_manual.pdf",
+          39,
+          -2.3665
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          91,
+          -2.4173
+        ]
+      ],
+      "answer": "Yes, the mortality report includes a check regarding whether the patient was treated in a critical care unit (ICU or HDU) during their admission, and if not, whether the patient should have been provided such care [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1347.6869000005536,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 1820,
+        "eval_ms": 0.0,
+        "eval_tokens": 46,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 36,
+      "question": "If Number of eligible families in SECC Data is 40 lakhs and Number of families currently enrolled in RSBY is 42 lakhs then what will be Total Number of eligible families for AB PM-JAY?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          8
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          8,
+          4.2047
+        ],
+        [
+          "beneficiary_identification.pdf",
+          5,
+          -2.8097
+        ],
+        [
+          "beneficiary_identification.pdf",
+          14,
+          -2.9094
+        ],
+        [
+          "beneficiary_identification.pdf",
+          15,
+          -3.3344
+        ],
+        [
+          "beneficiary_identification.pdf",
+          4,
+          -4.0385
+        ]
+      ],
+      "answer": "The Total Number of eligible families for AB PM-JAY will be 42 lakhs [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1144.9252000002161,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2935,
+        "eval_ms": 0.0,
+        "eval_tokens": 21,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 37,
+      "question": "Will PM himself be able to approve or reject any claims?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          4,
+          3.1508
+        ],
+        [
+          "beneficiary_identification.pdf",
+          15,
+          2.2536
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          15,
+          1.4119
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          14,
+          1.3559
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          -0.2751
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1125.619899999947,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2417,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 38,
+      "question": "How much build up area is required for Haemodialysis?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          49
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          2.3642
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          49,
+          -3.881
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          -8.5051
+        ],
+        [
+          "stg_manual.pdf",
+          20,
+          -8.8115
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          36,
+          -9.7508
+        ]
+      ],
+      "answer": "The required build-up area for Haemodialysis units is 175 Sq. Mtr [1, 2]. This area is comprised of the following:\n*   Registration Area (Reception, Waiting and Public Utilities): 30 Sq. Mtr [1, 2]\n*   Treatment Room (Procedure room, Staff Change room, Dirty Utility Room, Clean Utility, Dialyzer cleaning area, Toilet, Storeroom, CAPD training area, Store and Pharmacy): 80 Sq. Mtr [1, 2]\n*   Administrative Department (Account’s office, medical office): 20 Sq. Mtr [1, 2]\n*   Water Treatment Area (RO Plant, Water Pump): 20 Sq. Mtr [1, 2]\n*   Generator Area: 5 Sq. Mtr [1, 2]",
+      "cited_ranks": [
+        1,
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1,
+        2
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1352.8118000003815,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2556,
+        "eval_ms": 0.0,
+        "eval_tokens": 184,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 39,
+      "question": "Do hospital empanelment process need its Pan card?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          14
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          14,
+          1.2297
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          0.9961
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15,
+          0.9365
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.8928
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          25,
+          0.6912
+        ]
+      ],
+      "answer": "Yes, the hospital basic information section of the empanelment application requires the detail of the PAN card associated with the hospital [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1413.4830000002694,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2422,
+        "eval_ms": 0.0,
+        "eval_tokens": 27,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 40,
+      "question": "What is maximum number of speciality a hospital can apply with?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          16
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          16,
+          0.7546
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.6049
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          -1.0061
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          -1.3244
+        ],
+        [
+          "operation_manual.pdf",
+          13,
+          -1.9003
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1230.0856000001659,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2361,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 41,
+      "question": "When paying penalty to show cause notice for hospital, what needs to be shared with SHA office after amount is deposited?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          59
+        ]
+      ],
+      "first_hit_rank": 5,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          23,
+          3.7347
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          102,
+          3.6062
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          101,
+          3.5966
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          26,
+          3.2552
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          59,
+          3.0518
+        ]
+      ],
+      "answer": "In case NEFT/RTGS is being used for depositing the amount, the hospital shall provide the Unique Transaction ID to SHA office [2], [3], [5].",
+      "cited_ranks": [
+        2,
+        3,
+        5
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        5
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1672.1204000004946,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2510,
+        "eval_ms": 0.0,
+        "eval_tokens": 35,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 42,
+      "question": "What rules can be overruled by president of India over SEC?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          70,
+          -3.9669
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          35,
+          -4.9407
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          155,
+          -5.0475
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          155,
+          -5.4747
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          160,
+          -6.3258
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1083.1153999997696,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2963,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 43,
+      "question": "How much time does hospital have to oppose rejection by SHA?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          19
+        ]
+      ],
+      "first_hit_rank": 4,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          5.0735
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          37,
+          3.7456
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          26,
+          3.5719
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          19,
+          3.396
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          27,
+          3.0214
+        ]
+      ],
+      "answer": "Healthcare providers have the right to file a review against a rejection by the SHA within 15 working days of the rejection [1, 4].",
+      "cited_ranks": [
+        1,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        4
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1043.297100000018,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2853,
+        "eval_ms": 0.0,
+        "eval_tokens": 30,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 44,
+      "question": "How many minimum dialysis units should be available to empanel any standalone centre not associated with any hospital?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          5.0398
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          4.2899
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          27,
+          3.753
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          33,
+          2.7518
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          2.394
+        ]
+      ],
+      "answer": "Minimum 5 dialysis units should be available to empanel any standalone centre not associated with any hospital [1]. However, depending on the requirement of and situation in the state, the SHA may change the criteria by recording reasons in writing [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1288.6976999998296,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2853,
+        "eval_ms": 0.0,
+        "eval_tokens": 49,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 45,
+      "question": "In HBP 2.2, what percentage is revised rate for ICU without ventilator?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          18
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "operation_manual.pdf",
+          18,
+          6.1343
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          48,
+          -1.6713
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          -2.0873
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          54,
+          -3.0136
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          20,
+          -3.0962
+        ]
+      ],
+      "answer": "In HBP 2.2, the rates for ICU without ventilator have been revised by 136 percent [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1026.600199999848,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2945,
+        "eval_ms": 0.0,
+        "eval_tokens": 26,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 46,
+      "question": "What should be minimum revenue of hospital to be eligible for empanelment application?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          4.0782
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          27,
+          3.2788
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          2.3894
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          18,
+          2.3257
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          10,
+          2.2936
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1209.3350000004648,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2836,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 47,
+      "question": "What is status of pilot testing in state assam?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          20,
+          3.4005
+        ],
+        [
+          "stg_manual.pdf",
+          26,
+          -2.9459
+        ],
+        [
+          "stg_manual.pdf",
+          30,
+          -7.2853
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          -7.6046
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          -8.2788
+        ]
+      ],
+      "answer": "The status of pilot testing in Assam is \"Pilot completed\" [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1222.211100000095,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2437,
+        "eval_ms": 0.0,
+        "eval_tokens": 15,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 48,
+      "question": "How many procedures have reduced price in HBP 2.0 as compared to HBP 1.0",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          48
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          48,
+          5.4879
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          3.4162
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          20,
+          3.4121
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          19,
+          2.1663
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          52,
+          1.4647
+        ]
+      ],
+      "answer": "Prices have been reduced for 57 procedures in HBP 2.0 as compared to HBP 1.0 [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1425.151399999777,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2578,
+        "eval_ms": 0.0,
+        "eval_tokens": 28,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 49,
+      "question": "If patient has received R-CHOP- and first cycle was given on 26 feb 2020 then how soon they can give approval of second cycle at max?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          47
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          47,
+          1.0739
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          35,
+          -7.7701
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          36,
+          -7.7918
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          21,
+          -8.1269
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          30,
+          -9.1077
+        ]
+      ],
+      "answer": "If the first cycle is given on 26.02.2020, the second cycle should be given 21 days later, which is 18.03.2020 [1]. While reducing the gap is not advisable, if there is a technical issue preventing package approval, it can be reduced by one day as an acceptable period, meaning approval can be given on 17.03.2020 [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1551.8588000004456,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2499,
+        "eval_ms": 0.0,
+        "eval_tokens": 97,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 50,
+      "question": "How can one raise grievance under AB PM-JAY using online mode?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          14
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          14,
+          8.3933
+        ],
+        [
+          "operation_manual.pdf",
+          27,
+          4.1107
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          2.7525
+        ],
+        [
+          "operation_manual.pdf",
+          30,
+          2.5431
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          1.4305
+        ]
+      ],
+      "answer": "One can raise a grievance under AB PM-JAY using the online mode through the \"online grievance redressal portal – CGRMS of AB PM-JAY\" [1, 2, 4]. The portal can be accessed at https://cgrms.pmjay.gov.in [1, 2, 3, 4] or https://cgrms.pmjay.gov.in/GRMS/loginnew.htm [2], and another web address provided is https://grievance.pmjay.gov.in [3].",
+      "cited_ranks": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1580.0347000003967,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2508,
+        "eval_ms": 0.0,
+        "eval_tokens": 116,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 51,
+      "question": "Who is NGNO?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          13
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          13,
+          2.5289
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          14,
+          0.406
+        ],
+        [
+          "grievance_redressal.pdf",
+          12,
+          -0.5436
+        ],
+        [
+          "grievance_redressal.pdf",
+          30,
+          -3.9949
+        ],
+        [
+          "grievance_redressal.pdf",
+          11,
+          -4.2036
+        ]
+      ],
+      "answer": "NGNO is a person who is nominated by NHA to address the grievances at National level under PM-JAY [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1208.1930999993347,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2125,
+        "eval_ms": 0.0,
+        "eval_tokens": 26,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 52,
+      "question": "By what timeline, mortality report section 5.1 and 5.2 has to be filled by the hospital and sent?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          35
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          35,
+          6.6431
+        ],
+        [
+          "field_investigation_manual.pdf",
+          36,
+          -1.2877
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17,
+          -1.3709
+        ],
+        [
+          "field_investigation_manual.pdf",
+          39,
+          -2.5659
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15,
+          -2.8161
+        ]
+      ],
+      "answer": "Section 5.1 and 5.2 of the mortality report must be filled by the hospitals and sent \"within 48 hrs\" of the beneficiaries’ death [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1250.0154999997903,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2164,
+        "eval_ms": 0.0,
+        "eval_tokens": 37,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 53,
+      "question": "What is advised to eat by field investigation team at the time of medical audit at the hospital?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          19
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          19,
+          3.5661
+        ],
+        [
+          "field_investigation_manual.pdf",
+          13,
+          2.3275
+        ],
+        [
+          "field_investigation_manual.pdf",
+          12,
+          1.3631
+        ],
+        [
+          "field_investigation_manual.pdf",
+          11,
+          1.2357
+        ],
+        [
+          "field_investigation_manual.pdf",
+          51,
+          1.2336
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1363.7814000003345,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2043,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 54,
+      "question": "Is person in state tracked when approving or recommending to reject identified beneficiaries?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          15
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          15,
+          5.0319
+        ],
+        [
+          "beneficiary_identification.pdf",
+          4,
+          2.7143
+        ],
+        [
+          "operation_manual.pdf",
+          20,
+          2.5867
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          21,
+          0.4471
+        ],
+        [
+          "beneficiary_identification.pdf",
+          4,
+          -0.9051
+        ]
+      ],
+      "answer": "Yes. The system maintains a track of the operator who is approving or recommending a case for rejection [1]. Additionally, the person in the state who makes the decision to either agree with the insurer (rejecting the case) or disagree with the insurer (approving the case) is also tracked in the system [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1277.8950999991139,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2505,
+        "eval_ms": 0.0,
+        "eval_tokens": 65,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 55,
+      "question": "When did AB PM-JAY Additional Data Collection drive at Gram Sabhas take place?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          3
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          3,
+          8.3729
+        ],
+        [
+          "beneficiary_identification.pdf",
+          4,
+          0.1735
+        ],
+        [
+          "operation_manual.pdf",
+          3,
+          -0.3042
+        ],
+        [
+          "operation_manual.pdf",
+          5,
+          -1.5287
+        ],
+        [
+          "beneficiary_identification.pdf",
+          13,
+          -1.793
+        ]
+      ],
+      "answer": "The AB PM-JAY Additional Data Collection drive at Gram Sabhas across India took place on 30th April [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1712.232299999414,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2418,
+        "eval_ms": 0.0,
+        "eval_tokens": 27,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 56,
+      "question": "What is size of TMS claims in FY 21-22?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          108
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          108,
+          5.6764
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          50,
+          -4.8184
+        ],
+        [
+          "operation_manual.pdf",
+          22,
+          -5.1696
+        ],
+        [
+          "stg_manual.pdf",
+          33,
+          -6.0747
+        ],
+        [
+          "operation_manual.pdf",
+          24,
+          -6.3986
+        ]
+      ],
+      "answer": "The size of TMS claims in FY 21-22 was 1,46,01,475 [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1141.497000000527,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2783,
+        "eval_ms": 0.0,
+        "eval_tokens": 29,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 57,
+      "question": "Who is best batsman of all time in cricket?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          2,
+          -11.0571
+        ],
+        [
+          "operation_manual.pdf",
+          5,
+          -11.0713
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          1,
+          -11.1052
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          12,
+          -11.1381
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          3,
+          -11.1544
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1216.7063999995662,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 1341,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 58,
+      "question": "In case EHCP does not respond to show-cause notice in 5 days, what is max duration that it can be suspended for?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          30
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          21
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          32,
+          5.554
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          23,
+          5.4328
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22,
+          5.4128
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          29,
+          5.1236
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          33,
+          4.2748
+        ]
+      ],
+      "answer": "In case the EHCP does not provide a response to the show-cause notice within the stipulated time period, the EHCP may be suspended for a specified time period, not exceeding 6 months [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1244.493700000021,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2346,
+        "eval_ms": 0.0,
+        "eval_tokens": 42,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 59,
+      "question": "Which cities are classified for grant of house rent allowance to central government employees in Gujarat?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          37
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          37,
+          8.4044
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          38,
+          -4.8922
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51,
+          -8.6475
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          -8.8433
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          -8.9901
+        ]
+      ],
+      "answer": "The cities in Gujarat classified for the grant of house rent allowance to central government employees are Ahmadabad (UA) as a city classified as \"X\", and Rajkot (UA), Jamnagar (UA), Bhavnagar (UA), Vadodara (UA), and Surat (UA) as cities classified as \"Y\" [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1229.8469999996087,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3069,
+        "eval_ms": 0.0,
+        "eval_tokens": 67,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 60,
+      "question": "Around how many people got killed due to COVID-19 in india?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          89,
+          -3.9366
+        ],
+        [
+          "operation_manual.pdf",
+          3,
+          -8.5019
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3,
+          -8.7462
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3,
+          -9.3533
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          39,
+          -9.7851
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1191.1476000004768,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2485,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 61,
+      "question": "What do mean by DDO?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          3
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          30,
+          -6.3309
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          142,
+          -6.9388
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          6,
+          -7.2837
+        ],
+        [
+          "grievance_redressal.pdf",
+          29,
+          -7.3304
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          29,
+          -7.5674
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [
+        "Deputy District Officer"
+      ],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1149.7319000000061,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2372,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 62,
+      "question": "What do mean by CSC?",
+      "targets": [
+        [
+          "operation_manual.pdf",
+          3
+        ],
+        [
+          "operation_manual.pdf",
+          20
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          4
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          6
+        ],
+        [
+          "grievance_redressal.pdf",
+          22
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          10
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          29,
+          -3.1425
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          65,
+          -3.3639
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          66,
+          -3.9063
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          13,
+          -4.5038
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          28,
+          -4.5762
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [
+        "Common Service Centres"
+      ],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1260.7895000001008,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2119,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 63,
+      "question": "Who is dr indu bhusan?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          2
+        ],
+        [
+          "stg_manual.pdf",
+          21
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          3
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          11
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          21,
+          2.9412
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3,
+          0.3098
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3,
+          -2.0796
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          3,
+          -3.3038
+        ],
+        [
+          "stg_manual.pdf",
+          2,
+          -4.454
+        ]
+      ],
+      "answer": "Dr. Indu Bhushan is the Former CEO of the National Health Authority (NHA) [4, 5]. He is also identified as the former CEO of the National Health Agency [2].",
+      "cited_ranks": [
+        2,
+        4,
+        5
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        4,
+        5
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1607.0200000003751,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2532,
+        "eval_ms": 0.0,
+        "eval_tokens": 41,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 64,
+      "question": "In a case of patient doing self-discharge after surgery, how much payment will be done to hospital?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          10
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          12
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          11,
+          3.2686
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          10,
+          3.2621
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          12,
+          2.7348
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          9,
+          2.0472
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          11,
+          1.3616
+        ]
+      ],
+      "answer": "In a case of a patient taking discharge against medical advice (DAMA/LAMA) after surgery, payment for 75% of the package rate will be done to the hospital by the SHA/Insurer [2]. To qualify for this payment, the hospital must submit daily case sheets and OT notes for auditing purposes [2].",
+      "cited_ranks": [
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        2
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1703.4985000000233,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2586,
+        "eval_ms": 0.0,
+        "eval_tokens": 68,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 65,
+      "question": "What is primary identity document for family member under PM-JAY?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          12
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          12,
+          7.3051
+        ],
+        [
+          "beneficiary_identification.pdf",
+          14,
+          5.389
+        ],
+        [
+          "beneficiary_identification.pdf",
+          15,
+          4.1708
+        ],
+        [
+          "beneficiary_identification.pdf",
+          8,
+          3.1853
+        ],
+        [
+          "field_investigation_manual.pdf",
+          44,
+          2.5103
+        ]
+      ],
+      "answer": "Aadhaar will be primary identity document for a family member that has to be produced under the AB PM-JAY scheme [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1178.7729999996372,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2577,
+        "eval_ms": 0.0,
+        "eval_tokens": 28,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 66,
+      "question": "Does showing inflated medical bills considered as fraud?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          14
+        ]
+      ],
+      "first_hit_rank": 5,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          15,
+          2.9599
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          6,
+          -3.123
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48,
+          -3.807
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          47,
+          -4.2269
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          14,
+          -4.254
+        ]
+      ],
+      "answer": "Yes, inflated bills for medicines and medical devices, defined as \"claims for medicines and/or medical devices larger than the real costs,\" are considered fraud under the AB PM-JAY scheme [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1488.3100999995804,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2994,
+        "eval_ms": 0.0,
+        "eval_tokens": 41,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 67,
+      "question": "How much is maximum duration can be allowed by NHA to agency for fraud analytics services?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          20,
+          2.9095
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          107,
+          0.6247
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          23,
+          0.1341
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          1,
+          0.0085
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          24,
+          -0.5726
+        ]
+      ],
+      "answer": "The contract agreement is for a duration of 3 (three) years, with an extension beyond this period of up to a maximum of two (2) additional years on a yearly basis, at the sole discretion of the NHA [1].",
+      "cited_ranks": [
+        1
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [
+        "5"
+      ],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1312.6978999998755,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2484,
+        "eval_ms": 0.0,
+        "eval_tokens": 49,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 68,
+      "question": "What is validity of bids submitted to NHA?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          8
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          29
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          77
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29,
+          5.942
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          43,
+          5.1135
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          34,
+          4.581
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          26,
+          4.4428
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          26,
+          4.1563
+        ]
+      ],
+      "answer": "Bids must remain valid up to 180 (One Hundred & Eighty) days from the last date of submission of the Bids [1]. NHA may request that bidders extend this validity period [1, 2].",
+      "cited_ranks": [
+        1,
+        2
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1201.0879000008572,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2785,
+        "eval_ms": 0.0,
+        "eval_tokens": 47,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 69,
+      "question": "How many common types of fraud that may occur under AB PM-JAY?",
+      "targets": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47,
+          8.4078
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48,
+          7.457
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          14,
+          6.289
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48,
+          5.5718
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          11,
+          5.3981
+        ]
+      ],
+      "answer": "There are 32 common types of fraud that may occur under AB PM-JAY [1], [4].",
+      "cited_ranks": [
+        1,
+        4
+      ],
+      "citation_correct": true,
+      "cited_golden_ranks": [
+        1
+      ],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1261.7239999999583,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2410,
+        "eval_ms": 0.0,
+        "eval_tokens": 24,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    },
+    {
+      "row": 70,
+      "question": "What is ideal owner of POK?",
+      "targets": [],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          141,
+          -9.6719
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          133,
+          -9.7713
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          23,
+          -10.6533
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          86,
+          -10.7212
+        ],
+        [
+          "stg_manual.pdf",
+          27,
+          -10.772
+        ]
+      ],
+      "answer": "I cannot answer this from the provided sources.",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {
+        "served_by": "Google AI Studio",
+        "total_ms": 1199.0539999997054,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 3249,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      },
+      "error": ""
+    }
+  ]
+}

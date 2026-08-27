@@ -43,6 +43,18 @@ OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.groq.com/openai/v1")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "openai/gpt-oss-120b")
 OPENAI_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
 
+# Aggregators route ONE model id across SEVERAL upstream providers, which can
+# differ in quantisation, context handling and output shape. That makes the
+# served provider a variable of the experiment, not an implementation detail:
+# two runs naming the same model can be two different deployments.
+#
+# Set to pin routing to one upstream (e.g. "Anthropic", "Google AI Studio").
+# Unset means the aggregator picks, which is fine as long as the run RECORDS
+# what answered -- see served_by in parse_openai_stats. Recording is mandatory;
+# pinning is optional, because a provider that is down should fail the run
+# rather than silently swap deployments mid-benchmark.
+OPENAI_PROVIDER = os.getenv("OPENAI_PROVIDER", "")
+
 # The model actually in play, for the results `config` block. Reading OLLAMA_MODEL
 # there would mislabel every hosted run.
 LLM_MODEL = OLLAMA_MODEL if LLM_PROVIDER == "ollama" else OPENAI_MODEL
@@ -192,6 +204,14 @@ def parse_openai_stats(payload, elapsed_ms):
         return float(value) * 1000 if value else 0.0
 
     stats = {
+        # WHO answered, not just which model was asked for. An aggregator routes
+        # one model id across several upstream deployments, so a results file
+        # naming only the model is ambiguous in exactly the way design decision 26
+        # exists to prevent -- it would name something that had partial influence
+        # on the numbers while omitting the rest. Empty string when the endpoint
+        # does not say, which is honest; None would be indistinguishable from
+        # "not recorded yet" in a file written before this field existed.
+        "served_by": payload.get("provider") or "",
         # Wall clock measured here, because a provider that reports no timing at
         # all would otherwise report a total of zero for a call that took a second.
         "total_ms": ms("total_time") or elapsed_ms,
@@ -215,6 +235,28 @@ def parse_openai_stats(payload, elapsed_ms):
 # excludes errored questions from generation metrics, so an un-retried 429 silently
 # shrinks the denominator instead of showing up as a failure.
 RETRY_STATUSES = (429, 500, 502, 503, 504)
+
+# Transport failures get the same treatment, for the same reason, and they are a
+# SEPARATE code path: these never produce an HTTP status at all, so a status-code
+# check cannot see them and they skipped the retry logic entirely until 2026-08-26.
+#
+#   ChunkedEncodingError  connection dropped mid-response. Observed once when the
+#                         machine suspended mid-request (gotcha 17) -- which is a
+#                         local cause, but a home connection over 69 sequential
+#                         questions will produce this on its own eventually.
+#   ConnectionError       DNS, refused, reset
+#   Timeout               no response inside the request timeout
+#
+# The silent-shrinkage argument above applies with full force here: run_eval catches
+# these per question and continues, so the run does not FAIL, it just quietly covers
+# fewer questions and reports a confident average over whatever survived. That is
+# the shape of the archived FAILED-RUN file -- 52 of 69 errored, metrics computed
+# over 17, and nothing in the output looked wrong.
+RETRY_EXCEPTIONS = (
+    requests.exceptions.ChunkedEncodingError,
+    requests.exceptions.ConnectionError,
+    requests.exceptions.Timeout,
+)
 # Five was too few once a provider asks for a ~60 s wait: the run gave up after
 # ~30 s of exponential backoff and recorded 52 of 69 questions as errors.
 MAX_RETRIES = 8
@@ -349,30 +391,58 @@ def call_openai_compatible(prompt):
             "the environment. See .env.example."
         )
 
+    body = {
+        "model": OPENAI_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        # Matches the Ollama call so the two differ only by model.
+        "temperature": 0,
+        # NOT 512, unlike Ollama's num_predict, and the difference is
+        # deliberate. Reasoning models bill their chain of thought against
+        # this same budget, so an equal NUMBER is not an equal answer
+        # budget. At 512, openai/gpt-oss-120b spent the whole allowance
+        # reasoning on one question and returned empty content -- an answer
+        # that silently scored as a wrong answer rather than as an error.
+        # Matching the local number would be matching the label, not the
+        # thing the label refers to.
+        "max_tokens": 1536,
+    }
+    # Only sent when pinned. An empty routing block is not the same as no
+    # routing block on every aggregator, and a provider that ignores the key
+    # is preferable to one that reads a half-specified one.
+    if OPENAI_PROVIDER:
+        body["provider"] = {
+            "order": [OPENAI_PROVIDER],
+            # Falling back silently is the failure this exists to prevent.
+            "allow_fallbacks": False,
+        }
+
     delay = 2.0
     for attempt in range(MAX_RETRIES):
         pace()
         started = time.perf_counter()
-        response = requests.post(
-            f"{OPENAI_BASE_URL}/chat/completions",
-            headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
-            json={
-                "model": OPENAI_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                # Matches the Ollama call so the two differ only by model.
-                "temperature": 0,
-                # NOT 512, unlike Ollama's num_predict, and the difference is
-                # deliberate. Reasoning models bill their chain of thought against
-                # this same budget, so an equal NUMBER is not an equal answer
-                # budget. At 512, openai/gpt-oss-120b spent the whole allowance
-                # reasoning on one question and returned empty content -- an answer
-                # that silently scored as a wrong answer rather than as an error.
-                # Matching the local number would be matching the label, not the
-                # thing the label refers to.
-                "max_tokens": 1536,
-            },
-            timeout=180,
-        )
+        try:
+            response = requests.post(
+                f"{OPENAI_BASE_URL}/chat/completions",
+                headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
+                json=body,
+                timeout=180,
+            )
+        except RETRY_EXCEPTIONS as exc:
+            # Re-raise on the last attempt so the caller sees the real exception
+            # rather than a NameError on `response` -- run_eval records the type
+            # and message, and a transport failure should be identifiable as one
+            # in the results file.
+            if attempt == MAX_RETRIES - 1:
+                raise
+            # Backoff only, no retry_delay(): there is no response to read a
+            # provider hint from. Deliberately not paced against the rate-limit
+            # budget either -- a dropped connection is not a refusal, and treating
+            # it as one would wait out a rate-limit window that was never hit.
+            wait = delay
+            print(f"[{type(exc).__name__}; retry in {wait:.0f}s]", end="", flush=True)
+            time.sleep(wait)
+            delay *= 2
+            continue
         elapsed_ms = (time.perf_counter() - started) * 1000
         note_limits(response.headers)
 
