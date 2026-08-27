@@ -641,6 +641,77 @@ mattered more than any of it.
 
 ---
 
+# 17. The pre-registered experiment that inverted a headline result
+
+**The scenario.** The project's retrieval results showed keyword search (BM25) beating dense
+embeddings — MRR 0.677 against 0.624, and a wider gap on hit@1. That was a genuine surprise
+worth reporting, and it was reported.
+
+But the evaluation questions were hand-written by someone reading the source documents, so they
+reuse the documents' own vocabulary: *"cover amount on family floater basis"* rather than *"how
+much money do I get for an operation"*. **BM25 scores exactly that lexical overlap.** So the
+result might be measuring the question author, not the corpus.
+
+**How we got to the answer.** Measured the bias first rather than assuming it, using the same
+tokenizer BM25 itself uses: mean overlap between question and target page **78.1%**, and **15 of
+60 questions reused every content word** from their target page.
+
+Then a **paired** test — the same facts and the *same target pages*, only the wording changed,
+so retrieval is the only thing that can move. This design choice mattered: the intuitive
+alternative, collecting real user questions from public FAQs, would have produced genuine user
+language but different answers and different target pages, so any drop couldn't be attributed
+to vocabulary.
+
+The rewrites were drafted by a model given the question and the human-written expected answer,
+**never any page text**, then hand-reviewed. Two were rejected for expanding a domain acronym
+into the wrong domain — *EHCP* (Empanelled Health Care Provider) became a UK education plan,
+*NHA* (National Health Authority) became a housing authority — and one for drifting to a
+different information need. Dropping them was the *conservative* choice: they were the most
+jargon-dense rows, so excluding them makes the effect harder to detect, not easier.
+
+**Two outcomes were pre-registered before running**: that BM25's lead would shrink if the bias
+was real, and that reranking would degrade least, because a cross-encoder reads question and
+passage together rather than matching tokens.
+
+| retriever | MRR original | MRR lay phrasing | change |
+|---|---|---|---|
+| `vector` | 0.789 | 0.443 | −44% |
+| `bm25` | **0.941** | **0.144** | **−85%** |
+| `hybrid` | 0.912 | 0.402 | −56% |
+| `rerank` | 0.971 | 0.590 | −39% |
+
+**The ranking inverted.** BM25 went from second-best to last, finding the right page first in
+1 of 17 questions. Vector went from last to second. Reranking degraded least, as predicted.
+
+**Defensive argument.** "My headline retrieval result was that keyword search beat embeddings. I
+didn't trust it, because I'd written the evaluation questions myself while reading the source
+documents — and lexical overlap is precisely what BM25 scores. So I measured the overlap: 78%
+on average, with a quarter of the questions reusing every content word from their target page.
+Then I ran a paired test with the same facts and the same target pages, rewritten in lay
+language. BM25 dropped 85% and went from second place to last. My reported advantage was
+substantially an artifact of my own authorship. I pre-registered the predictions before running
+so I couldn't reinterpret the outcome, and I deliberately excluded the rows most favourable to
+the finding, which makes the effect harder to detect rather than easier."
+
+**Show-off argument.** Openings: *"how do you know your evaluation is valid?"*, *"tell me about
+a surprising result"*, *"what's the hardest part of building a RAG system?"*
+> "The most useful experiment I ran was one designed to attack my own headline result. I'd found
+> that keyword search beat embeddings on my eval — genuinely surprising, and the kind of thing
+> you'd want to write up. But I'd written the eval questions myself with the documents open, and
+> lexical overlap is exactly what BM25 rewards. So I measured it: 78% average overlap between
+> question and answer page. Then I rewrote the worst offenders in plain language, keeping the
+> same facts and the same target pages, and BM25 collapsed by 85% — from second-best retriever
+> to last. The reranker degraded least, which I'd predicted, because it actually reads the
+> question against the passage instead of matching words. The real lesson isn't about BM25 —
+> it's that if you write your own eval set from the source documents, you've encoded your
+> reading of them into the benchmark, and you will not see it unless you go looking."
+
+**Cross-reference:** this is the retrieval-side counterpart to entry 16. Both are the same move
+— compare against something that isolates what you're actually measuring — and both found the
+headline number was measuring the setup rather than the system.
+
+---
+
 # Backlog — entries still to be written
 
 Earlier phases contain material of the same quality that predates this journal and should be

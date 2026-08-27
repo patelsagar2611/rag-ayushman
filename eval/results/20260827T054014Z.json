@@ -1,0 +1,805 @@
+{
+  "timestamp": "20260827T054014Z",
+  "label": "vocab-original-hybrid-17q-partial",
+  "config": {
+    "k": 5,
+    "retriever": "hybrid",
+    "prompt_version": null,
+    "llm_provider": null,
+    "llm_model": null,
+    "llm_upstream_pin": null,
+    "only_rows": "6,9,10,11,16,18,26,29,32,38,44,47,51,52,59,65,69",
+    "question_set": "golden_set.csv",
+    "retrieval_only": true,
+    "embed_model": "BAAI/bge-small-en-v1.5",
+    "chunk_target_chars": 2400,
+    "chunk_overlap_chars": 400,
+    "n_questions": 17
+  },
+  "metrics": {
+    "n_total": 17,
+    "n_answerable": 17,
+    "n_abstain": 0,
+    "hit_rate@1": 0.8235294117647058,
+    "hit_rate@3": 1.0,
+    "hit_rate@5": 1.0,
+    "mrr": 0.9117647058823529,
+    "retrieve_ms_p50": 41.281299999354815,
+    "retrieve_ms_p95": 84.50717999949119
+  },
+  "cases": [
+    {
+      "row": 6,
+      "question": "By when should agency deploy team for the project?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          23,
+          0.0323
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          22,
+          0.032
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          20,
+          0.0306
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          55,
+          0.0304
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          21,
+          0.0301
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 9,
+      "question": "What is cut-off in technical evaluation for bidder?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          39
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          41
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          41,
+          0.0328
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          39,
+          0.0318
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          42,
+          0.0318
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          40,
+          0.0317
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          54,
+          0.0308
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 10,
+      "question": "What is timeline of empanelment request filed by hospital to DEC?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          22
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          22,
+          0.0328
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          0.0315
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          0.0315
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          0.0313
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.0305
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 11,
+      "question": "during inspection, if it is found that hospital has applied for multiple specialties, but all do not conform to minimum requirements under AB-PMJAY, then will it get empanelment?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.0325
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          0.0325
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          6,
+          0.0313
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          7,
+          0.0306
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.0304
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 16,
+      "question": "How many anti-fraud officers will gujarat state have?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          11
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          0.0328
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          28,
+          0.032
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          0.0315
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          12,
+          0.0308
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          0.0296
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 18,
+      "question": "Can proposal be disqualified in case of bidder increasing its quoted price after submission of the bid?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29,
+          0.0328
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          42,
+          0.0315
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          3,
+          0.0298
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          40,
+          0.0283
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          72,
+          0.0281
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 26,
+      "question": "What is amount for SHA to utilize for life saving conditions but request of approval will be moved on ticketing system?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          15
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "hbp_2_2_manual.pdf",
+          15,
+          0.032
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          101,
+          0.0264
+        ],
+        [
+          "operation_manual.pdf",
+          25,
+          0.0255
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          7,
+          0.0231
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          60,
+          0.0164
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 29,
+      "question": "How many aspirational districts have been identified by NITI Aayog?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          51
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          0.0325
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51,
+          0.0325
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          0.0317
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          44,
+          0.0235
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          41,
+          0.0156
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 32,
+      "question": "What is turn around time for SOS (Emergency) Grievances?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          18,
+          0.0328
+        ],
+        [
+          "grievance_redressal.pdf",
+          20,
+          0.0323
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          0.0317
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          0.0308
+        ],
+        [
+          "grievance_redressal.pdf",
+          13,
+          0.0301
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 38,
+      "question": "How much build up area is required for Haemodialysis?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          49
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          0.0328
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          49,
+          0.0323
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          0.0291
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          0.0289
+        ],
+        [
+          "operation_manual.pdf",
+          14,
+          0.0267
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 44,
+      "question": "How many minimum dialysis units should be available to empanel any standalone centre not associated with any hospital?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          0.0328
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          33,
+          0.0315
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          0.0315
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          44,
+          0.0315
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          0.0306
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 47,
+      "question": "What is status of pilot testing in state assam?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          20,
+          0.0328
+        ],
+        [
+          "stg_manual.pdf",
+          30,
+          0.0315
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          0.031
+        ],
+        [
+          "stg_manual.pdf",
+          11,
+          0.0299
+        ],
+        [
+          "stg_manual.pdf",
+          22,
+          0.0295
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 51,
+      "question": "Who is NGNO?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          13
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          13,
+          0.0328
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          0.0272
+        ],
+        [
+          "grievance_redressal.pdf",
+          12,
+          0.0161
+        ],
+        [
+          "grievance_redressal.pdf",
+          30,
+          0.0161
+        ],
+        [
+          "grievance_redressal.pdf",
+          11,
+          0.0159
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 52,
+      "question": "By what timeline, mortality report section 5.1 and 5.2 has to be filled by the hospital and sent?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          35
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          35,
+          0.0328
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17,
+          0.0315
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          88,
+          0.0294
+        ],
+        [
+          "field_investigation_manual.pdf",
+          39,
+          0.0293
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15,
+          0.0277
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 59,
+      "question": "Which cities are classified for grant of house rent allowance to central government employees in Gujarat?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          37
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          37,
+          0.0328
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          161,
+          0.0291
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          157,
+          0.0275
+        ],
+        [
+          "operation_manual.pdf",
+          3,
+          0.0269
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          60,
+          0.0259
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 65,
+      "question": "What is primary identity document for family member under PM-JAY?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          12
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          12,
+          0.0325
+        ],
+        [
+          "beneficiary_identification.pdf",
+          14,
+          0.0323
+        ],
+        [
+          "beneficiary_identification.pdf",
+          15,
+          0.032
+        ],
+        [
+          "beneficiary_identification.pdf",
+          12,
+          0.0308
+        ],
+        [
+          "beneficiary_identification.pdf",
+          5,
+          0.0301
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 69,
+      "question": "How many common types of fraud that may occur under AB PM-JAY?",
+      "targets": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47,
+          0.0323
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48,
+          0.0318
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48,
+          0.031
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          45,
+          0.0299
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          11,
+          0.0299
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    }
+  ]
+}

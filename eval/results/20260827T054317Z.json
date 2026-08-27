@@ -1,0 +1,805 @@
+{
+  "timestamp": "20260827T054317Z",
+  "label": "vocab-paraphrase-rerank-17q",
+  "config": {
+    "k": 5,
+    "retriever": "rerank",
+    "prompt_version": null,
+    "llm_provider": null,
+    "llm_model": null,
+    "llm_upstream_pin": null,
+    "only_rows": null,
+    "question_set": "paraphrase_set.csv",
+    "retrieval_only": true,
+    "embed_model": "BAAI/bge-small-en-v1.5",
+    "chunk_target_chars": 2400,
+    "chunk_overlap_chars": 400,
+    "n_questions": 17
+  },
+  "metrics": {
+    "n_total": 17,
+    "n_answerable": 17,
+    "n_abstain": 0,
+    "hit_rate@1": 0.5294117647058824,
+    "hit_rate@3": 0.5882352941176471,
+    "hit_rate@5": 0.7647058823529411,
+    "mrr": 0.5901960784313726,
+    "retrieve_ms_p50": 2452.613599999495,
+    "retrieve_ms_p95": 4368.484420000095
+  },
+  "cases": [
+    {
+      "row": 2,
+      "question": "How long after we sign the contract do you have to get your people started on the work?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          44,
+          -1.7562
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          19,
+          -2.764
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          77,
+          -4.5729
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          27,
+          -4.8173
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          73,
+          -4.8966
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 3,
+      "question": "What score do I need to get on the technical part to pass?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          39
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          41
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          39,
+          -3.5207
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          47,
+          -8.4549
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          41,
+          -8.5926
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          23,
+          -8.6724
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          130,
+          -9.0873
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 4,
+      "question": "How long does it take for the health board to approve a hospital's request to join the network?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          22
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          -0.3617
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          24,
+          -0.5536
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          19,
+          -0.754
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          -0.98
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          -1.3988
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 5,
+      "question": "How many people are working to stop fraud in Gujarat?",
+      "targets": [
+        [
+          "antifraud_guidelines.pdf",
+          11
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          -5.2396
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          37,
+          -7.3112
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3,
+          -7.4783
+        ],
+        [
+          "field_investigation_manual.pdf",
+          3,
+          -7.676
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          11,
+          -8.1412
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 6,
+      "question": "How many places are on the government's list of districts that need extra help to develop?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          51
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          -5.073
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          14,
+          -7.8741
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          37,
+          -7.9587
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          11,
+          -8.6206
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          41,
+          -8.6851
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 7,
+      "question": "How long does it take to get a response if I file an emergency complaint?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 0,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          25,
+          -1.5713
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          33,
+          -2.3576
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          20,
+          -3.1549
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22,
+          -3.5887
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          25,
+          -3.8317
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 8,
+      "question": "How much space do I need to set up a dialysis unit?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          49
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          1.7942
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          -4.3272
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          -5.5391
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          49,
+          -5.8569
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          28,
+          -7.2315
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 9,
+      "question": "How many dialysis machines does a standalone clinic need to have before it can be approved to provide treatment?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          34
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          34,
+          -1.0841
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          49,
+          -1.2553
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          26,
+          -1.9329
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          -2.4436
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          31,
+          -2.7265
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 10,
+      "question": "Has the trial for cataract surgery in Assam finished yet?",
+      "targets": [
+        [
+          "stg_manual.pdf",
+          20
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "stg_manual.pdf",
+          20,
+          -3.4798
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          43,
+          -5.9553
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          41,
+          -6.1322
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          48,
+          -8.2017
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          42,
+          -9.4642
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 11,
+      "question": "Who is the person in charge of handling complaints at the national level for the government health insurance scheme?",
+      "targets": [
+        [
+          "grievance_redressal.pdf",
+          13
+        ]
+      ],
+      "first_hit_rank": 4,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
+          5,
+          0.5097
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          12,
+          0.2747
+        ],
+        [
+          "grievance_redressal.pdf",
+          11,
+          -0.6557
+        ],
+        [
+          "grievance_redressal.pdf",
+          13,
+          -1.3592
+        ],
+        [
+          "operation_manual.pdf",
+          8,
+          -1.6372
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 12,
+      "question": "Which cities in Gujarat get extra money for rent for people working for the central government?",
+      "targets": [
+        [
+          "empanelment_dec2021.pdf",
+          37
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
+          37,
+          3.4932
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          38,
+          -8.7446
+        ],
+        [
+          "operation_manual.pdf",
+          7,
+          -9.7761
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          157,
+          -10.209
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          60,
+          -10.8037
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 13,
+      "question": "What ID do I need to show for a family member to use this health insurance?",
+      "targets": [
+        [
+          "beneficiary_identification.pdf",
+          12
+        ]
+      ],
+      "first_hit_rank": 4,
+      "retrieved": [
+        [
+          "beneficiary_identification.pdf",
+          9,
+          -1.4148
+        ],
+        [
+          "beneficiary_identification.pdf",
+          5,
+          -1.574
+        ],
+        [
+          "beneficiary_identification.pdf",
+          15,
+          -1.6219
+        ],
+        [
+          "beneficiary_identification.pdf",
+          12,
+          -1.6883
+        ],
+        [
+          "beneficiary_identification.pdf",
+          14,
+          -2.0445
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 14,
+      "question": "What are the different ways people try to cheat the government health insurance scheme?",
+      "targets": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
+          47,
+          -1.0424
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          43,
+          -1.1191
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          61,
+          -1.8547
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          21,
+          -2.4865
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          37,
+          -2.6716
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 15,
+      "question": "If a hospital applies to offer several types of medical services but doesn't meet the standards for all of them, will they still be allowed to join the program for the ones they do qualify for?",
+      "targets": [
+        [
+          "empanelment_v2_0.pdf",
+          23
+        ]
+      ],
+      "first_hit_rank": 3,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          16,
+          2.5978
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          2.4116
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          1.5848
+        ],
+        [
+          "operation_manual.pdf",
+          13,
+          -0.6233
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          -1.9736
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 16,
+      "question": "How much money can I get for a life-saving emergency, and how do I submit the request through the online portal?",
+      "targets": [
+        [
+          "hbp_2_2_manual.pdf",
+          15
+        ]
+      ],
+      "first_hit_rank": 5,
+      "retrieved": [
+        [
+          "empanelment_v2_0.pdf",
+          23,
+          -5.7938
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          36,
+          -6.4345
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          -7.1961
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          11,
+          -7.3541
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          15,
+          -8.0944
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 17,
+      "question": "Can I be kicked out of the running if I raise my price after I've already sent in my offer?",
+      "targets": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "fraud_analytics_rfe.pdf",
+          29,
+          -6.8733
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          31,
+          -8.5176
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          13,
+          -8.7814
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          83,
+          -8.9268
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          72,
+          -9.0484
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    },
+    {
+      "row": 18,
+      "question": "How long do hospitals have to finish and send in those two sections of the death report?",
+      "targets": [
+        [
+          "field_investigation_manual.pdf",
+          35
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "field_investigation_manual.pdf",
+          35,
+          3.1016
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          9,
+          -1.2975
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          11,
+          -2.8172
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          -3.1309
+        ],
+        [
+          "field_investigation_manual.pdf",
+          36,
+          -3.7658
+        ]
+      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
+      "error": ""
+    }
+  ]
+}

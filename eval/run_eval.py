@@ -598,6 +598,13 @@ def main():
                         help="re-run just these golden-set rows, e.g. 5,12,40-42. "
                              "Row numbers are CSV line numbers, as printed in results "
                              "files and as shown by eval/find.py")
+    parser.add_argument("--golden", default=str(GOLDEN),
+                        help="question set to score against. Defaults to the golden "
+                             "set; point it at eval/paraphrase_set.csv to run the "
+                             "vocabulary-bias experiment. Recorded in the results "
+                             "config, because two files with different questions and "
+                             "the same schema are otherwise indistinguishable after "
+                             "the fact.")
     parser.add_argument("--no-save", action="store_true")
     args = parser.parse_args()
 
@@ -641,9 +648,10 @@ def main():
                   "      different questions to different deployments, and the blend\n"
                   "      will differ on re-run. Set OPENAI_PROVIDER to pin it.\n")
 
-    cases = load_golden(GOLDEN)
+    golden = Path(args.golden)
+    cases = load_golden(golden)
     if not cases:
-        raise SystemExit(f"{GOLDEN} has no questions")
+        raise SystemExit(f"{golden} has no questions")
 
     only_rows = parse_rows(args.only_rows)
     if only_rows is not None:
@@ -654,7 +662,7 @@ def main():
             # row number would otherwise produce a patch file silently missing the
             # question it was created to recover.
             raise SystemExit(
-                f"--only-rows: {missing} not in {GOLDEN} "
+                f"--only-rows: {missing} not in {golden} "
                 f"(rows run {min(known)}-{max(known)})"
             )
         cases = [c for c in cases if c.row in only_rows]
@@ -672,7 +680,7 @@ def main():
             print("    NOTE: consider putting 'partial' in --label.")
         print()
 
-    print(f"loaded {len(cases)} questions from {GOLDEN}")
+    print(f"loaded {len(cases)} questions from {golden}")
     problems = validate(cases)
     print(f"validation: {problems} problem(s)\n")
 
@@ -715,6 +723,7 @@ def main():
                         # infer partialness from n_questions -- which would require
                         # knowing how many rows the golden set had at the time.
                         "only_rows": args.only_rows or None,
+                        "question_set": golden.name,
                         "retrieval_only": args.retrieval_only,
                         "embed_model": EMBED_MODEL,
                         "chunk_target_chars": TARGET_CHARS,

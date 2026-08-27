@@ -59,24 +59,29 @@ This ordering was set after stepping back from the eval work. **The first two th
 already published in the README; the third is the only remaining change likely to improve the
 product.** More model runs rank below all of them.
 
-### 1. The paraphrase experiment — biggest open threat to every retrieval number
+### 1. ~~The paraphrase experiment~~ — DONE 2026-08-27, and it inverted a headline
 
-The golden set was written by someone reading the documents, so questions reuse the documents'
-own vocabulary ("cover amount on family floater basis" rather than "how much money do I get for
-an operation"). **Lexical overlap between question and document is exactly what BM25 scores**,
-so BM25's win over the embeddings may be an artifact of authorship. Every retrieval figure in
-the README inherits this.
+**BM25's lead over the embeddings is substantially an artifact of who wrote the questions.**
+On 17 paired questions rewritten in lay language, BM25 fell from MRR 0.941 to **0.144** (hit@1
+88.2% → 5.9%) and went from second-best retriever to last; vector went from last to second.
+Reranking degraded least (−39%), as pre-registered. Everything degraded sharply. Full table and
+caveats in the README.
 
-Test: 15–20 questions phrased as a real user would, re-run all four retrievers
-(`--retrieval-only`, ~10 min, no LLM, no cost). If BM25's lead shrinks, the evaluation has a
-real limitation. If it holds, the finding is much stronger and can be claimed as such.
+Three follow-ups this opens, none of them started:
 
-**The phrasings must not come from anyone who has read the corpus** — which rules out the
-project author, and is the whole difficulty. Preference order: (1) real public PM-JAY FAQ or
-forum questions, which are actual user language and involve no LLM; (2) a person given the
-topic but not the documents; (3) LLM paraphrase of existing verified questions — this does
-*not* breach the anti-goal, since there is no LLM judge and the fact plus target pages stay
-human-verified, but it is a proxy for user language and must be disclosed as one.
+- **Extend the paraphrase set beyond 17 rows.** The current rows were chosen as the
+  highest-overlap in the set, so they overstate the effect. A sample drawn across the overlap
+  distribution would give an unbiased estimate. `eval/make_paraphrases.py` takes a row count.
+- **Reconsider hybrid.** It now scores *below plain vector* on lay phrasing (0.402 vs 0.443),
+  so design decision 23's quality case is weaker again. Still defensible on latency, but the
+  gap between "chosen on latency" and "also fine on quality" has widened.
+- **Real user questions, as a separate experiment.** The current rewrites are LLM-drafted and
+  strip nearly all domain vocabulary; a real user would keep some. Public PM-JAY FAQ or forum
+  questions would be actual user language — but they have different answers and target pages,
+  so that is an unpaired test measuring something else, and needs its own golden rows.
+
+`eval/paraphrase_set.csv` is now a **permanent second eval set**, run with
+`--golden eval/paraphrase_set.csv`. It is a robustness check, not a baseline.
 
 ### 2. Golden-set target completeness — confirmed broken
 

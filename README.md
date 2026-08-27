@@ -181,8 +181,26 @@ python -m eval.run_eval --retrieval-only     # no Ollama needed; this is the CI 
 python -m eval.run_eval                      # adds generation metrics
 python -m eval.run_eval --retriever rerank   # vector | bm25 | hybrid | rerank
 python -m eval.run_eval --min-hit-rate 0.7   # exit 1 below threshold
+python -m eval.run_eval --only-rows 5,12,40-42          # re-run specific rows
+python -m eval.run_eval --golden eval/paraphrase_set.csv  # the lay-phrasing set
 python -m eval.diff_editions                 # regenerate Docs/empanelment-diff.md
+python -m eval.pool_recall                   # candidate-pool ceilings
+python -m eval.vocab_overlap                 # question/target-page word overlap
+python -m eval.citation_companions           # head-to-head citation metrics
 ```
+
+### The two evaluation sets
+
+| set | rows | role |
+|---|---|---|
+| `eval/golden_set.csv` | 69 (60 answerable, 9 abstain) | **the baseline.** Every published number is measured on it. |
+| `eval/paraphrase_set.csv` | 17 | **a robustness check.** The highest-overlap golden questions rewritten in lay language, same facts and same target pages. |
+
+The paraphrase set is deliberately *not* a second baseline: 17 questions is too few for a
+headline figure, and its rows were chosen as the least representative ones in the corpus. Its
+purpose is to answer one question — how much of a retrieval score survives a user who does not
+phrase things the way the documents do. See
+[Does BM25 actually win?](#does-bm25-actually-win-or-did-the-question-author-write-like-the-documents)
 
 ### Golden set schema
 
@@ -326,7 +344,76 @@ reproducible in minutes with `--retrieval-only`.
 | `rerank` — hybrid top-30, cross-encoder | **71.7%** | **85.0%** | **95.0%** | **0.795** | 3,269 ms |
 | **change vs baseline** | **+23.4 pts** | **+13.3 pts** | **+5.0 pts** | **+0.171** | ×126 slower |
 
+> **Read the BM25 row with the caveat below.** Its lead over the embeddings holds only for
+> questions written by someone who had read the documents. On lay phrasing it collapses and
+> the ranking inverts — see [Does BM25 actually win, or did the question author write like the
+> documents?](#does-bm25-actually-win-or-did-the-question-author-write-like-the-documents)
+
 Three of those rows are more interesting than the summary line.
+
+### Does BM25 actually win, or did the question author write like the documents?
+
+The golden set was written by someone reading the corpus, so the questions reuse the corpus's
+own vocabulary — *"cover amount on family floater basis"* rather than *"how much money do I get
+for an operation"*. **BM25 scores exactly that lexical overlap.** So its measured lead may be a
+property of the author rather than of the corpus.
+
+Measured, not assumed. `eval/vocab_overlap.py` scores each question's content words against its
+target page, using the *same tokenizer BM25 uses*:
+
+| | |
+|---|---|
+| mean overlap | **78.1%** |
+| median | 83.3% |
+| questions reusing **every** content word from their target page | **15 of 60** |
+
+Then the paired test: the 17 highest-overlap questions rewritten in lay language, keeping the
+same facts and the **same target pages**, so retrieval is the only thing that can move. Rewrites
+were drafted from the question and the human-written expected answer — never from page text —
+and hand-reviewed (`eval/make_paraphrases.py`). Mean overlap fell 97.9% → 34.6%.
+
+| retriever | MRR original | MRR lay phrasing | change | hit@1 |
+|---|---|---|---|---|
+| `vector` | 0.789 | 0.443 | −44% | 64.7% → 29.4% |
+| `bm25` | **0.941** | **0.144** | **−85%** | 88.2% → **5.9%** |
+| `hybrid` | 0.912 | 0.402 | −56% | 82.4% → 29.4% |
+| `rerank` | 0.971 | **0.590** | **−39%** | 94.1% → 52.9% |
+
+**The ranking inverts.**
+
+```
+original wording:   rerank 0.971  >  bm25 0.941  >  hybrid 0.912  >  vector 0.789
+lay wording:        rerank 0.590  >  vector 0.443  >  hybrid 0.402  >  bm25 0.144
+```
+
+BM25 goes from second to last, finding the right page first in **1 of 17 questions**. Vector
+goes from last to second. Both outcomes were **pre-registered before the run**: that BM25's lead
+would shrink if the bias was real, and that reranking would degrade least because a
+cross-encoder reads question and passage together. The first held far more strongly than
+"shrink" anticipated.
+
+Three consequences:
+
+- **The +0.171 MRR headline above is measured on favourable phrasing.** Treat it as an upper
+  bound. The four-retriever table is not wrong, but it answers "which retriever wins on
+  questions phrased like the documents", which is not the question a deployed system faces.
+- **Hybrid inherits the weakness.** At 0.402 it falls *below* plain vector, because RRF is
+  fusing in a retriever that has stopped working.
+- **Everything degrades sharply.** Even the best retriever loses 39%. That is a product finding
+  independent of BM25: this system is brittle to phrasing, and the eval set as originally
+  written could not have shown it.
+
+**Two caveats, both meaning this is an upper bound on the effect.** The 17 rows were selected as
+the *highest-overlap* in the set (97.9% mean against 78.1% set-wide), so they are where the bias
+bites hardest by construction. And the rewrites are LLM-drafted — a proxy for user language that
+strips almost all domain vocabulary, where a real user would likely keep some ("Ayushman card",
+"claim"). Neither rescues a hit@1 of 5.9%: a 15-questions-to-1 collapse is not a small-sample
+artifact.
+
+`eval/paraphrase_set.csv` is kept as a **permanent second evaluation set**. Run any retriever
+against it with `--golden eval/paraphrase_set.csv`. It is a robustness check, not a replacement
+baseline — 17 questions is too few to be a headline number, and its rows are deliberately the
+least representative ones.
 
 ### Which candidate pool should the reranker get?
 
@@ -906,7 +993,10 @@ assertion.
 23. **The rerank candidate pool is a parameter, and `hybrid` was chosen on LATENCY, not
     quality.** The union pool measures strictly better on coverage (98.3% vs 95.0% hit@5).
     Anyone reversing this should reverse it on latency evidence, not because they think hybrid
-    retrieves better — it does not.
+    retrieves better — it does not. **The quality case for hybrid got weaker again in
+    2026-08-27:** on lay phrasing it scores *below plain vector* (0.402 vs 0.443), because RRF
+    fuses in a BM25 arm that has effectively stopped working. Hybrid's remaining justification
+    is entirely latency.
 24. **Losing arms stay reachable by flag, never deleted.** `rerank-bm25` and `rerank-union` both
     lost and both remain modes. A results file naming a mode that no longer exists is
     unreproducible archaeology.
