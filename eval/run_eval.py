@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 import sys
@@ -133,6 +134,108 @@ def build_targets(files, pages, row):
 
     print(f"  row {row}: {len(files)} file(s) cannot be paired with {len(numbers)} page(s)")
     return []
+
+
+def question_set_fingerprint(path):
+    """Content hash of the question set that produced a run.
+
+    Which eval scored a number was previously recorded only inside the free-text
+    `--label`, as a human-typed string like "goldenv2". That is a claim, not
+    evidence, and it went wrong: two runs labelled one way turned out to be another
+    (gotcha 20). With three revisions of the golden set now live -- and every
+    published figure having moved when the third landed -- "which set produced this"
+    has to be recoverable from the file rather than asserted alongside it.
+
+    Twelve hex characters, not the full digest: enough that a collision is not a
+    practical concern for a handful of CSVs, short enough to read in a table.
+
+    Line endings are normalised before hashing, and that is not a detail. Git stores
+    LF while a Windows checkout materialises CRLF, so hashing raw bytes would give
+    the same question set two different fingerprints depending on where it was read
+    -- making the field lie in exactly the situation it exists to prevent. This is a
+    hash of the CONTENT, not of the file on disk.
+    """
+    normalised = Path(path).read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(normalised).hexdigest()[:12]
+
+
+def observed_providers(outcomes):
+    """The deployments that actually answered, as a sorted list of distinct names.
+
+    Distinct from `llm_upstream_pin`, which records the pin that was REQUESTED. An
+    aggregator resolves one model id to several deployments and picks per request,
+    so a request for a pin and a run that honoured it are different facts and the
+    gap between them is invisible unless both are recorded.
+
+    A list of length > 1 IS the definition of a blended run -- no answer-diffing
+    needed, which is how gotcha 20 was eventually settled after being settled the
+    slow way first. Returns None when the question does not apply (retrieval-only,
+    or a local model that reports no provider).
+    """
+    names = {
+        (o.gen_stats or {}).get("served_by")
+        for o in outcomes
+        if (o.gen_stats or {}).get("served_by")
+    }
+    return sorted(names) or None
+
+
+def build_descriptor(config):
+    """A run's name, COMPOSED from what was recorded rather than typed alongside it.
+
+    `label` stays, because a human note about intent ("noise-rep2", "measured, not
+    adopted") carries meaning no derived string can. But a label is a claim, and two
+    files whose labels said `openrouter-...` turned out to be the unpinned runs --
+    the label named the aggregator and never said whether the pin held (gotcha 20).
+    A descriptor cannot disagree with the file it describes, because it is made of it.
+    """
+    served = config.get("served_by")
+    if config["retrieval_only"]:
+        engine = "retrieval"
+    else:
+        engine = (config.get("llm_model") or "no-llm").replace("/", "_")
+    parts = [
+        config["retriever"],
+        engine,
+        f"{config['n_questions']}q",
+        f"{Path(config['question_set']).stem}@{config['question_set_sha']}",
+    ]
+    if served:
+        parts.append("blended" if len(served) > 1 else f"via-{served[0].replace(' ', '-')}")
+    if config.get("only_rows"):
+        parts.append("partial")
+    return "-".join(parts)
+
+
+def warn_label_contradicts_data(label, config):
+    """The typed label says one thing, the recorded fields say another.
+
+    Exactly the failure in gotcha 20, made loud at the moment it is created rather
+    than discovered later by diffing 69 answers. Only checks claims the data can
+    actually adjudicate -- it is a lint, not a schema.
+    """
+    lower = (label or "").lower()
+    served = config.get("served_by") or []
+    problems = []
+    if "pinned" in lower and len(served) > 1:
+        problems.append(
+            f"label says 'pinned' but {len(served)} deployments served this run "
+            f"({', '.join(served)}) -- that is a blended run"
+        )
+    if "unpinned" in lower and len(served) == 1:
+        problems.append(
+            f"label says 'unpinned' but every request was served by {served[0]}"
+        )
+    for tag in ("goldenv1", "goldenv2", "goldenv3"):
+        if tag in lower.replace("-", "").replace("_", ""):
+            problems.append(
+                f"label asserts '{tag}'; the question set is now recorded as "
+                f"question_set_sha={config['question_set_sha']} -- prefer the hash, "
+                "which cannot go stale"
+            )
+            break
+    for problem in problems:
+        print(f"  LABEL WARNING: {problem}")
 
 
 def parse_rows(spec):
@@ -704,32 +807,53 @@ def main():
     if not args.no_save:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        served_by = observed_providers(outcomes)
+        # Rows in the question set FILE, which is not len(cases) under --only-rows.
+        # n_questions already records how many were scored; this records what they
+        # were drawn from, so a partial run is legible without external context.
+        with golden.open(encoding="utf-8-sig", newline="") as fh:
+            total_rows = sum(1 for _ in csv.DictReader(fh))
         dest = RESULTS_DIR / f"{stamp}.json"
+        # Built as a value rather than inline in the dump call, so `descriptor`
+        # can be composed FROM the config instead of typed beside it.
+        config = {
+            "k": args.k,
+            "retriever": args.retriever,
+            "prompt_version": prompt_version,
+            "llm_provider": llm_provider,
+            "llm_model": llm_model,
+            "llm_upstream_pin": llm_upstream_pin,
+            # Present and null on a full run, so a reader never has to
+            # infer partialness from n_questions -- which would require
+            # knowing how many rows the golden set had at the time.
+            "only_rows": args.only_rows or None,
+            "question_set": golden.name,
+            # WHICH REVISION of that question set. The name alone is not
+            # enough: `golden_set.csv` has meant three different things,
+            # and every published figure moved when the third landed.
+            "question_set_sha": question_set_fingerprint(golden),
+            "question_set_rows": total_rows,
+            # What actually served the requests, as opposed to
+            # llm_upstream_pin, which is what was asked for. A list
+            # longer than one entry is a blended run.
+            "served_by": served_by,
+            "retrieval_only": args.retrieval_only,
+            "embed_model": EMBED_MODEL,
+            "chunk_target_chars": TARGET_CHARS,
+            "chunk_overlap_chars": OVERLAP_CHARS,
+            "n_questions": len(cases),
+        }
+        warn_label_contradicts_data(args.label, config)
         dest.write_text(
             json.dumps(
                 {
                     "timestamp": stamp,
                     "label": args.label,
+                    # Derived from `config`, so it cannot contradict the run it names.
+                    "descriptor": build_descriptor(config),
                     # Config is recorded so a results file is self-describing --
                     # a metrics table is meaningless without knowing what produced it.
-                    "config": {
-                        "k": args.k,
-                        "retriever": args.retriever,
-                        "prompt_version": prompt_version,
-                        "llm_provider": llm_provider,
-                        "llm_model": llm_model,
-                        "llm_upstream_pin": llm_upstream_pin,
-                        # Present and null on a full run, so a reader never has to
-                        # infer partialness from n_questions -- which would require
-                        # knowing how many rows the golden set had at the time.
-                        "only_rows": args.only_rows or None,
-                        "question_set": golden.name,
-                        "retrieval_only": args.retrieval_only,
-                        "embed_model": EMBED_MODEL,
-                        "chunk_target_chars": TARGET_CHARS,
-                        "chunk_overlap_chars": OVERLAP_CHARS,
-                        "n_questions": len(cases),
-                    },
+                    "config": config,
                     "metrics": metrics,
                     "cases": [
                         {

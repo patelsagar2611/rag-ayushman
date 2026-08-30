@@ -1,62 +1,34 @@
 {
-  "timestamp": "20260826T210919Z",
-  "label": "openrouter-phase2-rerank-69q-goldenv2-qwen2.5-7b-instruct",
+  "timestamp": "20260828T113954Z",
+  "label": "goldenv3-rerank-retrieval-69q",
   "config": {
     "k": 5,
     "retriever": "rerank",
-    "prompt_version": 1,
-    "llm_provider": "openai",
-    "llm_model": "qwen/qwen-2.5-7b-instruct",
-    "llm_upstream_pin": "Phala",
+    "prompt_version": null,
+    "llm_provider": null,
+    "llm_model": null,
+    "llm_upstream_pin": null,
     "only_rows": null,
-    "retrieval_only": false,
+    "question_set": "golden_set.csv",
+    "retrieval_only": true,
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
     "n_questions": 69,
-    "question_set": "golden_set.csv",
-    "question_set_sha": "84864818a4a4",
+    "question_set_sha": "3648c3657e23",
     "question_set_rows": 69,
-    "served_by": [
-      "Phala"
-    ]
+    "served_by": null
   },
   "metrics": {
     "n_total": 69,
     "n_answerable": 60,
     "n_abstain": 9,
-    "hit_rate@1": 0.7166666666666667,
-    "hit_rate@3": 0.85,
-    "hit_rate@5": 0.95,
-    "mrr": 0.7947222222222222,
-    "retrieve_ms_p50": 2379.5529999988503,
-    "retrieve_ms_p95": 3139.7656600005575,
-    "n_generation_errors": 0,
-    "abstention_recall": 1.0,
-    "n_false_abstention_denom": 57,
-    "false_abstention_rate": 0.08771929824561403,
-    "false_abstention_rate_unconditioned": 0.11666666666666667,
-    "abstained_on_retrieval_miss": 2,
-    "citation_correctness": 0.7547169811320755,
-    "uncited_answers": 0,
-    "served_by": {
-      "Phala": 69
-    },
-    "citations_per_answer": 1.6037735849056605,
-    "citation_precision": 0.6295597484276729,
-    "n_must_contain": 30,
-    "must_contain_pass": 0.8333333333333334,
-    "generate_ms_p50": 1389.1737000012654,
-    "generate_ms_p95": 2937.046940001889,
-    "n_timed": 69,
-    "prompt_eval_ms_p50": 0.0,
-    "eval_ms_p50": 0.0,
-    "load_ms_p50": 0.0,
-    "prompt_eval_tokens_p50": 2377.0,
-    "prompt_eval_tps": 0.0,
-    "eval_tokens_p50": 27.0,
-    "eval_tps": 0.0,
-    "n_model_reloads": 0
+    "hit_rate@1": 0.8166666666666667,
+    "hit_rate@3": 0.95,
+    "hit_rate@5": 0.9666666666666667,
+    "mrr": 0.8791666666666667,
+    "retrieve_ms_p50": 3486.3532999997915,
+    "retrieve_ms_p95": 3791.4589799998794
   },
   "cases": [
     {
@@ -66,6 +38,10 @@
         [
           "empanelment_v2_0.pdf",
           40
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          27
         ]
       ],
       "first_hit_rank": 1,
@@ -96,29 +72,12 @@
           2.3389
         ]
       ],
-      "answer": "A hospital would be empaneled as a network private hospital with the approval of the respective State Health Authority if it adheres with the following minimum criteria: it should have at least 10 inpatient beds with adequate spacing and supporting staff as per norms [1, 3]. However, for hospitals in Aspirational Districts, the minimum number of inpatient beds required for empanelment is 5 [2].",
-      "cited_ranks": [
-        1,
-        2,
-        3
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2488.027300001704,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2349,
-        "eval_ms": 0.0,
-        "eval_tokens": 87,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -153,23 +112,12 @@
           -10.9186
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 935.438399996201,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2515,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -213,25 +161,12 @@
           2.1942
         ]
       ],
-      "answer": "The approach on hospital empanelment involves several key aspects as outlined in the sources:\n\n1. **State-Level Empanelment**: All States/Union Territories can empanel healthcare providers only within their own State/UT [1].\n\n2. **Inter-State Empanelment**: If a State Health Agency (SHA) determines the need to empanel healthcare service providers outside its own state, it can approach the National Health Authority (NHA) with a specific request and rationale. The NHA will review the request with the hospital state and may request the hospital state to empanel the provider. If the hospital state is a non-PM-JAY implementing state, the NHA may directly empanel the healthcare provider or designate specific SHAs for empanelment [1].\n\n3. **Public Healthcare Facilities**: Any public healthcare facility with the capacity to provide services covered under PM-JAY can be empaneled. Facilities below CHC level must raise at least one preauthorization within 6 months of empanelment; otherwise, they will be moved to an 'invalid public hospital bucket' [1].\n\n4. **Eligibility of Public Hospitals**: Public hospitals under other schemes/government bodies, including Employee State Insurance Corporation (ESIC) and CGHS hospitals, are eligible for empanelment if they meet the minimum eligible requirements under PM-JAY. These hospitals must fill in the application on the web portal [1].\n\n5. **Quality Milestones**: Healthcare service providers are encouraged to attain quality milestones by attaining PM-JAY Certification (Bronze, Silver, and Gold) [1].\n\n6. **Incentives**: These quality certifications provide incentives in terms of higher prices for health benefit packages [1].\n\n7. **Private Hospitals**: Private hospitals are encouraged to provide ROHINI ID provided by Insurance Information Bureau (IIB), and public hospitals are encouraged to have National Identification Number (NIN) provided by MoHFW [1].\n\nThese measures aim to ensure quality, accessibility, and accountability in the empanelment process for healthcare providers under the Ayushman Bharat PM-JAY scheme.",
-      "cited_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 8726.900800000294,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2317,
-        "eval_ms": 0.0,
-        "eval_tokens": 423,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -241,6 +176,10 @@
         [
           "empanelment_v2_0.pdf",
           8
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          10
         ]
       ],
       "first_hit_rank": 1,
@@ -271,28 +210,12 @@
           0.8687
         ]
       ],
-      "answer": "Hospitals will undergo a renewal process for empanelment once every 3 years or till the expiry of validity of AB PM-JAY Bronze/NABH certification (when empaneled based on AB PM-JAY Bronze/NABH criteria) to determine compliance to minimum standards. [1, 2]",
-      "cited_ranks": [
-        1,
-        2
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1940.606199998001,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2077,
-        "eval_ms": 0.0,
-        "eval_tokens": 64,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -332,27 +255,12 @@
           -2.9919
         ]
       ],
-      "answer": "The agency shall deploy the team for the project within fifteen (15) days of the date of Signing of Agreement / receiving of LOI. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1319.0146000051755,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2512,
-        "eval_ms": 0.0,
-        "eval_tokens": 33,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -392,27 +300,12 @@
           -5.7176
         ]
       ],
-      "answer": "The minimum qualification and experience required for the data scientist role in the agency are:\n\n- Bachelor’s or Master’s degree in Data Science, Computer Science, Statistics, Mathematics, or a related field.\n- Minimum 5 years (out of which least 3 years in developing AI/ML models) of experience in analytics and managing big data.\n- The resources should have demonstrable credentials of having worked/developed AI/ML models on their own. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2495.1242999959504,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2504,
-        "eval_ms": 0.0,
-        "eval_tokens": 94,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -452,27 +345,12 @@
           1.4288
         ]
       ],
-      "answer": "NHA makes no representation or warranty as to the completeness or accuracy of any response made in good faith, nor does it undertake to answer all the queries that have been posed by the Bidders. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1387.4161999992793,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1971,
-        "eval_ms": 0.0,
-        "eval_tokens": 43,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -516,28 +394,12 @@
           -0.2358
         ]
       ],
-      "answer": "The bidder needs to attain an aggregate technical score of at least 70% or more to qualify the technical evaluation stage. [2, 4]",
-      "cited_ranks": [
-        2,
-        4
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1525.7342999975663,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2181,
-        "eval_ms": 0.0,
-        "eval_tokens": 32,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -547,6 +409,10 @@
         [
           "empanelment_v2_0.pdf",
           22
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15
         ]
       ],
       "first_hit_rank": 1,
@@ -577,27 +443,12 @@
           2.6548
         ]
       ],
-      "answer": "After the empanelment request by a hospital is filed, the application should be scrutinized by the DEC and processed completely within 15 days of receipt of application. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1414.3069999990985,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2519,
-        "eval_ms": 0.0,
-        "eval_tokens": 38,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -607,6 +458,10 @@
         [
           "empanelment_v2_0.pdf",
           23
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16
         ]
       ],
       "first_hit_rank": 1,
@@ -637,30 +492,12 @@
           -0.1101
         ]
       ],
-      "answer": "According to the sources provided, if during inspection it is found that a hospital has applied for multiple specialties but all do not conform to the minimum requirements under AB-PMJAY, the hospital will only be empaneled for specialties that conform to PM-JAY norms.\n\n[1] [2] [3] [4]",
-      "cited_ranks": [
-        1,
-        2,
-        3,
-        4
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2145.2986000003875,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2375,
-        "eval_ms": 0.0,
-        "eval_tokens": 67,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -670,9 +507,13 @@
         [
           "operation_manual.pdf",
           7
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51
         ]
       ],
-      "first_hit_rank": 4,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "hbp_2_2_manual.pdf",
@@ -700,28 +541,12 @@
           -2.2054
         ]
       ],
-      "answer": "A hospital will receive an incentive of 15% for full NABH accreditation. [1, 4]",
-      "cited_ranks": [
-        1,
-        4
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        4
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1114.1256999981124,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2524,
-        "eval_ms": 0.0,
-        "eval_tokens": 25,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -761,27 +586,12 @@
           -0.2547
         ]
       ],
-      "answer": "The Ayushman Bharat Pradhan Manti Jan Arogya Yojana (PM-JAY) scheme aims to provide health cover to over 10.74 crore entitled beneficiary families, which form the bottom 40% of the Indian population. [1]",
-      "cited_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "50"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1791.4952999999514,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2211,
-        "eval_ms": 0.0,
-        "eval_tokens": 59,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -795,6 +605,14 @@
         [
           "empanelment_dec2021.pdf",
           20
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22
         ]
       ],
       "first_hit_rank": 2,
@@ -825,31 +643,12 @@
           0.3279
         ]
       ],
-      "answer": "All attempts shall be made to close the case within the above-mentioned period and in case of any delay report must be submitted to CEO SHA, citing the reasons for the same. [2, 3]",
-      "cited_ranks": [
-        2,
-        3
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        2,
-        3
-      ],
-      "missing_substrings": [
-        "10"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1462.7436000009766,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2534,
-        "eval_ms": 0.0,
-        "eval_tokens": 43,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -893,32 +692,12 @@
           4.1622
         ]
       ],
-      "answer": "The EHCP will not be allowed more than 10 working days to respond [1, 2, 4, 5].",
-      "cited_ranks": [
-        1,
-        2,
-        4,
-        5
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1,
-        2,
-        4
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1985.382999999274,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2231,
-        "eval_ms": 0.0,
-        "eval_tokens": 29,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -958,23 +737,12 @@
           -3.2363
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 872.8512000016053,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2469,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1009,23 +777,12 @@
           -8.6283
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 938.4644000019762,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2893,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1065,27 +822,12 @@
           1.4547
         ]
       ],
-      "answer": "Yes, a proposal can be disqualified in case the Bidder increases its quoted price after the submission of the bid. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1302.5115999989794,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2806,
-        "eval_ms": 0.0,
-        "eval_tokens": 27,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1099,6 +841,14 @@
         [
           "antifraud_guidebook_2024.pdf",
           25
+        ],
+        [
+          "field_investigation_manual.pdf",
+          9
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17
         ]
       ],
       "first_hit_rank": 1,
@@ -1129,25 +879,12 @@
           0.6242
         ]
       ],
-      "answer": "100% [2]",
-      "cited_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 827.511700001196,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2105,
-        "eval_ms": 0.0,
-        "eval_tokens": 8,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1187,27 +924,12 @@
           -3.1943
         ]
       ],
-      "answer": "ICU/ Medical Treatment blocking done for more than 5 days of stay, other than in the case of critical illnesses. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1240.5947000006563,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2608,
-        "eval_ms": 0.0,
-        "eval_tokens": 29,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1221,6 +943,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           25
+        ],
+        [
+          "field_investigation_manual.pdf",
+          8
         ]
       ],
       "first_hit_rank": 1,
@@ -1251,26 +977,12 @@
           -3.0556
         ]
       ],
-      "answer": "3% of total cases hospitalized [3, 7].",
-      "cited_ranks": [
-        3,
-        7
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 973.046199993405,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2336,
-        "eval_ms": 0.0,
-        "eval_tokens": 13,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1310,25 +1022,12 @@
           -0.6657
         ]
       ],
-      "answer": "HBP 2.0 was launched in November 2019 [2].",
-      "cited_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1044.8221000042395,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2778,
-        "eval_ms": 0.0,
-        "eval_tokens": 19,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1368,27 +1067,12 @@
           -5.0945
         ]
       ],
-      "answer": "Hospital should display direction signage for guidance from reception to the PM-JAY desk. Either stickers or hangings are to be used for the same. The display location should not be limited to specific spots; the hospital should identify other spots best suited to the requirements. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 32853.83830000501,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2377,
-        "eval_ms": 0.0,
-        "eval_tokens": 56,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1428,27 +1112,12 @@
           -8.5101
         ]
       ],
-      "answer": "1,50,000 health and wellness centers will be set up with improved infrastructure, assured availability of drugs and diagnostic services along with strengthening of referral mechanisms and community linkages. [4]",
-      "cited_ranks": [
-        4
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        4
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1728.7059999944177,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2606,
-        "eval_ms": 0.0,
-        "eval_tokens": 42,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1482,6 +1151,14 @@
         [
           "empanelment_dec2021.pdf",
           7
+        ],
+        [
+          "operation_manual.pdf",
+          7
+        ],
+        [
+          "grievance_redressal.pdf",
+          6
         ]
       ],
       "first_hit_rank": 1,
@@ -1512,29 +1189,12 @@
           0.1137
         ]
       ],
-      "answer": "The cover amount under PM JAY for family floater basis is INR 5,00,000. [1, 3]",
-      "cited_ranks": [
-        1,
-        3
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1,
-        3
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1205.4532000038307,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2577,
-        "eval_ms": 0.0,
-        "eval_tokens": 32,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1574,27 +1234,12 @@
           -4.1674
         ]
       ],
-      "answer": "For any SHA to utilize the unspecified package above ₹1 lakh for life-saving conditions, the request of approval will be moved on the ticketing system. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1084.229600004619,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1947,
-        "eval_ms": 0.0,
-        "eval_tokens": 34,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1634,27 +1279,12 @@
           -3.8247
         ]
       ],
-      "answer": "The per day price for bed if a patient is admitted to ICU with ventilator support is ₹ 4,500. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1250.859699997818,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2763,
-        "eval_ms": 0.0,
-        "eval_tokens": 30,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1698,25 +1328,12 @@
           1.9665
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "148"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1395.7050000026356,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2914,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1756,30 +1373,12 @@
           -3.844
         ]
       ],
-      "answer": "112 [1] [2]",
-      "cited_ranks": [
-        1,
-        2
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        2
-      ],
-      "missing_substrings": [
-        "117"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1290.0773000001209,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2576,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1789,9 +1388,25 @@
         [
           "grievance_redressal.pdf",
           16
+        ],
+        [
+          "grievance_redressal.pdf",
+          22
+        ],
+        [
+          "grievance_redressal.pdf",
+          23
+        ],
+        [
+          "grievance_redressal.pdf",
+          24
+        ],
+        [
+          "grievance_redressal.pdf",
+          25
         ]
       ],
-      "first_hit_rank": 5,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "grievance_redressal.pdf",
@@ -1819,27 +1434,12 @@
           3.8949
         ]
       ],
-      "answer": "If any party to a grievance is not satisfied, then they have 30 days to appeal that decision. [5]",
-      "cited_ranks": [
-        5
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        5
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1461.5478999985498,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1917,
-        "eval_ms": 0.0,
-        "eval_tokens": 27,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1879,27 +1479,12 @@
           -5.8931
         ]
       ],
-      "answer": "The acceptable threshold for Grievances that needed escalation is 10% or less. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 3128.0810000025667,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1925,
-        "eval_ms": 0.0,
-        "eval_tokens": 22,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1939,27 +1524,12 @@
           -1.2993
         ]
       ],
-      "answer": "The turn around time for SOS (Emergency) Grievances is 6 working hours. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1294.027099997038,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1770,
-        "eval_ms": 0.0,
-        "eval_tokens": 22,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -1999,28 +1569,12 @@
           -1.245
         ]
       ],
-      "answer": "No, the desk audit checklist provided does not specifically mention the need for ICU documents. [2] [3]",
-      "cited_ranks": [
-        2,
-        3
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        3
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1419.0566000033868,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2595,
-        "eval_ms": 0.0,
-        "eval_tokens": 24,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2055,23 +1609,12 @@
           -3.5566
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1613.3038000043598,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2417,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2081,9 +1624,13 @@
         [
           "field_investigation_manual.pdf",
           36
+        ],
+        [
+          "field_investigation_manual.pdf",
+          37
         ]
       ],
-      "first_hit_rank": 3,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "field_investigation_manual.pdf",
@@ -2111,23 +1658,12 @@
           -2.4173
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1262.4397999970824,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1600,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2167,27 +1703,12 @@
           -4.0385
         ]
       ],
-      "answer": "Total Number of eligible families for AB PM-JAY will be 42 lakhs [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1251.6587999998592,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2700,
-        "eval_ms": 0.0,
-        "eval_tokens": 21,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2222,23 +1743,12 @@
           -0.2751
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1030.9025000024121,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2280,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2282,29 +1792,12 @@
           -9.7508
         ]
       ],
-      "answer": "The build-up area required for Haemodialysis units is 175 Sq. Mtr. [1, 2]",
-      "cited_ranks": [
-        1,
-        2
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1,
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1450.4195000045002,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2489,
-        "eval_ms": 0.0,
-        "eval_tokens": 28,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2344,27 +1837,12 @@
           0.6912
         ]
       ],
-      "answer": "Yes, the hospital empanelment process requires the details of the PAN card associated with the hospital. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1312.3311000017566,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2305,
-        "eval_ms": 0.0,
-        "eval_tokens": 24,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2404,23 +1882,12 @@
           -1.9003
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 969.8999000029289,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2177,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2429,10 +1896,30 @@
       "targets": [
         [
           "empanelment_v2_0.pdf",
+          57
+        ],
+        [
+          "empanelment_v2_0.pdf",
           59
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          64
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          101
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          102
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          103
         ]
       ],
-      "first_hit_rank": 5,
+      "first_hit_rank": 2,
       "retrieved": [
         [
           "empanelment_dec2021.pdf",
@@ -2460,29 +1947,12 @@
           3.0518
         ]
       ],
-      "answer": "In case NEFT/RTGS is being used for depositing the amount, the hospital shall provide the Unique Transaction ID to SHA office. [2, 3, 5]",
-      "cited_ranks": [
-        2,
-        3,
-        5
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        5
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1587.0608999975957,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2370,
-        "eval_ms": 0.0,
-        "eval_tokens": 38,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2517,23 +1987,12 @@
           -6.3258
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1084.2601999975159,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2785,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2543,9 +2002,13 @@
         [
           "empanelment_dec2021.pdf",
           19
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17
         ]
       ],
-      "first_hit_rank": 4,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "empanelment_dec2021.pdf",
@@ -2573,25 +2036,12 @@
           3.0214
         ]
       ],
-      "answer": "The hospital has the right to file a review against the rejection with the State Empanelment Committee (SEC) within 15 working days of rejection. [1]",
-      "cited_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1663.9817000032053,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2603,
-        "eval_ms": 0.0,
-        "eval_tokens": 35,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2631,27 +2081,12 @@
           2.394
         ]
       ],
-      "answer": "Minimum 5 dialysis units should be available to empanel any standalone centre not associated with any hospital. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1361.6567999997642,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2760,
-        "eval_ms": 0.0,
-        "eval_tokens": 25,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2691,27 +2126,12 @@
           -3.0962
         ]
       ],
-      "answer": "[2]",
-      "cited_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "136"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 955.1012000010815,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2777,
-        "eval_ms": 0.0,
-        "eval_tokens": 4,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2746,23 +2166,12 @@
           2.2936
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1413.4683999945992,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2710,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2802,27 +2211,12 @@
           -8.2788
         ]
       ],
-      "answer": "Pilot testing for Assam was completed for Haemodialysis / peritoneal dialysis [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1144.8645999989822,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2363,
-        "eval_ms": 0.0,
-        "eval_tokens": 23,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2862,28 +2256,12 @@
           1.4647
         ]
       ],
-      "answer": "[3] [4] I cannot answer this from the provided sources. The sources only mention the number of procedures with reduced or increased prices, but not the specific number of procedures with reduced prices in HBP 2.0 as compared to HBP 1.0.",
-      "cited_ranks": [
-        3,
-        4
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "57"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1809.3013999969116,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2461,
-        "eval_ms": 0.0,
-        "eval_tokens": 57,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2923,27 +2301,12 @@
           -9.1077
         ]
       ],
-      "answer": "If the first cycle of R-CHOP was given on 26 February 2020, the second cycle should have been given on 16 March 2020, which is 21 days later. However, the approval can be given one day earlier due to a technical issue, i.e., 15 March 2020 [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2533.6954000013066,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2416,
-        "eval_ms": 0.0,
-        "eval_tokens": 80,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -2953,6 +2316,10 @@
         [
           "grievance_redressal.pdf",
           14
+        ],
+        [
+          "operation_manual.pdf",
+          27
         ]
       ],
       "first_hit_rank": 1,
@@ -2983,26 +2350,12 @@
           1.4305
         ]
       ],
-      "answer": "One can raise a grievance under AB PM-JAY using online mode through the online grievance redressal portal – CGRMS of AB PM-JAY (https://cgrms.pmjay.gov.in/GRMS/loginnew.htm) [2, 4].",
-      "cited_ranks": [
-        2,
-        4
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 3964.618600002723,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2357,
-        "eval_ms": 0.0,
-        "eval_tokens": 56,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3042,26 +2395,12 @@
           -4.2036
         ]
       ],
-      "answer": "NGNO is a person who is nominated by NHA to address the grievances at national level under PM-JAY. [2] [3]",
-      "cited_ranks": [
-        2,
-        3
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1353.6698000025353,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1953,
-        "eval_ms": 0.0,
-        "eval_tokens": 30,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3101,27 +2440,12 @@
           -2.8161
         ]
       ],
-      "answer": "Section 5.1 of the mortality report is to be filled by the hospitals and sent at the time of beneficiaries’ death (within 48 hrs) [1]. Section 5.2 is to be submitted at claim submission by the hospital [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1766.0121000008075,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1964,
-        "eval_ms": 0.0,
-        "eval_tokens": 54,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3161,23 +2485,12 @@
           1.2336
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 995.5323999965913,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1889,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3217,27 +2530,12 @@
           -0.9051
         ]
       ],
-      "answer": "Yes, the person in the state making the decision is tracked in the system. This is evident from the following statement in the provided sources:\n\n- \"The System maintains a track of which Operator is Approving / Recommending for rejection. The Insurance Company/Trust can analyze the approval or rejection pattern of each of the operators.\" [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2468.1255999967107,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2368,
-        "eval_ms": 0.0,
-        "eval_tokens": 69,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3277,27 +2575,12 @@
           -1.793
         ]
       ],
-      "answer": "The AB PM-JAY Additional Data Collection drive at Gram Sabhas took place on 30th April [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1577.1036000005552,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2213,
-        "eval_ms": 0.0,
-        "eval_tokens": 25,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3337,27 +2620,12 @@
           -6.3986
         ]
       ],
-      "answer": "The size of TMS claims in FY 21-22 was 1,46,01,475 [1].",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1382.5893000030192,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2531,
-        "eval_ms": 0.0,
-        "eval_tokens": 31,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3392,23 +2660,12 @@
           -11.1544
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1019.9257000058424,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1333,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3420,11 +2677,15 @@
           30
         ],
         [
+          "empanelment_v2_0.pdf",
+          32
+        ],
+        [
           "empanelment_dec2021.pdf",
           21
         ]
       ],
-      "first_hit_rank": 0,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "empanelment_v2_0.pdf",
@@ -3452,29 +2713,12 @@
           4.2748
         ]
       ],
-      "answer": "In case the EHCP does not provide any response to the show-cause notice within the stipulated time period, the EHCP may be suspended for a specified time period, not exceeding 6 months.\n\n[1] [2] [3] [4] [5]",
-      "cited_ranks": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2451.466900005471,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2248,
-        "eval_ms": 0.0,
-        "eval_tokens": 57,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3514,28 +2758,12 @@
           -8.9901
         ]
       ],
-      "answer": "According to the information provided in the sources, the cities classified for the grant of house rent allowance to central government employees in Gujarat are:\n\n- Ahmadabad (UA)\n- Rajkot (UA)\n- Jamnagar (UA)\n- Bhavnagar (UA)\n- Vadodara (UA)\n- Surat (UA) [1] [2]",
-      "cited_ranks": [
-        1,
-        2
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2535.882500000298,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2903,
-        "eval_ms": 0.0,
-        "eval_tokens": 74,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3570,23 +2798,12 @@
           -9.7851
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1094.9714000016684,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2321,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3626,25 +2843,12 @@
           -7.5674
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "Deputy District Officer"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1053.3451000010245,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2205,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3704,25 +2908,12 @@
           -4.5762
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
-      "missing_substrings": [
-        "Common Service Centres"
-      ],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1009.4776999976602,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 1983,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "missing_substrings": [],
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3748,6 +2939,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           11
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3
         ]
       ],
       "first_hit_rank": 1,
@@ -3778,28 +2973,12 @@
           -4.454
         ]
       ],
-      "answer": "Dr. Indu Bhushan is the Chief Executive Officer of the National Health Authority and Former CEO of the National Health Authority. She has been involved in the development and management of the Ayushman Bharat – Pradhan Mantri Jan Arogya Yojana (PM-JAY) scheme, as evidenced by her involvement in the preface of the antifraud guidelines and field investigation manual. [2] [3]",
-      "cited_ranks": [
-        2,
-        3
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        3
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 2645.565799997712,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2429,
-        "eval_ms": 0.0,
-        "eval_tokens": 89,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3843,27 +3022,12 @@
           1.3616
         ]
       ],
-      "answer": "In a case of patient doing self-discharge (Leave Against Medical Advice) after surgery, the hospital will be paid 75% of the total package amount [2].",
-      "cited_ranks": [
-        2
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1572.4250999992364,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2452,
-        "eval_ms": 0.0,
-        "eval_tokens": 36,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3903,27 +3067,12 @@
           2.5103
         ]
       ],
-      "answer": "Aadhaar will be the primary identity document for a family member under the AB PM-JAY scheme. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1233.023900000262,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2284,
-        "eval_ms": 0.0,
-        "eval_tokens": 25,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -3933,9 +3082,13 @@
         [
           "fraud_analytics_rfe.pdf",
           14
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          15
         ]
       ],
-      "first_hit_rank": 5,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "fraud_analytics_rfe.pdf",
@@ -3963,25 +3116,12 @@
           -4.254
         ]
       ],
-      "answer": "Yes, showing inflated medical bills is considered as fraud. This includes claims for medicines and/or medical devices larger than the real costs [1].",
-      "cited_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1420.016600000963,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2794,
-        "eval_ms": 0.0,
-        "eval_tokens": 29,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -4021,25 +3161,12 @@
           -0.5726
         ]
       ],
-      "answer": "The maximum duration that can be allowed by NHA to the agency for fraud analytics services is 5 years. This includes the initial 3-year contract period plus up to 2 additional years, each year at the sole discretion of NHA. [2]",
-      "cited_ranks": [
-        2
-      ],
+      "answer": "",
+      "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1916.5027999988524,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2166,
-        "eval_ms": 0.0,
-        "eval_tokens": 53,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -4087,27 +3214,12 @@
           4.1563
         ]
       ],
-      "answer": "Bids must remain valid up to 180 days from the last date of submission of the bids. [1]",
-      "cited_ranks": [
-        1
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1390.0327000010293,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2622,
-        "eval_ms": 0.0,
-        "eval_tokens": 26,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -4117,6 +3229,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           47
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48
         ]
       ],
       "first_hit_rank": 1,
@@ -4147,31 +3263,12 @@
           5.3981
         ]
       ],
-      "answer": "32 [1] [2] [3] [4] [5]",
-      "cited_ranks": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "citation_correct": true,
-      "cited_golden_ranks": [
-        1
-      ],
+      "answer": "",
+      "cited_ranks": [],
+      "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1103.6331000068458,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 2264,
-        "eval_ms": 0.0,
-        "eval_tokens": 18,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     },
     {
@@ -4191,14 +3288,14 @@
           -9.7713
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          128,
-          -10.504
-        ],
-        [
           "antifraud_guidelines.pdf",
           23,
           -10.6533
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          86,
+          -10.7212
         ],
         [
           "stg_manual.pdf",
@@ -4206,25 +3303,14 @@
           -10.772
         ]
       ],
-      "answer": "I cannot answer this from the provided sources.",
+      "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
       "cited_golden_ranks": [],
       "missing_substrings": [],
-      "gen_stats": {
-        "served_by": "Phala",
-        "total_ms": 1008.2717000041157,
-        "load_ms": 0.0,
-        "queue_ms": 0.0,
-        "prompt_eval_ms": 0.0,
-        "prompt_eval_tokens": 3141,
-        "eval_ms": 0.0,
-        "eval_tokens": 10,
-        "prompt_eval_tps": 0.0,
-        "eval_tps": 0.0
-      },
+      "gen_stats": {},
       "error": ""
     }
   ],
-  "descriptor": "rerank-qwen_qwen-2.5-7b-instruct-69q-golden_set@84864818a4a4-via-Phala"
+  "descriptor": "rerank-retrieval-69q-golden_set@3648c3657e23"
 }

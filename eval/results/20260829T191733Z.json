@@ -1,6 +1,7 @@
 {
-  "timestamp": "20260827T053930Z",
-  "label": "vocab-paraphrase-vector-17q",
+  "timestamp": "20260829T191733Z",
+  "label": "vocab-paraphrase-vector-17q-goldenv3",
+  "descriptor": "vector-retrieval-17q-paraphrase_set@7f7956a5db50",
   "config": {
     "k": 5,
     "retriever": "vector",
@@ -10,14 +11,14 @@
     "llm_upstream_pin": null,
     "only_rows": null,
     "question_set": "paraphrase_set.csv",
+    "question_set_sha": "7f7956a5db50",
+    "question_set_rows": 17,
+    "served_by": null,
     "retrieval_only": true,
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
-    "n_questions": 17,
-    "question_set_sha": "3db71603ce58",
-    "question_set_rows": 17,
-    "served_by": null
+    "n_questions": 17
   },
   "metrics": {
     "n_total": 17,
@@ -26,9 +27,9 @@
     "hit_rate@1": 0.29411764705882354,
     "hit_rate@3": 0.5882352941176471,
     "hit_rate@5": 0.6470588235294118,
-    "mrr": 0.44313725490196076,
-    "retrieve_ms_p50": 40.23010000037175,
-    "retrieve_ms_p95": 45.14158000001771
+    "mrr": 0.45294117647058824,
+    "retrieve_ms_p50": 32.59589999993295,
+    "retrieve_ms_p95": 40.60668000001896
   },
   "cases": [
     {
@@ -132,6 +133,10 @@
         [
           "empanelment_v2_0.pdf",
           22
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15
         ]
       ],
       "first_hit_rank": 1,
@@ -586,6 +591,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           47
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48
         ]
       ],
       "first_hit_rank": 2,
@@ -631,9 +640,13 @@
         [
           "empanelment_v2_0.pdf",
           23
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16
         ]
       ],
-      "first_hit_rank": 3,
+      "first_hit_rank": 2,
       "retrieved": [
         [
           "empanelment_v2_0.pdf",
@@ -804,6 +817,5 @@
       "gen_stats": {},
       "error": ""
     }
-  ],
-  "descriptor": "vector-retrieval-17q-paraphrase_set@3db71603ce58"
+  ]
 }

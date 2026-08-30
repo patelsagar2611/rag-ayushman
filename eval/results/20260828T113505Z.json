@@ -1,19 +1,21 @@
 {
-  "timestamp": "20260824T185501Z",
-  "label": "phase2-rerank-bm25-pool-69q",
+  "timestamp": "20260828T113505Z",
+  "label": "goldenv3-bm25-retrieval-69q",
   "config": {
     "k": 5,
-    "retriever": "rerank-bm25",
+    "retriever": "bm25",
     "prompt_version": null,
     "llm_provider": null,
     "llm_model": null,
+    "llm_upstream_pin": null,
+    "only_rows": null,
+    "question_set": "golden_set.csv",
     "retrieval_only": true,
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
     "n_questions": 69,
-    "question_set": "golden_set.csv",
-    "question_set_sha": "7271cfbaeed3",
+    "question_set_sha": "3648c3657e23",
     "question_set_rows": 69,
     "served_by": null
   },
@@ -21,12 +23,12 @@
     "n_total": 69,
     "n_answerable": 60,
     "n_abstain": 9,
-    "hit_rate@1": 0.7333333333333333,
-    "hit_rate@3": 0.8666666666666667,
-    "hit_rate@5": 0.95,
-    "mrr": 0.8080555555555555,
-    "retrieve_ms_p50": 3732.109100004891,
-    "retrieve_ms_p95": 4922.2133800023585
+    "hit_rate@1": 0.7,
+    "hit_rate@3": 0.8333333333333334,
+    "hit_rate@5": 0.8666666666666667,
+    "mrr": 0.7658333333333334,
+    "retrieve_ms_p50": 5.109299999958239,
+    "retrieve_ms_p95": 11.447879999968784
   },
   "cases": [
     {
@@ -36,39 +38,44 @@
         [
           "empanelment_v2_0.pdf",
           40
-        ]
-      ],
-      "first_hit_rank": 1,
-      "retrieved": [
-        [
-          "empanelment_v2_0.pdf",
-          40,
-          6.7026
         ],
         [
           "empanelment_dec2021.pdf",
+          27
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
+        [
+          "empanelment_dec2021.pdf",
           30,
-          6.1757
+          39.6363
         ],
         [
           "empanelment_dec2021.pdf",
           27,
-          5.1013
+          32.9026
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          31.8099
         ],
         [
           "empanelment_v2_0.pdf",
           6,
-          2.3389
+          28.5484
         ],
         [
-          "empanelment_dec2021.pdf",
-          10,
-          2.0709
+          "hbp_2_2_manual.pdf",
+          52,
+          28.1799
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -81,33 +88,34 @@
       "retrieved": [
         [
           "antifraud_guidebook_2024.pdf",
+          41,
+          14.8151
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
           110,
-          -10.7132
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          47,
-          -10.9675
-        ],
-        [
-          "stg_manual.pdf",
-          7,
-          -10.9769
+          14.425
         ],
         [
           "antifraud_guidebook_2024.pdf",
           41,
-          -11.035
+          13.5422
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          38,
-          -11.0522
+          "stg_manual.pdf",
+          7,
+          13.3535
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          12,
+          12.9406
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -128,34 +136,35 @@
       "first_hit_rank": 3,
       "retrieved": [
         [
-          "empanelment_v2_0.pdf",
-          7,
-          4.007
+          "hbp_2_2_manual.pdf",
+          47,
+          10.714
         ],
         [
-          "empanelment_dec2021.pdf",
-          9,
-          3.8829
+          "empanelment_v2_0.pdf",
+          26,
+          10.5669
         ],
         [
           "empanelment_v2_0.pdf",
           5,
-          3.018
+          10.3129
         ],
         [
-          "empanelment_dec2021.pdf",
-          5,
-          2.3243
+          "hbp_2_2_manual.pdf",
+          49,
+          10.284
         ],
         [
-          "empanelment_v2_0.pdf",
-          3,
-          2.1942
+          "antifraud_guidebook_2024.pdf",
+          87,
+          9.9422
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -167,39 +176,44 @@
         [
           "empanelment_v2_0.pdf",
           8
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          10
         ]
       ],
       "first_hit_rank": 1,
       "retrieved": [
         [
-          "empanelment_v2_0.pdf",
-          8,
-          5.8804
-        ],
-        [
           "empanelment_dec2021.pdf",
           10,
-          4.5167
+          13.6624
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          8,
+          13.5885
         ],
         [
           "empanelment_v2_0.pdf",
           24,
-          1.4789
+          11.4265
         ],
         [
           "empanelment_dec2021.pdf",
-          16,
-          0.6134
+          26,
+          11.359
         ],
         [
-          "empanelment_dec2021.pdf",
-          17,
-          0.066
+          "antifraud_guidebook_2024.pdf",
+          118,
+          10.3962
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -218,32 +232,33 @@
         [
           "fraud_analytics_rfe.pdf",
           23,
-          5.5016
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          22,
-          0.2012
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          55,
-          -2.0204
+          23.0918
         ],
         [
           "fraud_analytics_rfe.pdf",
           20,
-          -2.3589
+          22.4068
         ],
         [
           "fraud_analytics_rfe.pdf",
-          32,
-          -2.9919
+          107,
+          17.1274
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          22,
+          16.8534
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          38,
+          15.6075
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -257,37 +272,38 @@
           24
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 2,
       "retrieved": [
         [
           "fraud_analytics_rfe.pdf",
-          24,
-          4.4316
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
           23,
-          4.4098
+          36.3582
         ],
         [
           "fraud_analytics_rfe.pdf",
-          85,
-          -3.9364
+          24,
+          24.607
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          30,
+          22.1028
         ],
         [
           "fraud_analytics_rfe.pdf",
-          22,
-          -4.7563
+          38,
+          20.0783
         ],
         [
-          "empanelment_v2_0.pdf",
-          6,
-          -5.7176
+          "antifraud_guidelines.pdf",
+          15,
+          19.6472
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -306,32 +322,33 @@
         [
           "fraud_analytics_rfe.pdf",
           34,
-          6.6848
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          52,
-          4.3638
+          35.8555
         ],
         [
           "fraud_analytics_rfe.pdf",
           51,
-          4.1129
+          29.3715
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          4,
+          26.2741
         ],
         [
           "fraud_analytics_rfe.pdf",
           34,
-          3.0985
+          25.6077
         ],
         [
           "fraud_analytics_rfe.pdf",
           8,
-          1.4288
+          25.574
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -342,6 +359,10 @@
       "targets": [
         [
           "fraud_analytics_rfe.pdf",
+          39
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
           41
         ]
       ],
@@ -350,32 +371,33 @@
         [
           "fraud_analytics_rfe.pdf",
           41,
-          4.8943
+          40.0766
         ],
         [
           "fraud_analytics_rfe.pdf",
           39,
-          1.3508
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          42,
-          0.791
+          21.6273
         ],
         [
           "fraud_analytics_rfe.pdf",
           40,
-          0.1133
+          19.9989
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          42,
+          18.8379
         ],
         [
           "fraud_analytics_rfe.pdf",
           54,
-          -0.2358
+          18.1577
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -387,6 +409,10 @@
         [
           "empanelment_v2_0.pdf",
           22
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15
         ]
       ],
       "first_hit_rank": 1,
@@ -394,32 +420,33 @@
         [
           "empanelment_v2_0.pdf",
           22,
-          6.2923
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          16,
-          3.799
+          28.8299
         ],
         [
           "empanelment_dec2021.pdf",
           17,
-          3.7974
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          17,
-          3.5049
+          22.8338
         ],
         [
           "empanelment_v2_0.pdf",
-          11,
-          2.6548
+          23,
+          21.7074
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          9,
+          20.8147
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17,
+          20.3473
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -431,39 +458,44 @@
         [
           "empanelment_v2_0.pdf",
           23
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16
         ]
       ],
       "first_hit_rank": 1,
       "retrieved": [
         [
+          "empanelment_dec2021.pdf",
+          16,
+          66.157
+        ],
+        [
           "empanelment_v2_0.pdf",
           23,
-          7.7009
+          62.0279
         ],
         [
           "empanelment_dec2021.pdf",
           16,
-          7.4995
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          16,
-          6.9473
+          49.4515
         ],
         [
           "empanelment_v2_0.pdf",
           22,
-          3.5616
+          45.1512
         ],
         [
           "empanelment_v2_0.pdf",
           6,
-          -0.1101
+          30.4498
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -475,39 +507,44 @@
         [
           "operation_manual.pdf",
           7
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51
         ]
       ],
-      "first_hit_rank": 4,
+      "first_hit_rank": 1,
       "retrieved": [
+        [
+          "operation_manual.pdf",
+          7,
+          25.5119
+        ],
         [
           "hbp_2_2_manual.pdf",
           51,
-          6.4129
-        ],
-        [
-          "operation_manual.pdf",
-          17,
-          1.2413
+          24.3068
         ],
         [
           "empanelment_dec2021.pdf",
           10,
-          0.5938
+          15.5287
         ],
         [
           "operation_manual.pdf",
-          7,
-          -0.5254
+          17,
+          14.5835
         ],
         [
-          "empanelment_dec2021.pdf",
-          18,
-          -2.9984
+          "hbp_2_2_manual.pdf",
+          50,
+          13.0162
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -521,37 +558,38 @@
           7
         ]
       ],
-      "first_hit_rank": 2,
+      "first_hit_rank": 0,
       "retrieved": [
         [
-          "empanelment_dec2021.pdf",
-          7,
-          2.0974
+          "antifraud_guidebook_2024.pdf",
+          88,
+          17.838
         ],
         [
-          "operation_manual.pdf",
-          7,
-          0.9896
-        ],
-        [
-          "operation_manual.pdf",
+          "antifraud_guidelines.pdf",
           5,
-          0.9347
+          17.2439
         ],
         [
-          "grievance_redressal.pdf",
-          6,
-          0.8751
+          "antifraud_guidebook_2024.pdf",
+          78,
+          16.4221
         ],
         [
-          "stg_manual.pdf",
-          6,
-          -0.4465
+          "antifraud_guidebook_2024.pdf",
+          40,
+          16.1724
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          5,
+          16.0881
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -567,39 +605,48 @@
         [
           "empanelment_dec2021.pdf",
           20
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22
         ]
       ],
       "first_hit_rank": 2,
       "retrieved": [
         [
-          "field_investigation_manual.pdf",
-          14,
-          1.3309
-        ],
-        [
-          "empanelment_v2_0.pdf",
-          29,
-          1.301
+          "antifraud_guidebook_2024.pdf",
+          156,
+          22.6219
         ],
         [
           "empanelment_dec2021.pdf",
           20,
-          0.8891
+          21.9866
         ],
         [
-          "field_investigation_manual.pdf",
-          17,
-          -0.1174
+          "empanelment_v2_0.pdf",
+          29,
+          21.3464
         ],
         [
-          "empanelment_dec2021.pdf",
-          25,
-          -0.2121
+          "antifraud_guidebook_2024.pdf",
+          88,
+          20.6006
+        ],
+        [
+          "grievance_redressal.pdf",
+          8,
+          20.1429
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -620,34 +667,35 @@
       "first_hit_rank": 1,
       "retrieved": [
         [
-          "empanelment_dec2021.pdf",
-          22,
-          7.7172
-        ],
-        [
           "empanelment_v2_0.pdf",
           32,
-          7.3815
-        ],
-        [
-          "empanelment_v2_0.pdf",
-          31,
-          6.2353
+          68.9236
         ],
         [
           "empanelment_dec2021.pdf",
           22,
-          5.403
+          66.8438
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          22,
+          63.9851
         ],
         [
           "empanelment_v2_0.pdf",
           31,
-          4.1622
+          57.4593
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          31,
+          55.1561
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -666,32 +714,33 @@
         [
           "antifraud_guidelines.pdf",
           11,
-          3.41
-        ],
-        [
-          "antifraud_guidelines.pdf",
-          10,
-          0.1139
+          18.5931
         ],
         [
           "antifraud_guidelines.pdf",
           28,
-          -1.1621
-        ],
-        [
-          "antifraud_guidelines.pdf",
-          10,
-          -2.5143
+          13.4512
         ],
         [
           "antifraud_guidelines.pdf",
           12,
-          -3.2363
+          11.711
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          96,
+          11.3183
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          10,
+          11.0232
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -704,33 +753,34 @@
       "retrieved": [
         [
           "antifraud_guidebook_2024.pdf",
-          13,
-          -6.9287
+          72,
+          15.1693
         ],
         [
-          "antifraud_guidelines.pdf",
-          3,
-          -8.2369
+          "stg_manual.pdf",
+          27,
+          14.4403
         ],
         [
-          "fraud_analytics_rfe.pdf",
-          12,
-          -8.7224
+          "stg_manual.pdf",
+          6,
+          13.8425
         ],
         [
-          "antifraud_guidelines.pdf",
-          19,
-          -9.1873
+          "antifraud_guidebook_2024.pdf",
+          72,
+          13.7673
         ],
         [
-          "fraud_analytics_rfe.pdf",
-          71,
-          -9.2033
+          "stg_manual.pdf",
+          32,
+          13.3593
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -749,32 +799,33 @@
         [
           "fraud_analytics_rfe.pdf",
           29,
-          6.4749
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          36,
-          2.6138
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          31,
-          1.8102
+          50.479
         ],
         [
           "fraud_analytics_rfe.pdf",
           39,
-          1.5869
+          38.2117
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          42,
+          36.3634
         ],
         [
           "fraud_analytics_rfe.pdf",
           77,
-          1.4547
+          35.6019
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          38,
+          35.1013
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -790,6 +841,14 @@
         [
           "antifraud_guidebook_2024.pdf",
           25
+        ],
+        [
+          "field_investigation_manual.pdf",
+          9
+        ],
+        [
+          "field_investigation_manual.pdf",
+          17
         ]
       ],
       "first_hit_rank": 1,
@@ -797,32 +856,33 @@
         [
           "antifraud_guidelines.pdf",
           17,
-          4.4103
-        ],
-        [
-          "field_investigation_manual.pdf",
-          17,
-          2.0432
-        ],
-        [
-          "field_investigation_manual.pdf",
-          8,
-          0.7579
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          23,
-          -0.0516
+          20.6662
         ],
         [
           "antifraud_guidebook_2024.pdf",
+          74,
+          20.3218
+        ],
+        [
+          "field_investigation_manual.pdf",
+          35,
+          20.0656
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          13,
+          19.5145
+        ],
+        [
+          "beneficiary_identification.pdf",
           16,
-          -1.0075
+          19.2398
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -841,32 +901,33 @@
         [
           "antifraud_guidelines.pdf",
           24,
-          2.8929
+          36.134
         ],
         [
           "antifraud_guidelines.pdf",
           23,
-          1.9753
+          29.6766
         ],
         [
           "antifraud_guidebook_2024.pdf",
           70,
-          0.3184
+          29.2574
         ],
         [
-          "antifraud_guidelines.pdf",
-          23,
-          -0.1269
+          "antifraud_guidebook_2024.pdf",
+          72,
+          24.525
         ],
         [
-          "hbp_2_2_manual.pdf",
-          52,
-          -3.1943
+          "antifraud_guidebook_2024.pdf",
+          72,
+          21.2741
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -882,39 +943,44 @@
         [
           "antifraud_guidebook_2024.pdf",
           25
+        ],
+        [
+          "field_investigation_manual.pdf",
+          8
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 5,
       "retrieved": [
         [
+          "beneficiary_identification.pdf",
+          16,
+          18.687
+        ],
+        [
+          "grievance_redressal.pdf",
+          19,
+          18.4497
+        ],
+        [
+          "field_investigation_manual.pdf",
+          15,
+          18.3821
+        ],
+        [
           "antifraud_guidelines.pdf",
-          17,
-          4.5602
+          15,
+          16.8273
         ],
         [
           "field_investigation_manual.pdf",
           8,
-          1.3703
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          24,
-          -0.5133
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          25,
-          -0.5294
-        ],
-        [
-          "field_investigation_manual.pdf",
-          18,
-          -3.0556
+          16.4323
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -928,37 +994,38 @@
           20
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 0,
       "retrieved": [
         [
-          "operation_manual.pdf",
-          20,
-          2.8656
+          "hbp_2_2_manual.pdf",
+          22,
+          14.2727
         ],
         [
           "hbp_2_2_manual.pdf",
           48,
-          0.6277
+          14.0056
         ],
         [
           "hbp_2_2_manual.pdf",
-          20,
-          -0.3347
+          52,
+          13.3267
         ],
         [
           "hbp_2_2_manual.pdf",
-          53,
-          -0.5977
+          47,
+          12.9212
         ],
         [
           "hbp_2_2_manual.pdf",
-          44,
-          -0.6657
+          54,
+          12.6948
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -977,32 +1044,33 @@
         [
           "operation_manual.pdf",
           16,
-          2.9771
+          16.5276
         ],
         [
           "operation_manual.pdf",
           15,
-          0.2539
+          8.9773
         ],
         [
           "operation_manual.pdf",
-          31,
-          -5.0735
+          15,
+          7.7889
         ],
         [
           "empanelment_dec2021.pdf",
-          29,
-          -5.0945
+          12,
+          7.5557
         ],
         [
-          "operation_manual.pdf",
-          15,
-          -5.8003
+          "antifraud_guidelines.pdf",
+          25,
+          7.3488
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1016,37 +1084,38 @@
           6
         ]
       ],
-      "first_hit_rank": 4,
+      "first_hit_rank": 3,
       "retrieved": [
         [
           "stg_manual.pdf",
           7,
-          -0.2188
+          16.2178
         ],
         [
-          "operation_manual.pdf",
-          20,
-          -5.1939
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          48,
-          -6.9424
+          "antifraud_guidebook_2024.pdf",
+          72,
+          14.1317
         ],
         [
           "stg_manual.pdf",
           6,
-          -7.9872
+          13.7204
         ],
         [
-          "hbp_2_2_manual.pdf",
-          46,
-          -8.5101
+          "operation_manual.pdf",
+          20,
+          13.4895
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          31,
+          13.1694
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1082,6 +1151,14 @@
         [
           "empanelment_dec2021.pdf",
           7
+        ],
+        [
+          "operation_manual.pdf",
+          7
+        ],
+        [
+          "grievance_redressal.pdf",
+          6
         ]
       ],
       "first_hit_rank": 1,
@@ -1089,32 +1166,33 @@
         [
           "stg_manual.pdf",
           7,
-          3.0386
+          22.9717
         ],
         [
-          "operation_manual.pdf",
-          7,
-          1.4532
+          "beneficiary_identification.pdf",
+          14,
+          16.9045
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          13,
-          1.215
-        ],
-        [
-          "grievance_redressal.pdf",
-          6,
-          0.1109
+          "beneficiary_identification.pdf",
+          15,
+          14.0576
         ],
         [
           "beneficiary_identification.pdf",
           3,
-          -0.3779
+          13.8329
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          23,
+          13.3838
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1133,32 +1211,33 @@
         [
           "hbp_2_2_manual.pdf",
           15,
-          4.2459
+          59.0705
         ],
         [
           "operation_manual.pdf",
           19,
-          -3.2175
+          33.4503
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          28,
+          28.608
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          32,
+          28.2463
         ],
         [
           "operation_manual.pdf",
-          25,
-          -3.9681
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          101,
-          -4.5553
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          18,
-          -4.6986
+          19,
+          26.9931
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1177,32 +1256,33 @@
         [
           "hbp_2_2_manual.pdf",
           18,
-          1.0765
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          28,
-          -3.2272
+          36.5249
         ],
         [
           "empanelment_v2_0.pdf",
           42,
-          -3.3435
+          30.4809
         ],
         [
           "empanelment_v2_0.pdf",
           41,
-          -3.4625
+          29.6938
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          28,
+          28.285
         ],
         [
           "hbp_2_2_manual.pdf",
           10,
-          -3.8247
+          28.2583
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1214,39 +1294,44 @@
         [
           "hbp_2_2_manual.pdf",
           23
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          33
         ]
       ],
-      "first_hit_rank": 3,
+      "first_hit_rank": 0,
       "retrieved": [
+        [
+          "operation_manual.pdf",
+          18,
+          21.4974
+        ],
         [
           "hbp_2_2_manual.pdf",
           48,
-          4.2085
+          19.4805
         ],
         [
           "hbp_2_2_manual.pdf",
           46,
-          3.328
+          18.4273
         ],
         [
           "hbp_2_2_manual.pdf",
-          23,
-          2.8411
+          45,
+          17.2024
         ],
         [
           "hbp_2_2_manual.pdf",
-          52,
-          1.9665
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          21,
-          1.7887
+          22,
+          16.9075
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1260,37 +1345,38 @@
           51
         ]
       ],
-      "first_hit_rank": 2,
+      "first_hit_rank": 1,
       "retrieved": [
-        [
-          "empanelment_dec2021.pdf",
-          40,
-          5.5806
-        ],
         [
           "hbp_2_2_manual.pdf",
           51,
-          3.306
+          30.9187
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          26.6852
         ],
         [
           "empanelment_dec2021.pdf",
           30,
-          2.347
+          25.5523
         ],
         [
           "hbp_2_2_manual.pdf",
           35,
-          -0.4659
+          20.6912
         ],
         [
           "operation_manual.pdf",
           7,
-          -3.844
+          16.9829
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1302,39 +1388,56 @@
         [
           "grievance_redressal.pdf",
           16
-        ]
-      ],
-      "first_hit_rank": 5,
-      "retrieved": [
-        [
-          "grievance_redressal.pdf",
-          23,
-          7.3525
         ],
         [
           "grievance_redressal.pdf",
+          22
+        ],
+        [
+          "grievance_redressal.pdf",
+          23
+        ],
+        [
+          "grievance_redressal.pdf",
+          24
+        ],
+        [
+          "grievance_redressal.pdf",
+          25
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "grievance_redressal.pdf",
           24,
-          6.3579
+          46.7727
         ],
         [
           "grievance_redressal.pdf",
           22,
-          5.3068
+          44.6932
         ],
         [
           "grievance_redressal.pdf",
           25,
-          4.5378
+          43.571
+        ],
+        [
+          "grievance_redressal.pdf",
+          23,
+          42.2445
         ],
         [
           "grievance_redressal.pdf",
           16,
-          3.8949
+          41.0688
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1353,32 +1456,33 @@
         [
           "grievance_redressal.pdf",
           19,
-          5.487
+          33.3744
         ],
         [
           "grievance_redressal.pdf",
           18,
-          0.5157
+          27.915
         ],
         [
           "grievance_redressal.pdf",
           5,
-          -2.063
+          17.0596
         ],
         [
-          "grievance_redressal.pdf",
-          12,
-          -5.8878
+          "stg_manual.pdf",
+          6,
+          13.7462
         ],
         [
           "grievance_redressal.pdf",
           4,
-          -5.8931
+          13.3648
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1392,37 +1496,38 @@
           20
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 2,
       "retrieved": [
         [
           "grievance_redressal.pdf",
-          20,
-          5.8767
+          18,
+          33.3758
         ],
         [
           "grievance_redressal.pdf",
-          18,
-          3.1341
+          20,
+          33.1419
         ],
         [
           "grievance_redressal.pdf",
           5,
-          2.0874
+          23.8228
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          19.7004
         ],
         [
           "grievance_redressal.pdf",
           21,
-          -0.8828
-        ],
-        [
-          "grievance_redressal.pdf",
-          5,
-          -1.2993
+          18.9265
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1439,34 +1544,35 @@
       "first_hit_rank": 3,
       "retrieved": [
         [
-          "antifraud_guidebook_2024.pdf",
-          70,
-          1.0694
+          "field_investigation_manual.pdf",
+          12,
+          19.5081
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          75,
-          0.8038
+          "field_investigation_manual.pdf",
+          5,
+          16.2101
         ],
         [
           "field_investigation_manual.pdf",
           21,
-          0.742
+          15.8655
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          71,
-          -0.9175
+          75,
+          15.0849
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          69,
-          -1.245
+          70,
+          14.238
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1478,34 +1584,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "empanelment_dec2021.pdf",
-          16,
-          -1.6872
-        ],
-        [
           "antifraud_guidebook_2024.pdf",
-          57,
-          -3.2482
+          155,
+          21.9072
         ],
         [
-          "empanelment_dec2021.pdf",
-          22,
-          -3.4921
+          "fraud_analytics_rfe.pdf",
+          61,
+          21.6405
         ],
         [
-          "empanelment_dec2021.pdf",
-          17,
-          -4.5828
+          "empanelment_v2_0.pdf",
+          6,
+          21.605
         ],
         [
           "hbp_2_2_manual.pdf",
-          7,
-          -4.9262
+          28,
+          20.6245
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          153,
+          20.4999
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1517,39 +1624,44 @@
         [
           "field_investigation_manual.pdf",
           36
+        ],
+        [
+          "field_investigation_manual.pdf",
+          37
         ]
       ],
-      "first_hit_rank": 3,
+      "first_hit_rank": 0,
       "retrieved": [
         [
           "field_investigation_manual.pdf",
-          37,
-          0.1842
-        ],
-        [
-          "field_investigation_manual.pdf",
           17,
-          -1.0126
+          21.6744
         ],
         [
-          "field_investigation_manual.pdf",
-          36,
-          -1.7085
-        ],
-        [
-          "field_investigation_manual.pdf",
-          39,
-          -2.3665
+          "empanelment_v2_0.pdf",
+          48,
+          20.4115
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          91,
-          -2.4173
+          88,
+          19.2016
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          70,
+          18.8087
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          74,
+          18.7426
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1568,32 +1680,33 @@
         [
           "beneficiary_identification.pdf",
           8,
-          4.2047
-        ],
-        [
-          "grievance_redressal.pdf",
-          6,
-          -1.9533
+          123.842
         ],
         [
           "beneficiary_identification.pdf",
-          5,
-          -2.8097
+          16,
+          79.1367
         ],
         [
           "beneficiary_identification.pdf",
-          4,
-          -4.0385
+          6,
+          61.8423
         ],
         [
-          "hbp_2_2_manual.pdf",
-          6,
-          -4.3074
+          "beneficiary_identification.pdf",
+          3,
+          61.2374
+        ],
+        [
+          "beneficiary_identification.pdf",
+          9,
+          60.6771
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1605,34 +1718,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "beneficiary_identification.pdf",
-          4,
-          3.1508
-        ],
-        [
-          "beneficiary_identification.pdf",
-          15,
-          2.2536
+          "hbp_2_2_manual.pdf",
+          36,
+          20.7282
         ],
         [
           "hbp_2_2_manual.pdf",
           15,
-          1.4119
+          17.4527
+        ],
+        [
+          "operation_manual.pdf",
+          19,
+          17.3658
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          11,
+          17.2534
         ],
         [
           "hbp_2_2_manual.pdf",
           14,
-          1.3559
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          17,
-          -0.2751
+          17.2377
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1655,32 +1769,33 @@
         [
           "empanelment_dec2021.pdf",
           34,
-          2.3642
+          22.9555
         ],
         [
           "empanelment_v2_0.pdf",
           49,
-          -3.881
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          30,
-          -8.5051
+          22.9501
         ],
         [
           "stg_manual.pdf",
           20,
-          -8.8115
+          15.0226
         ],
         [
           "empanelment_dec2021.pdf",
-          36,
-          -9.7508
+          30,
+          12.9006
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          96,
+          12.1402
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1699,32 +1814,33 @@
         [
           "empanelment_v2_0.pdf",
           14,
-          1.2297
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          39,
-          1.1209
+          12.5518
         ],
         [
           "empanelment_v2_0.pdf",
           23,
-          0.9961
+          10.3845
         ],
         [
           "empanelment_dec2021.pdf",
-          15,
-          0.9365
+          17,
+          9.2033
         ],
         [
-          "empanelment_dec2021.pdf",
+          "beneficiary_identification.pdf",
           16,
-          0.8928
+          9.0157
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          28,
+          8.9007
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1738,37 +1854,38 @@
           16
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 0,
       "retrieved": [
         [
-          "empanelment_v2_0.pdf",
-          16,
-          0.7546
+          "hbp_2_2_manual.pdf",
+          46,
+          19.4995
         ],
         [
           "operation_manual.pdf",
           13,
-          -1.9003
-        ],
-        [
-          "empanelment_v2_0.pdf",
-          40,
-          -3.5957
+          19.1289
         ],
         [
           "empanelment_v2_0.pdf",
           11,
-          -3.644
+          18.8192
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          50,
+          18.7949
         ],
         [
           "empanelment_dec2021.pdf",
           33,
-          -3.645
+          17.8449
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1779,40 +1896,61 @@
       "targets": [
         [
           "empanelment_v2_0.pdf",
-          59
-        ]
-      ],
-      "first_hit_rank": 5,
-      "retrieved": [
+          57
+        ],
         [
-          "empanelment_dec2021.pdf",
-          23,
-          3.7347
+          "empanelment_v2_0.pdf",
+          59
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          64
         ],
         [
           "antifraud_guidebook_2024.pdf",
+          101
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          102
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          103
+        ]
+      ],
+      "first_hit_rank": 1,
+      "retrieved": [
+        [
+          "antifraud_guidebook_2024.pdf",
           102,
-          3.6062
+          41.8232
         ],
         [
           "antifraud_guidebook_2024.pdf",
           101,
-          3.5966
+          38.4293
         ],
         [
           "empanelment_dec2021.pdf",
           26,
-          3.2552
+          37.9586
         ],
         [
           "empanelment_v2_0.pdf",
           59,
-          3.0518
+          37.9321
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          119,
+          37.7713
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1824,34 +1962,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "fraud_analytics_rfe.pdf",
-          70,
-          -3.9669
+          "antifraud_guidebook_2024.pdf",
+          155,
+          17.5813
         ],
         [
           "empanelment_v2_0.pdf",
           35,
-          -4.9407
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          155,
-          -5.0475
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          155,
-          -5.4747
+          16.8933
         ],
         [
           "fraud_analytics_rfe.pdf",
-          8,
-          -6.4126
+          92,
+          16.8798
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          157,
+          16.272
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          154,
+          16.1656
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1863,39 +2002,44 @@
         [
           "empanelment_dec2021.pdf",
           19
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          17
         ]
       ],
       "first_hit_rank": 4,
       "retrieved": [
         [
+          "antifraud_guidebook_2024.pdf",
+          88,
+          17.0355
+        ],
+        [
+          "field_investigation_manual.pdf",
+          34,
+          15.3495
+        ],
+        [
+          "stg_manual.pdf",
+          33,
+          14.9724
+        ],
+        [
           "empanelment_dec2021.pdf",
           17,
-          5.0735
-        ],
-        [
-          "empanelment_v2_0.pdf",
-          37,
-          3.7456
+          14.9156
         ],
         [
           "empanelment_dec2021.pdf",
-          26,
-          3.5719
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          19,
-          3.396
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          27,
-          3.0214
+          16,
+          14.1001
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1914,32 +2058,33 @@
         [
           "empanelment_dec2021.pdf",
           34,
-          5.0398
-        ],
-        [
-          "empanelment_v2_0.pdf",
-          40,
-          4.2899
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          27,
-          3.753
+          37.521
         ],
         [
           "empanelment_dec2021.pdf",
           33,
-          2.7518
+          34.8891
         ],
         [
           "empanelment_dec2021.pdf",
-          30,
-          2.394
+          44,
+          25.7474
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16,
+          25.5362
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          40,
+          24.5948
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1958,32 +2103,33 @@
         [
           "operation_manual.pdf",
           18,
-          6.1343
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          48,
-          -1.6713
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          46,
-          -2.0873
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          54,
-          -3.0136
+          42.0684
         ],
         [
           "hbp_2_2_manual.pdf",
           50,
-          -3.1682
+          23.3591
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          21.4792
+        ],
+        [
+          "field_investigation_manual.pdf",
+          25,
+          20.6634
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          51,
+          20.4855
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -1995,34 +2141,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "empanelment_dec2021.pdf",
-          27,
-          3.2788
-        ],
-        [
           "empanelment_v2_0.pdf",
-          25,
-          2.9187
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          16,
-          2.3894
+          26,
+          25.258
         ],
         [
           "empanelment_dec2021.pdf",
           18,
-          2.3257
+          24.0276
         ],
         [
           "empanelment_dec2021.pdf",
-          10,
-          2.2936
+          19,
+          23.6333
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          22,
+          23.2422
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          39,
+          23.1249
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2041,32 +2188,33 @@
         [
           "stg_manual.pdf",
           20,
-          3.4005
-        ],
-        [
-          "stg_manual.pdf",
-          26,
-          -2.9459
-        ],
-        [
-          "stg_manual.pdf",
-          30,
-          -7.2853
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          40,
-          -8.2788
+          28.3355
         ],
         [
           "stg_manual.pdf",
           12,
-          -8.6662
+          17.8219
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          40,
+          15.3867
+        ],
+        [
+          "stg_manual.pdf",
+          30,
+          15.0054
+        ],
+        [
+          "grievance_redressal.pdf",
+          5,
+          13.231
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2085,32 +2233,33 @@
         [
           "hbp_2_2_manual.pdf",
           48,
-          5.4879
+          55.5477
         ],
         [
           "hbp_2_2_manual.pdf",
           46,
-          3.4162
+          41.1009
         ],
         [
           "hbp_2_2_manual.pdf",
-          20,
-          3.4121
+          53,
+          36.3687
         ],
         [
           "hbp_2_2_manual.pdf",
-          19,
-          2.1663
+          49,
+          35.4206
         ],
         [
           "hbp_2_2_manual.pdf",
-          52,
-          1.4647
+          47,
+          34.2865
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2129,32 +2278,33 @@
         [
           "hbp_2_2_manual.pdf",
           47,
-          1.0739
+          46.799
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          46,
+          26.2261
+        ],
+        [
+          "stg_manual.pdf",
+          31,
+          25.9824
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          35,
-          -7.7701
+          88,
+          25.4153
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          36,
-          -7.7918
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          21,
-          -8.1269
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          35,
-          -8.842
+          "field_investigation_manual.pdf",
+          34,
+          25.1669
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2166,39 +2316,44 @@
         [
           "grievance_redressal.pdf",
           14
+        ],
+        [
+          "operation_manual.pdf",
+          27
         ]
       ],
       "first_hit_rank": 1,
       "retrieved": [
         [
-          "grievance_redressal.pdf",
-          14,
-          8.3933
-        ],
-        [
           "operation_manual.pdf",
           27,
-          4.1107
+          23.5817
         ],
         [
           "grievance_redressal.pdf",
-          5,
-          2.7525
+          14,
+          19.5745
         ],
         [
           "operation_manual.pdf",
           30,
-          2.5431
+          16.1455
+        ],
+        [
+          "grievance_redressal.pdf",
+          28,
+          15.8644
         ],
         [
           "operation_manual.pdf",
-          7,
-          1.4305
+          23,
+          13.6897
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2217,32 +2372,33 @@
         [
           "grievance_redressal.pdf",
           13,
-          2.5289
+          12.3781
         ],
         [
           "grievance_redressal.pdf",
           30,
-          -3.9949
+          7.32
         ],
         [
           "grievance_redressal.pdf",
           5,
-          -6.8281
+          7.2307
         ],
         [
           "antifraud_guidebook_2024.pdf",
           160,
-          -8.8879
+          5.3068
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          160,
-          -9.0523
+          161,
+          5.0326
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2261,32 +2417,33 @@
         [
           "field_investigation_manual.pdf",
           35,
-          6.6431
+          51.319
         ],
         [
           "field_investigation_manual.pdf",
           17,
-          -1.3709
+          44.4383
         ],
         [
-          "field_investigation_manual.pdf",
-          39,
-          -2.5659
+          "antifraud_guidebook_2024.pdf",
+          88,
+          35.8788
         ],
         [
           "empanelment_dec2021.pdf",
           15,
-          -2.8161
+          34.4915
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          91,
-          -4.4585
+          "field_investigation_manual.pdf",
+          5,
+          32.4623
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2300,37 +2457,38 @@
           19
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 0,
       "retrieved": [
         [
           "field_investigation_manual.pdf",
-          19,
-          3.5661
-        ],
-        [
-          "field_investigation_manual.pdf",
           13,
-          2.3275
+          31.1597
         ],
         [
-          "field_investigation_manual.pdf",
-          12,
-          1.3631
+          "antifraud_guidebook_2024.pdf",
+          18,
+          29.9084
         ],
         [
-          "field_investigation_manual.pdf",
-          51,
-          1.2336
+          "antifraud_guidebook_2024.pdf",
+          24,
+          29.8533
         ],
         [
           "field_investigation_manual.pdf",
           15,
-          1.2095
+          29.8039
+        ],
+        [
+          "field_investigation_manual.pdf",
+          35,
+          28.5497
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2349,32 +2507,33 @@
         [
           "beneficiary_identification.pdf",
           15,
-          5.0319
+          30.4106
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          21,
-          0.4471
+          "grievance_redressal.pdf",
+          8,
+          19.1369
         ],
         [
-          "beneficiary_identification.pdf",
-          4,
-          -0.9051
+          "empanelment_dec2021.pdf",
+          13,
+          18.0258
         ],
         [
           "beneficiary_identification.pdf",
           5,
-          -0.9792
+          17.6025
         ],
         [
-          "beneficiary_identification.pdf",
-          3,
-          -1.7138
+          "antifraud_guidelines.pdf",
+          16,
+          17.3456
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2393,32 +2552,33 @@
         [
           "beneficiary_identification.pdf",
           3,
-          8.3729
-        ],
-        [
-          "beneficiary_identification.pdf",
-          4,
-          0.1735
+          31.3993
         ],
         [
           "operation_manual.pdf",
-          3,
-          -0.3042
+          20,
+          19.2878
         ],
         [
           "beneficiary_identification.pdf",
           13,
-          -1.793
+          16.8326
+        ],
+        [
+          "operation_manual.pdf",
+          3,
+          15.9129
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          143,
-          -1.9748
+          97,
+          14.5598
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2437,32 +2597,33 @@
         [
           "fraud_analytics_rfe.pdf",
           108,
-          5.6764
+          37.484
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          30,
+          19.6352
+        ],
+        [
+          "stg_manual.pdf",
+          35,
+          19.1605
         ],
         [
           "hbp_2_2_manual.pdf",
           50,
-          -4.8184
+          17.9422
         ],
         [
-          "operation_manual.pdf",
-          22,
-          -5.1696
-        ],
-        [
-          "stg_manual.pdf",
-          33,
-          -6.0747
-        ],
-        [
-          "operation_manual.pdf",
-          24,
-          -6.3986
+          "field_investigation_manual.pdf",
+          25,
+          17.8896
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2474,34 +2635,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "fraud_analytics_rfe.pdf",
-          44,
-          -11.078
+          "field_investigation_manual.pdf",
+          24,
+          12.7291
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          120,
-          -11.1277
+          121,
+          12.5153
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          152,
-          -11.1618
+          78,
+          12.4671
         ],
         [
           "hbp_2_2_manual.pdf",
-          27,
-          -11.1693
+          32,
+          11.7498
         ],
         [
-          "hbp_2_2_manual.pdf",
-          33,
-          -11.1704
+          "antifraud_guidebook_2024.pdf",
+          127,
+          11.6948
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2515,41 +2677,46 @@
           30
         ],
         [
+          "empanelment_v2_0.pdf",
+          32
+        ],
+        [
           "empanelment_dec2021.pdf",
           21
         ]
       ],
-      "first_hit_rank": 0,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "empanelment_v2_0.pdf",
           32,
-          5.554
-        ],
-        [
-          "empanelment_dec2021.pdf",
-          23,
-          5.4328
+          55.9079
         ],
         [
           "empanelment_dec2021.pdf",
           22,
-          5.4128
+          55.2319
         ],
         [
-          "empanelment_v2_0.pdf",
-          29,
-          5.1236
+          "empanelment_dec2021.pdf",
+          21,
+          50.5866
         ],
         [
-          "empanelment_v2_0.pdf",
-          33,
-          4.2748
+          "antifraud_guidebook_2024.pdf",
+          26,
+          50.4374
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          21,
+          47.8727
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2568,32 +2735,33 @@
         [
           "empanelment_dec2021.pdf",
           37,
-          8.4044
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          51,
-          -8.6475
-        ],
-        [
-          "operation_manual.pdf",
-          7,
-          -8.9901
+          58.5906
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          157,
-          -9.4161
+          161,
+          21.2166
         ],
         [
           "operation_manual.pdf",
-          20,
-          -10.1041
+          9,
+          21.1001
+        ],
+        [
+          "grievance_redressal.pdf",
+          6,
+          20.8063
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          161,
+          20.554
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2605,34 +2773,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "fraud_analytics_rfe.pdf",
-          89,
-          -3.9366
+          "stg_manual.pdf",
+          27,
+          16.4682
         ],
         [
-          "field_investigation_manual.pdf",
-          3,
-          -8.7462
+          "antifraud_guidebook_2024.pdf",
+          72,
+          14.5575
         ],
         [
-          "empanelment_dec2021.pdf",
-          39,
-          -9.0478
+          "stg_manual.pdf",
+          20,
+          14.3248
         ],
         [
-          "antifraud_guidelines.pdf",
-          3,
-          -9.3533
+          "stg_manual.pdf",
+          26,
+          13.8714
         ],
         [
-          "fraud_analytics_rfe.pdf",
-          89,
-          -10.2262
+          "antifraud_guidebook_2024.pdf",
+          72,
+          13.7673
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2646,37 +2815,38 @@
           3
         ]
       ],
-      "first_hit_rank": 1,
+      "first_hit_rank": 0,
       "retrieved": [
-        [
-          "operation_manual.pdf",
-          3,
-          -6.5086
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          29,
-          -7.5674
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          80,
-          -7.6324
-        ],
         [
           "antifraud_guidelines.pdf",
           6,
-          -7.7852
+          9.9427
         ],
         [
           "antifraud_guidebook_2024.pdf",
           104,
-          -7.9861
+          9.2382
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          29,
+          9.1197
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          79,
+          8.8201
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          40,
+          8.5924
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2688,6 +2858,10 @@
         [
           "operation_manual.pdf",
           3
+        ],
+        [
+          "operation_manual.pdf",
+          20
         ],
         [
           "empanelment_v2_0.pdf",
@@ -2709,34 +2883,35 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "antifraud_guidebook_2024.pdf",
-          65,
-          -3.3639
-        ],
-        [
-          "field_investigation_manual.pdf",
-          18,
-          -3.7287
+          "antifraud_guidelines.pdf",
+          6,
+          9.9427
         ],
         [
           "antifraud_guidebook_2024.pdf",
-          66,
-          -3.9063
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          28,
-          -4.5762
+          104,
+          9.2382
         ],
         [
           "antifraud_guidebook_2024.pdf",
           29,
-          -4.7144
+          9.1197
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          79,
+          8.8201
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          65,
+          8.7748
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2764,39 +2939,44 @@
         [
           "antifraud_guidebook_2024.pdf",
           11
-        ]
-      ],
-      "first_hit_rank": 1,
-      "retrieved": [
-        [
-          "stg_manual.pdf",
-          21,
-          2.9412
         ],
         [
           "antifraud_guidelines.pdf",
-          3,
-          0.3098
-        ],
+          3
+        ]
+      ],
+      "first_hit_rank": 2,
+      "retrieved": [
         [
-          "field_investigation_manual.pdf",
-          3,
-          -2.0796
+          "antifraud_guidebook_2024.pdf",
+          12,
+          16.9764
         ],
         [
           "hbp_2_2_manual.pdf",
           3,
-          -3.3038
+          14.8613
         ],
         [
           "stg_manual.pdf",
           2,
-          -4.454
+          14.7287
+        ],
+        [
+          "stg_manual.pdf",
+          21,
+          14.0302
+        ],
+        [
+          "antifraud_guidelines.pdf",
+          3,
+          11.1794
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2814,37 +2994,38 @@
           12
         ]
       ],
-      "first_hit_rank": 2,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "hbp_2_2_manual.pdf",
-          11,
-          3.2686
-        ],
-        [
-          "hbp_2_2_manual.pdf",
           10,
-          3.2621
+          37.203
         ],
         [
           "hbp_2_2_manual.pdf",
           12,
-          2.7348
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          9,
-          2.0472
+          34.2676
         ],
         [
           "hbp_2_2_manual.pdf",
           11,
-          1.3616
+          32.6617
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          9,
+          30.5199
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          70,
+          27.6233
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2863,32 +3044,33 @@
         [
           "beneficiary_identification.pdf",
           12,
-          7.3051
-        ],
-        [
-          "beneficiary_identification.pdf",
-          14,
-          5.389
+          27.5762
         ],
         [
           "beneficiary_identification.pdf",
           15,
-          4.1708
+          26.9643
         ],
         [
           "beneficiary_identification.pdf",
-          8,
-          3.1853
+          14,
+          22.3195
+        ],
+        [
+          "beneficiary_identification.pdf",
+          2,
+          22.0433
         ],
         [
           "beneficiary_identification.pdf",
           12,
-          2.447
+          19.9197
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2900,39 +3082,44 @@
         [
           "fraud_analytics_rfe.pdf",
           14
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          15
         ]
       ],
-      "first_hit_rank": 0,
+      "first_hit_rank": 1,
       "retrieved": [
         [
           "fraud_analytics_rfe.pdf",
           15,
-          2.9599
+          14.102
         ],
         [
           "antifraud_guidelines.pdf",
-          6,
-          -3.123
+          24,
+          11.2267
         ],
         [
-          "antifraud_guidelines.pdf",
-          23,
-          -4.5848
+          "hbp_2_2_manual.pdf",
+          24,
+          10.228
         ],
         [
           "antifraud_guidebook_2024.pdf",
           43,
-          -5.2649
+          9.5636
         ],
         [
-          "antifraud_guidebook_2024.pdf",
-          110,
-          -7.2747
+          "antifraud_guidelines.pdf",
+          10,
+          8.528
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2951,32 +3138,33 @@
         [
           "fraud_analytics_rfe.pdf",
           20,
-          2.9095
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          107,
-          0.6247
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          24,
-          -0.5726
+          27.0325
         ],
         [
           "fraud_analytics_rfe.pdf",
           19,
-          -1.0939
+          24.6314
         ],
         [
-          "antifraud_guidelines.pdf",
-          19,
-          -1.4749
+          "hbp_2_2_manual.pdf",
+          46,
+          24.0104
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          28,
+          21.2332
+        ],
+        [
+          "hbp_2_2_manual.pdf",
+          54,
+          20.2902
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -2987,7 +3175,15 @@
       "targets": [
         [
           "fraud_analytics_rfe.pdf",
+          8
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
           29
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          77
         ]
       ],
       "first_hit_rank": 1,
@@ -2995,32 +3191,33 @@
         [
           "fraud_analytics_rfe.pdf",
           29,
-          5.942
+          25.8817
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          26,
+          21.0235
+        ],
+        [
+          "fraud_analytics_rfe.pdf",
+          29,
+          19.3274
         ],
         [
           "fraud_analytics_rfe.pdf",
           43,
-          5.1135
+          18.5497
         ],
         [
           "fraud_analytics_rfe.pdf",
-          34,
-          4.581
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          26,
-          4.4428
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          26,
-          4.1563
+          9,
+          17.4812
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -3032,6 +3229,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           47
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48
         ]
       ],
       "first_hit_rank": 1,
@@ -3039,32 +3240,33 @@
         [
           "antifraud_guidebook_2024.pdf",
           47,
-          8.4078
+          18.1957
+        ],
+        [
+          "operation_manual.pdf",
+          29,
+          17.407
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          45,
+          16.6514
         ],
         [
           "antifraud_guidebook_2024.pdf",
           48,
-          7.457
+          16.3488
         ],
         [
           "antifraud_guidebook_2024.pdf",
           48,
-          5.5718
-        ],
-        [
-          "fraud_analytics_rfe.pdf",
-          11,
-          5.3981
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          15,
-          4.8949
+          15.5824
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
@@ -3076,38 +3278,39 @@
       "first_hit_rank": 0,
       "retrieved": [
         [
-          "antifraud_guidebook_2024.pdf",
-          141,
-          -9.6719
-        ],
-        [
-          "antifraud_guidebook_2024.pdf",
-          133,
-          -9.7713
-        ],
-        [
-          "hbp_2_2_manual.pdf",
-          47,
-          -10.3551
-        ],
-        [
-          "antifraud_guidelines.pdf",
-          23,
-          -10.6533
-        ],
-        [
           "stg_manual.pdf",
           27,
-          -10.772
+          12.3235
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          141,
+          12.2269
+        ],
+        [
+          "field_investigation_manual.pdf",
+          19,
+          10.835
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          34,
+          9.7631
+        ],
+        [
+          "empanelment_v2_0.pdf",
+          14,
+          9.7251
         ]
       ],
       "answer": "",
       "cited_ranks": [],
       "citation_correct": false,
+      "cited_golden_ranks": [],
       "missing_substrings": [],
       "gen_stats": {},
       "error": ""
     }
   ],
-  "descriptor": "rerank-bm25-retrieval-69q-golden_set@7271cfbaeed3"
+  "descriptor": "bm25-retrieval-69q-golden_set@3648c3657e23"
 }

@@ -11,7 +11,11 @@
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
-    "n_questions": 69
+    "n_questions": 69,
+    "question_set": "golden_set.csv",
+    "question_set_sha": "84864818a4a4",
+    "question_set_rows": 69,
+    "served_by": null
   },
   "metrics": {
     "n_total": 69,
@@ -3974,5 +3978,6 @@
       },
       "error": ""
     }
-  ]
+  ],
+  "descriptor": "vector-models_gemini-3.1-flash-lite-69q-golden_set@84864818a4a4"
 }

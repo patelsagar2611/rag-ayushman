@@ -67,25 +67,58 @@ def load(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+# A golden-set edit and a row-offset bug both make saved targets disagree with the
+# current ones, and only one of them invalidates the re-scoring. They are told apart
+# by DIRECTION, not by count:
+#
+#   an edit   adds targets to rows that were incomplete -> saved is a SUBSET of current
+#   an offset pairs row N against row N+/-1's targets   -> saved has pages current lacks
+#
+# This replaced a bare `len(changed) > 6` threshold, which was calibrated to the four
+# rows of the v1 -> v2 edit and fired on every file once v3 corrected eighteen. Two
+# things were wrong with the count test beyond needing recalibration on every eval fix:
+# it FAILED OPEN on the bug it existed to catch, since a two-row off-by-one slips under
+# any threshold big enough to allow a real edit, and it gets weaker precisely as the
+# golden set gets more corrected. The direction test has neither property.
+#
+# Measured before adopting it: across v1 -> v2 -> v3, two independent golden-set
+# revisions over 14 results files, every single change was additive and not one row
+# lost a target.
+MAX_CHANGED_ROWS = 40  # backstop only; the removal check is the real guard
+
+
 def verify_targets(data, targets, path):
     """Compare this file's SAVED targets against the current golden set.
 
-    Two jobs. It catches an alignment bug -- an off-by-one in the row mapping makes
-    nearly every row disagree, which is loud, where the resulting metrics are merely
-    wrong-looking. And it reports which rows the golden set actually changed, so the
-    v1 -> v2 re-scoring is visible rather than asserted: HANDOFF section 0 records
-    exactly four rows gaining target pages (9, 28, 62, 68).
+    Two jobs. It catches an alignment bug -- see the note above on why that is
+    detected by direction rather than by how many rows moved. And it reports which
+    rows the golden set actually changed, so re-scoring against a corrected set is
+    visible rather than asserted.
     """
-    changed = []
+    changed, removed = [], []
     for case in data["cases"]:
         saved = {tuple(t) for t in case.get("targets") or []}
-        if saved != targets.get(case["row"], set()):
+        current = targets.get(case["row"], set())
+        if saved != current:
             changed.append(case["row"])
-    if len(changed) > 6:
+        if saved - current:
+            removed.append((case["row"], sorted(saved - current)))
+
+    if removed:
+        detail = "; ".join(
+            f"row {row} lost {pages}" for row, pages in removed[:5]
+        )
+        raise SystemExit(
+            f"{Path(path).name}: {len(removed)} row(s) have SAVED targets the current "
+            f"golden set no longer lists -- {detail}. A golden-set edit only adds "
+            "targets, so this is an alignment bug (check the row offset in "
+            "golden_targets()) or a target was deleted rather than added."
+        )
+    if len(changed) > MAX_CHANGED_ROWS:
         raise SystemExit(
             f"{Path(path).name}: {len(changed)} of {len(data['cases'])} rows disagree "
-            "with the current golden set. That is an alignment bug, not a golden-set "
-            "edit -- check the row offset in golden_targets()."
+            "with the current golden set. Additive, so not an offset bug, but that is "
+            "more of the set than an edit should touch -- confirm before trusting it."
         )
     return changed
 

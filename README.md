@@ -12,7 +12,7 @@ measured on a local model. 11 documents, 629 pages, 872 chunks, 69 hand-written 
 questions.
 
 **The headline result: a large retrieval gain bought almost no answer gain.** Reranking
-improved retrieval by 24% in MRR. It reduced false refusals on every model tested — and
+improved retrieval by 26% in MRR (0.699 → 0.879). It reduced false refusals on every model tested — and
 improved citation *precision* on none, while actively harming it on a local 7B model. An
 earlier version of this README reported a +3.8 point attribution gain on a hosted model; that
 turned out to be an artifact of a metric that passes when *any* citation is correct, rewarding
@@ -187,6 +187,7 @@ python -m eval.diff_editions                 # regenerate Docs/empanelment-diff.
 python -m eval.pool_recall                   # candidate-pool ceilings
 python -m eval.vocab_overlap                 # question/target-page word overlap
 python -m eval.citation_companions           # head-to-head citation metrics
+python -m eval.backfill_provenance --dry-run # add run provenance to older results files
 ```
 
 ### The two evaluation sets
@@ -274,6 +275,14 @@ Every run writes a self-describing JSON file to `eval/results/`, recording k, th
 model and the chunk parameters alongside the metrics — a metrics table is meaningless
 without knowing what produced it.
 
+**Every run records which eval scored it, and what actually served it.** `question_set_sha` is
+a content hash of the question file — line endings normalised, so a Windows checkout and a git
+blob agree — and `served_by` lists the deployments that answered, where a list longer than one
+entry *is* a blended run. `descriptor` is composed from those fields rather than typed beside
+them. This exists because the alternative was tried: run identity lived in a hand-typed `label`,
+and two runs labelled `openrouter-…` turned out to be the unpinned ones (gotcha 20). Backfill
+historical files with `python -m eval.backfill_provenance`.
+
 **MRR, not just hit rate.** Hit rate is binary: rank 1 and rank 5 both score 1.0. MRR scores
 them 1.0 and 0.2. Since the known weakness is answer-bearing chunks ranking below topical
 ones, MRR is the number the Phase 2 reranker has to move; hit rate could stay flat while the
@@ -320,10 +329,18 @@ figure in this README inherits that bias. The test is to re-run with questions p
 someone who has not read the corpus; it is not yet done, and it is the single largest open
 threat to these numbers.
 
-**It is also known to be incomplete in places.** One row listed a single page for a fact
-stated on two; the model answered from the unlisted page, cited it, and scored as a citation
-failure — the model was right and the golden set was wrong. Four rows have since gained
-targets. `citation_correctness` below should therefore be read as a **floor**.
+**It was known to be incomplete, and a full review on 2026-08-28 found how incomplete.**
+Eighteen of the 60 answerable rows gained target pages; two of them (35, 66) had listed a page
+that does not contain the answer at all, and had been scoring a guaranteed citation failure in
+every run since the set was written. One row — 41 — listed a single page for a sentence that
+appears **verbatim on six pages across two documents**.
+
+Every published figure moved as a result. **This is a measurement change, not an improvement.**
+The review is written up under
+[the completeness review](#the-golden-set-was-incomplete-and-correcting-it-moved-every-number),
+including a prediction made before the re-scoring that turned out to be wrong. Both the old and
+new figures are kept visible throughout. `citation_correctness` should still be read as a
+**floor** — the review was thorough, not exhaustive.
 
 ## Retrieval results — what each Phase 2 change bought
 
@@ -338,11 +355,20 @@ reproducible in minutes with `--retrieval-only`.
 
 | Retriever | hit@1 | hit@3 | hit@5 | **MRR** | retrieve p50 |
 |---|---|---|---|---|---|
-| `vector` — dense only (Phase 1 baseline) | 48.3% | 71.7% | 90.0% | **0.624** | 26 ms |
-| `bm25` — keyword only | 58.3% | 78.3% | 81.7% | **0.677** | 2 ms |
-| `hybrid` — RRF of the two | 51.7% | 81.7% | 86.7% | **0.671** | 29 ms |
-| `rerank` — hybrid top-30, cross-encoder | **71.7%** | **85.0%** | **95.0%** | **0.795** | 3,269 ms |
-| **change vs baseline** | **+23.4 pts** | **+13.3 pts** | **+5.0 pts** | **+0.171** | ×126 slower |
+| `vector` — dense only (Phase 1 baseline) | 56.7% | 78.3% | 91.7% | **0.699** | 36 ms |
+| `bm25` — keyword only | 70.0% | 83.3% | 86.7% | **0.766** | 5 ms |
+| `hybrid` — RRF of the two | 61.7% | 88.3% | 91.7% | **0.753** | 41 ms |
+| `rerank` — hybrid top-30, cross-encoder | **81.7%** | **95.0%** | **96.7%** | **0.879** | 3,486 ms |
+| **change vs baseline** | **+25.0 pts** | **+16.7 pts** | **+5.0 pts** | **+0.180** | ×97 slower |
+
+> **These figures are goldenv3, 2026-08-28.** Eighteen rows gained target pages after a
+> completeness review found the golden set was missing pages that genuinely answer the
+> question. **Every number here rose because the scorer was corrected, not because retrieval
+> improved** — the retriever is byte-identical and re-scoring the 24 August runs against the
+> corrected set reproduces these figures exactly. The superseded goldenv1 figures were
+> `vector` 48.3/71.7/90.0/0.624 and `rerank` 71.7/85.0/95.0/0.795, a headline of **+0.171**.
+> Correcting the eval made the reranking gain slightly *larger*, not smaller — see
+> [the completeness review](#the-golden-set-was-incomplete-and-correcting-it-moved-every-number).
 
 > **Read the BM25 row with the caveat below.** Its lead over the embeddings holds only for
 > questions written by someone who had read the documents. On lay phrasing it collapses and
@@ -363,30 +389,45 @@ target page, using the *same tokenizer BM25 uses*:
 
 | | |
 |---|---|
-| mean overlap | **78.1%** |
+| mean overlap | **81.1%** |
 | median | 83.3% |
-| questions reusing **every** content word from their target page | **15 of 60** |
+| questions reusing **every** content word from their target page | **19 of 60** |
+
+Measured against goldenv3. The completeness review raised these — overlap is scored against the
+union of a question's target pages, so adding a target can only raise it. The set-wide mean moved
+78.1% → 81.1% and the questions reusing *every* content word moved 15 → 19 of 60. **The bias this
+quantifies is therefore slightly worse than first reported, not better.**
 
 Then the paired test: the 17 highest-overlap questions rewritten in lay language, keeping the
 same facts and the **same target pages**, so retrieval is the only thing that can move. Rewrites
 were drafted from the question and the human-written expected answer — never from page text —
-and hand-reviewed (`eval/make_paraphrases.py`). Mean overlap fell 97.9% → 34.6%.
+and hand-reviewed (`eval/make_paraphrases.py`). Mean overlap fell **98.2% → 36.1%**.
+
+Those 17 rows were chosen by the goldenv1 overlap ranking, and that selection is deliberately
+*not* re-derived against goldenv3 — 19 rows now tie at 100% where 15 did, so a fresh top-17 would
+be a different set, and swapping the rows would silently change what the paired experiment
+measures rather than update it.
 
 | retriever | MRR original | MRR lay phrasing | change | hit@1 |
 |---|---|---|---|---|
-| `vector` | 0.789 | 0.443 | −44% | 64.7% → 29.4% |
-| `bm25` | **0.941** | **0.144** | **−85%** | 88.2% → **5.9%** |
-| `hybrid` | 0.912 | 0.402 | −56% | 82.4% → 29.4% |
-| `rerank` | 0.971 | **0.590** | **−39%** | 94.1% → 52.9% |
+| `vector` | 0.799 | 0.453 | −43% | 64.7% → 29.4% |
+| `bm25` | **0.971** | **0.159** | **−84%** | 94.1% → **5.9%** |
+| `hybrid` | 0.941 | 0.461 | −51% | 88.2% → 35.3% |
+| `rerank` | 0.971 | **0.600** | **−38%** | 94.1% → 52.9% |
+
+Both arms re-scored against goldenv3 on 2026-08-29, after the paraphrase set's targets were
+brought back into line with the golden rows they pair with — three of its 17 rows had been left
+behind by the completeness review, which would have scored the two sets against different
+answers and called the difference phrasing.
 
 **The ranking inverts.**
 
 ```
-original wording:   rerank 0.971  >  bm25 0.941  >  hybrid 0.912  >  vector 0.789
-lay wording:        rerank 0.590  >  vector 0.443  >  hybrid 0.402  >  bm25 0.144
+original wording:   rerank 0.971  =  bm25 0.971  >  hybrid 0.941  >  vector 0.799
+lay wording:        rerank 0.600  >  hybrid 0.461  ~  vector 0.453  >  bm25 0.159
 ```
 
-BM25 goes from second to last, finding the right page first in **1 of 17 questions**. Vector
+BM25 goes from **tied first to last**, finding the right page first in **1 of 17 questions**. Vector
 goes from last to second. Both outcomes were **pre-registered before the run**: that BM25's lead
 would shrink if the bias was real, and that reranking would degrade least because a
 cross-encoder reads question and passage together. The first held far more strongly than
@@ -394,17 +435,22 @@ cross-encoder reads question and passage together. The first held far more stron
 
 Three consequences:
 
-- **The +0.171 MRR headline above is measured on favourable phrasing.** Treat it as an upper
+- **The +0.180 MRR headline above is measured on favourable phrasing.** Treat it as an upper
   bound. The four-retriever table is not wrong, but it answers "which retriever wins on
   questions phrased like the documents", which is not the question a deployed system faces.
-- **Hybrid inherits the weakness.** At 0.402 it falls *below* plain vector, because RRF is
-  fusing in a retriever that has stopped working.
-- **Everything degrades sharply.** Even the best retriever loses 39%. That is a product finding
+- **Hybrid inherits the weakness, though not as badly as first measured.** On the corrected
+  scoring hybrid (0.461) and plain vector (0.453) are indistinguishable — a 0.008 gap on 17
+  questions is noise, not an ordering. An earlier version of this section reported hybrid at
+  0.402 against vector's 0.443 and concluded that fusion drags the result *below* dense
+  retrieval alone. **That no longer holds.** What survives is the weaker and still useful claim:
+  fusing in a retriever that has stopped working buys nothing — hybrid's large advantage on
+  document-phrased questions (0.941 vs 0.799) evaporates entirely on lay phrasing.
+- **Everything degrades sharply.** Even the best retriever loses 38%. That is a product finding
   independent of BM25: this system is brittle to phrasing, and the eval set as originally
   written could not have shown it.
 
 **Two caveats, both meaning this is an upper bound on the effect.** The 17 rows were selected as
-the *highest-overlap* in the set (97.9% mean against 78.1% set-wide), so they are where the bias
+the *highest-overlap* in the set (98.2% mean against 81.1% set-wide), so they are where the bias
 bites hardest by construction. And the rewrites are LLM-drafted — a proxy for user language that
 strips almost all domain vocabulary, where a real user would likely keep some ("Ayushman card",
 "claim"). Neither rescues a hit@1 of 5.9%: a 15-questions-to-1 collapse is not a small-sample
@@ -422,12 +468,16 @@ pools measured at depth 30, everything else identical:
 
 | pool fed to the cross-encoder | hit@1 | hit@3 | hit@5 | MRR | p50 | pool recall@30 |
 |---|---|---|---|---|---|---|
-| `hybrid` — RRF of both, cut to 30 | 71.7% | 85.0% | 95.0% | 0.795 | 2.0 s | 96.7% |
-| `bm25` — BM25 top 30 | **73.3%** | 86.7% | 95.0% | **0.808** | 3.7 s | 98.3% |
-| `union` — both lists, deduped (~50) | 71.7% | 86.7% | **98.3%** | 0.806 | 6.7 s | **100%** |
+| `hybrid` — RRF of both, cut to 30 | 81.7% | 95.0% | 96.7% | 0.879 | 2.0 s | 96.7% |
+| `bm25` — BM25 top 30 | **83.3%** | **96.7%** | 98.3% | **0.896** | 3.7 s | **100%** |
+| `union` — both lists, deduped (~50) | 81.7% | **96.7%** | **100%** | 0.891 | 6.7 s | **100%** |
 
-**`hybrid` was kept, on latency, not on quality.** It loses the coverage comparison — 95.0%
-against the union's 98.3% hit@5 — and the target is a public demo on free hosting where the
+Re-scored to goldenv3 from the saved candidate lists; the arms themselves were not re-run,
+because retrieval is deterministic (design decision 17) and re-scoring the hybrid arm
+reproduces the fresh run above to three decimal places.
+
+**`hybrid` was kept, on latency, not on quality.** It loses the coverage comparison — 96.7%
+against the union's 100% hit@5 — and the target is a public demo on free hosting where the
 cross-encoder is projected to run ~4× slower than locally. Anyone reversing this should
 reverse it on latency evidence, not because they believe hybrid retrieves better. It does not.
 
@@ -454,16 +504,16 @@ hybrid-vs-bm25 comparison *was* fixed in advance. And the union's depth-25 opera
 recall, which is test-set contact under the project's own rule against tuning on the eval
 set. `RRF_K`, fusion depth and `k` remain at inherited defaults.
 
-**BM25 alone beat the embeddings.** Not the expected result. On MRR (0.677 vs 0.624) and
-hit@1 (58.3% vs 48.3%) a bag-of-words scorer with no semantics outperformed
-`bge-small-en-v1.5`, at a thirteenth of the latency. It loses on hit@5 (81.7% vs 90.0%):
+**BM25 alone beat the embeddings.** Not the expected result. On MRR (0.766 vs 0.699) and
+hit@1 (70.0% vs 56.7%) a bag-of-words scorer with no semantics outperformed
+`bge-small-en-v1.5`, at a seventh of the latency. It loses on hit@5 (86.7% vs 91.7%):
 when BM25 misses it misses completely, whereas dense retrieval degrades gracefully. The
 corpus explains it — these are government manuals full of rare, exact tokens (`HWCs`,
 `PAN card`, `5,00,000`, `HBP 2.2`) that a 384-dimension embedding blurs together and an IDF
 term rewards precisely.
 
-**Fusion made hit@1 worse.** RRF dropped rank-1 accuracy to 51.7%, below BM25's 58.3%, while
-lifting hit@3 to 81.7%. That is the mechanism working as designed rather than a bug: RRF
+**Fusion made hit@1 worse.** RRF dropped rank-1 accuracy to 61.7%, below BM25's 70.0%, while
+lifting hit@3 to 88.3%. That is the mechanism working as designed rather than a bug: RRF
 rewards chunks both retrievers agree on, so a chunk one retriever ranks first and the other
 never returns gets pushed down. Taken as a final ranker, fusion is a poor trade here.
 
@@ -472,12 +522,20 @@ ranker — and on that job the honest current answer is that **it is losing to B
 
 | Pool for reranking | recall@5 | recall@10 | recall@20 | recall@30 |
 |---|---|---|---|---|
-| `vector` | 90.0% | 90.0% | 95.0% | 96.7% |
-| `bm25` | 81.7% | 86.7% | 95.0% | **98.3%** |
-| `hybrid` | 86.7% | 95.0% | 96.7% | 96.7% |
+| `vector` | 91.7% | 91.7% | 95.0% | 96.7% |
+| `bm25` | 86.7% | 90.0% | 96.7% | **100.0%** |
+| `hybrid` | 91.7% | 95.0% | 96.7% | 96.7% |
 
 A reranker can only reorder what it is handed, so pool recall is its hard ceiling — and BM25
-alone reaches more golden pages by depth 30 than the fused pool does. On an earlier
+alone now reaches **every** golden page by depth 30, where the fused pool reaches 96.7%.
+`hybrid` is the only pool that fails to reach 100%.
+
+> **Read that 100% with the authorship caveat attached, always.** It is a *golden-set* number,
+> measured on questions written by someone who had read the documents — which is precisely the
+> lexical overlap BM25 scores. On the paraphrase set the ordering **inverts** and BM25 finds the
+> right page first in 1 of 17 questions. A BM25-only pool reaching 100% here is not evidence
+> that a BM25-only pool is the right design; it is the same authorship artifact showing up in a
+> new column. See [Does BM25 actually win?](#does-bm25-actually-win-or-did-the-question-author-write-like-the-documents) On an earlier
 56-question version of this set the two tied at 100% and fusion was kept on a margin
 argument; **that argument has since reversed and the design has not yet caught up.** Testing
 a BM25-only pool is the top open item.
@@ -498,7 +556,7 @@ is not — so fusion here discards precisely the contribution BM25 was added to 
 **Reranking is where the gain is**, and it is the gain the baseline predicted: the Phase 1
 gap between hit@1 and hit@5 said the right chunk was nearly always retrieved and merely
 ranked badly. Closing that was the whole thesis of Phase 2, and it closed — MRR moved
-0.624 → 0.795 and hit@1 rose 23 points.
+0.699 → 0.879 and hit@1 rose 25 points.
 
 ### A claim that did not survive a bigger question set
 
@@ -508,19 +566,31 @@ for the fused pool. Both figures dropped when eleven questions were added — to
 correction rather than a regression: they were the numbers most likely to be flattering, and
 they were being used to justify an architecture choice that the larger set now contradicts.
 
-### Where retrieval fails completely: glossary pages
+### Where retrieval fails: glossary pages, and fusion throws them away
 
-Two questions have their golden page absent from the candidate pool entirely, and they are
-the same kind of question — an acronym answered by an abbreviations table.
+Two questions still miss at k=5, and they are the same kind of question — an acronym answered
+by an abbreviations table. But the reason changed when the golden set was corrected, and the
+new reason is worse for the architecture:
 
-- `DDO` appears on **exactly one page of the whole corpus** — the glossary — and dense
-  retrieval still does not surface it at all.
-- `CSC` appears on 15 pages. All five golden targets are glossary pages; the fifteen
-  competitors are pages that *use* the term, and they win.
+```
+row 61  "What do mean by DDO?"    vector MISS   bm25 rank 17   hybrid NOT IN POOL
+row 62  "What do mean by CSC?"    vector rank 22  bm25 rank 26  hybrid NOT IN POOL
+```
 
-**A glossary entry mentions a term once, in a list, with no explanatory context.** Both
-retrievers systematically prefer pages that discuss a term over the page that defines it, and
-no amount of reranking fixes it, because the cross-encoder never sees the page.
+**`reached by NO pool at depth 30: 0`.** Every golden page in the set is now found by *some*
+component retriever within depth 30. Neither of these is a retrieval failure any more — both
+are **fusion discarding a find a component made.** RRF rewards chunks both retrievers agree
+on, so a page that only one retriever reaches gets pushed below the cut, and a page pushed out
+of the pool is unrecoverable by the reranker.
+
+The underlying difficulty is still real and worth stating: **a glossary entry mentions a term
+once, in a list, with no explanatory context.** `DDO` appears on exactly one page of the whole
+corpus and dense retrieval does not surface it; `CSC` appears on 15 pages, where the pages that
+*use* the term outrank the page that defines it. But the corpus is no longer the binding
+constraint — the fusion step is.
+
+Both retrievers systematically prefer pages that discuss a term over the page that defines
+it, and no amount of reranking fixes it, because the cross-encoder never sees the page.
 
 ### Two predictions, tested
 
@@ -569,9 +639,17 @@ language, with different numbers. No reranker can resolve that — it is
 [open question 1](Docs/HANDOFF.md), which edition is in force, and it needs a metadata
 answer rather than a retrieval one.
 
-**Adjacent pages of the same document crowd each other out.** Row 30's top five are
-`grievance_redressal.pdf` pages 23, 24, 22, 25 and — fifth — the golden page 16. Appeal
-timelines recur across that whole chapter.
+> **~~Adjacent pages of the same document crowd each other out.~~ Retracted 2026-08-28 — this
+> was an eval failure, not a reranker failure.** The paragraph read: *"Row 30's top five are
+> `grievance_redressal.pdf` pages 23, 24, 22, 25 and — fifth — the golden page 16. Appeal
+> timelines recur across that whole chapter."* All four of those pages state the 30-day appeal
+> rule the question asks for; the golden set listed one of them. The reranker returned five
+> correct pages and was scored 1 for 5. Worse, `vector` returned **the same five pages** in a
+> different order, so this was never an example of reranking making a window homogeneous — the
+> two windows were identical. What it is an example of is [the metric punishing
+> breadth](#the-golden-set-was-incomplete-and-correcting-it-moved-every-number). Kept visible
+> rather than deleted, because a failure mode that turned out to be a measurement artifact is
+> the most useful kind of correction to be able to show.
 
 **It can demote a page the pool had ranked well.** Row 58 entered the candidate pool at
 rank 3 and came out below the top 5. Reranking is not monotone — it is a different model with
@@ -598,16 +676,24 @@ subsets — and re-scored against the current golden set. Reproduce with
 
 | head-to-head, `vector` → `rerank` | n | cited a golden page | **citation precision** | citations/answer |
 |---|---|---|---|---|
-| local `qwen2.5:7b` | 47 | 78.7% → 72.3% (**−6.4**) | 65.3% → 56.7% (**−8.6**) | 1.52 → 1.68 |
-| hosted `gemini-3.1-flash-lite`, Google endpoint | 52 | 90.4% → 94.2% (**+3.8**) | 76.3% → 76.5% (**+0.2**) | 1.56 → 1.63 |
-| hosted `gemini-3.1-flash-lite`, OpenRouter **pinned** | 52 | 90.4% → 94.2% (**+3.8**) | 76.3% → 76.5% (**+0.2**) | 1.56 → 1.63 |
-| hosted `qwen-2.5-7b-instruct`, unquantised | 48 | 77.1% → 72.9% (**−4.2**) | 63.3% → 61.2% (**−2.1**) | 1.43 → 1.62 |
+| local `qwen2.5:7b` | 47 | 89.4% → 83.0% (**−6.4**) | 83.3% → 72.7% (**−10.6**) | 1.52 → 1.68 |
+| hosted `gemini-3.1-flash-lite`, Google endpoint | 52 | 98.1% → **100.0%** (**+1.9**) | 93.6% → 93.9% (**+0.3**) | 1.56 → 1.63 |
+| hosted `gemini-3.1-flash-lite`, OpenRouter **pinned** | 52 | 98.1% → **100.0%** (**+1.9**) | 93.6% → 93.9% (**+0.3**) | 1.56 → 1.63 |
+| hosted `qwen-2.5-7b-instruct`, unquantised | 48 | 85.4% → 85.4% (**0.0**) | 81.2% → 76.0% (**−5.2**) | 1.43 → 1.62 |
+
+> **goldenv3, 2026-08-28.** Re-scored from the saved answers against the corrected golden set —
+> no model was re-run and nothing was paid for. Absolute attribution rises about **17 points**
+> across every arm: the models were far better at citing than the eval said. The superseded
+> goldenv2 figures were 65.3% → 56.7% (local), 76.3% → 76.5% (hosted `flash-lite`), 63.3% →
+> 61.2% (hosted `qwen`). **`cited a golden page` is now saturated** for `flash-lite` +
+> `rerank` at 100.0% and can no longer move.
 
 Row 2 is not a typo: pinned to Google AI Studio through OpenRouter, `flash-lite` reproduces the
 direct-endpoint run **to the digit**, and a repeat of it was byte-identical across all 69
-answers in both arms. An unpinned OpenRouter run of the same model gave 76.3% → 76.5% as
-77.3% → 76.5%, because it was blended across deployments — that difference was routing, not
-measurement error (gotcha 16).
+answers in both arms. An unpinned OpenRouter run of the same model gave 93.6% → 93.9% as
+94.6% → 93.8%, flipping the sign of the delta, because it was blended across deployments —
+that difference was routing, not measurement error (gotcha 16). Its `served_by` field reads
+`{Google: 38, Google AI Studio: 31}`, which is what identifies it as unpinned (gotcha 20).
 
 Row 3 settles a confound in the local result. The local `qwen2.5:7b` runs through Ollama, which
 serves a *quantised* copy — so "the model is weak" and "the compression hurt it" predicted the
@@ -615,7 +701,7 @@ same observation. Running the **same model family unquantised** reproduces the p
 metrics, so the cause is the model, not Ollama. The magnitudes are smaller, especially precision
 (−2.1 against −8.6), which suggests quantisation *amplifies* the effect without causing it.
 
-Retrieval improved identically in every row — MRR 0.624 → 0.795, hit@1 48.3% → 71.7%.
+Retrieval improved identically in every row — MRR 0.699 → 0.879, hit@1 56.7% → 81.7%.
 
 ### Why the two citation columns disagree
 
@@ -625,9 +711,47 @@ sources gets more chances to pass it, and **reranking measurably makes models ci
 attribution improved.
 
 Citation precision — *what fraction of the pages it cited were right* — removes that tailwind.
-Applied to the hosted model, the entire +3.8 point gain goes with it, twice, on two independent
+Applied to the hosted model, the entire apparent gain goes with it, twice, on two independent
 serving paths. Applied to the local model, the damage is **larger** than the headline number
 said, because it degraded *despite* the same tailwind.
+
+### The golden set was incomplete, and correcting it moved every number
+
+A completeness review on 2026-08-28 added target pages to **18 of the 60 answerable rows**. The
+detector inverted the usual assumption: instead of asking whether the model cited the right
+page, it collected every page the models cited that the golden set did *not* list, counted by
+how many of the 13 committed generation runs cited it. A page cited by twelve of thirteen runs
+across three model families is not one model hallucinating — it is a page the question author
+forgot to list. Two rows were worse than incomplete: rows 35 and 66 listed a page that does not
+contain the answer at all, and scored a guaranteed citation failure in **every** run.
+
+**A prediction registered before the re-scoring, and lost.** The expectation was that the
+correction would *compress* the precision gap, because reranking pulls more of these pages into
+the window and so had more opportunity to be marked wrong. The opposite happened. Both arms
+gained ~17 points, but `vector` gained more, so the penalty **widened**: −8.6 → −10.6 locally
+and −2.1 → −5.2 on the unquantised hosted copy.
+
+The mechanism, measured rather than assumed — *of the citations scored wrong under the old set,
+what fraction turn out to be right under the corrected one?*
+
+| | citations | scored wrong before | now correct | **recovery rate** |
+|---|---|---|---|---|
+| local `qwen` — `vector` | 70 | 31 | 18 | **58.1%** |
+| local `qwen` — `rerank` | 77 | 39 | 15 | **38.5%** |
+| `flash-lite` — `vector` | 81 | 29 | 21 | **72.4%** |
+| `flash-lite` — `rerank` | 85 | 30 | 21 | **70.0%** |
+
+When the dense-retrieval arm cited a page the eval called wrong, the eval was wrong 58% of the
+time. When the reranked arm did, only 38%. **Reranking's mistakes were more often real
+mistakes**, and the incomplete eval had been *flattering* reranking rather than penalising it.
+On `flash-lite` both arms recover at the same rate, which is exactly why its delta did not move.
+
+**A second, separable defect the review exposed: the old metric punished breadth.** Row 30's
+`vector` answer cited five pages, every one of which states the rule asked for, and scored
+**0.20** because four were unlisted. An answer citing one of those same pages scored **1.00**.
+That is the precise inverse of the `citation_correctness` bias in gotcha 18 — one metric rewards
+citing broadly, the other punished it — and the eval's incompleteness is what drove the second.
+Treat both columns as having been unreliable in *opposite* directions before this correction.
 
 > **A confound that was checked and turned out small.** Reranking also changes how many golden
 > pages are in the window, not just where they rank — row 25 below goes from 1-of-5 golden to
@@ -662,17 +786,24 @@ there, and this replicates on **every** pair:
 
 | pair | refused despite evidence | denominator |
 |---|---|---|
-| local `qwen2.5:7b` | 14.8% → **10.5%** | 54 → 57 |
-| hosted, Google endpoint | 7.4% → **5.3%** | 54 → 57 |
-| hosted, via OpenRouter | 7.4% → **5.3%** | 54 → 57 |
+| local `qwen2.5:7b` | 16.4% → **10.3%** | 55 → 58 |
+| hosted `flash-lite`, Google endpoint | 7.3% → **5.2%** | 55 → 58 |
+| hosted `flash-lite`, OpenRouter pinned | 7.3% → **5.2%** | 55 → 58 |
+| hosted `qwen-2.5-7b`, unquantised | 12.7% → **10.3%** | 55 → 58 |
 
 The denominator grows in every row because that rate is conditioned on the golden page having
 been retrieved at all (design decision 18), and reranking retrieves three more of them. So the
 improvement is real on both counts: more questions have their evidence present, **and** a
 smaller share of those get refused anyway.
 
+The denominators moved 54 → 55 and 57 → 58 with the goldenv3 correction, because one more
+question now has its evidence counted as retrieved in each arm. The rates are essentially
+unchanged and the finding is untouched — unlike the citation metrics, this one barely felt the
+eval correction, because it is conditioned on retrieval rather than scored against targets.
+
 `must_contain` moved only on the local model, and downward — 93.3% → 86.2%, against 96.8% →
-96.8% on both hosted pairs. Consistent with the citation result: the local model handles the
+96.8% on both hosted pairs. **These figures are unaffected by the goldenv3 correction**: the
+check runs against the model's answer text, not against target pages. Consistent with the citation result: the local model handles the
 reranked window worse, the hosted model is indifferent to it.
 
 ### The sharpest version: reranking's gain is the retriever's, not the model's
@@ -683,18 +814,23 @@ rank 1 is a golden page.
 
 | | always-cite-`[1]` | model's precision | **model's lift** |
 |---|---|---|---|
-| local `qwen2.5:7b` — vector | 54.3% | 65.3% | **+10.9** |
-| local `qwen2.5:7b` — rerank | 76.6% | 56.7% | **−19.9** |
-| hosted `flash-lite` — vector | 51.9% | 76.3% | **+24.4** |
-| hosted `flash-lite` — rerank | 75.0% | 76.5% | **+1.5** |
+| local `qwen2.5:7b` — vector | 63.0% | 83.3% | **+20.3** |
+| local `qwen2.5:7b` — rerank | **87.2%** | 72.7% | **−14.5** |
+| hosted `qwen-2.5-7b` — vector | 61.7% | 81.2% | **+19.5** |
+| hosted `qwen-2.5-7b` — rerank | **87.5%** | 76.0% | **−11.5** |
+| hosted `flash-lite` — vector | 61.5% | 93.6% | **+32.1** |
+| hosted `flash-lite` — rerank | **86.5%** | 93.9% | **+7.4** |
 
-Under dense retrieval both models beat the trivial baseline clearly. **Under reranking that
-added value collapses on both** — to +1.5 on the hosted model, and to *negative* on the local
-one, where you would have gotten better citations by discarding its output and citing the first
-chunk.
+Under dense retrieval every model beats the trivial baseline clearly. **Under reranking that
+added value collapses on all three** — to +7.4 on the hosted light model, and to *negative* on
+both 7B models, where you would have gotten better citations by discarding their output and
+citing the first chunk.
 
-The mechanism is in the left column: it jumps ~23 points in both pairs, because reranking's
-achievement is putting the right chunk first (hit@1 48.3% → 71.7%). **Reranking's benefit is
+The mechanism is in the left column: it jumps ~25 points in every pair, because reranking's
+achievement is putting the right chunk first (hit@1 56.7% → 81.7%). Note what did **not**
+happen on `flash-lite`: its precision barely moved between arms (93.6% → 93.9%). Its lift
+collapsed because **the bar rose**, not because the model got worse — which is the second
+caveat below, now the dominant effect rather than a footnote. **Reranking's benefit is
 realised by the retriever; the generator adds nothing on top of it,** and the weaker generator
 gives some back.
 
@@ -714,7 +850,7 @@ discipline, and both exposed years of apparent progress that a ten-line heuristi
 
 ### So the honest summary
 
-Reranking is a large **retrieval** win (MRR +0.171) that converts into exactly one **answer**
+Reranking is a large **retrieval** win (MRR +0.180) that converts into exactly one **answer**
 win — fewer false refusals — and no measurable attribution win on either model. It actively
 harms attribution on a small local model. "We added reranking and the system improved" remains
 unsupportable; so, now, does "better retrieval helps models that already attribute well."
@@ -753,7 +889,7 @@ to say which chunk it used.
 | | `vector` | `rerank` |
 |---|---|---|
 | questions answered | 47 | **52** |
-| false abstention rate | 14.8% | **10.5%** |
+| false abstention rate | 16.4% | **10.3%** |
 | abstention recall (out-of-corpus) | **100%** | **100%** |
 
 More evidence in the window means the model refuses less often, while still never answering
@@ -781,7 +917,7 @@ claim was too strong, and it is corrected above rather than quietly removed.
 
 Reranking takes retrieval from 26 ms to 3.3 s per query, which sounds fatal and is not:
 generation on this machine is ~127 s per question, so the reranker adds about **2.5% to
-end-to-end latency** in exchange for +0.171 MRR. On a hosted LLM that arithmetic reverses
+end-to-end latency** in exchange for +0.180 MRR. On a hosted LLM that arithmetic reverses
 and 3.3 s would dominate — worth stating, since the tradeoff is a property of the deployment,
 not of the reranker.
 
@@ -807,8 +943,8 @@ answer out.
 
 The consequence is that **`k` is the primary latency parameter**, not just a quality one.
 Capping `num_predict` harder would save nothing. And reranking earns a second dividend here:
-hit@3 was 73.5% in Phase 1 and is 89.8% now, which makes a smaller `k` defensible for the
-first time.
+hit@3 is 78.3% under dense retrieval and 95.0% after reranking, which makes a smaller `k`
+defensible for the first time.
 
 A query therefore costs about **2¼ minutes end to end** locally, which is measured,
 reproducible, and not demoable. That is a property of running a 7B model on CPU, not of the
@@ -848,6 +984,7 @@ eval/known_gaps.csv    written but unscorable (answer lives in an image)
 eval/run_eval.py       scoring harness; --retrieval-only needs no LLM
 eval/find.py           keyword lookup, for filling in page numbers
 eval/diff_editions.py  where the two empanelment editions disagree
+eval/backfill_provenance.py  adds question-set hash + served_by to older results files
 eval/results/          one committed JSON per run
 Docs/HANDOFF.md        authoritative status: what is done, half-done, and next
 Docs/DEPLOYMENT.md     hosted-LLM and public-demo plan (not built yet)
@@ -994,9 +1131,17 @@ assertion.
     quality.** The union pool measures strictly better on coverage (98.3% vs 95.0% hit@5).
     Anyone reversing this should reverse it on latency evidence, not because they think hybrid
     retrieves better — it does not. **The quality case for hybrid got weaker again in
-    2026-08-27:** on lay phrasing it scores *below plain vector* (0.402 vs 0.443), because RRF
-    fuses in a BM25 arm that has effectively stopped working. Hybrid's remaining justification
-    is entirely latency.
+    2026-08-27:** on lay phrasing its large advantage over plain vector disappears entirely
+    (0.941 → 0.461 against vector's 0.799 → 0.453), because RRF fuses in a BM25 arm that has
+    effectively stopped working. ~~It scores *below* plain vector, 0.402 vs 0.443~~ — that
+    stronger form was an artifact of scoring the two sets against different targets and did not
+    survive re-scoring on 2026-08-29; the two are tied. **And again in 2026-08-28:** on
+    the corrected golden set a BM25-only pool reaches **100%** recall at depth 30 while hybrid
+    reaches 96.7%, and hybrid is now the only pool that fails to reach every golden page.
+    Hybrid's remaining justification is entirely latency. Two counterweights before acting on
+    this: the BM25 evidence is golden-set evidence and the paraphrase set inverts it; and the
+    lay-phrasing claim above was itself *overstated* before re-scoring — hybrid does not fall
+    below plain vector, it ties it.
 24. **Losing arms stay reachable by flag, never deleted.** `rerank-bm25` and `rerank-union` both
     lost and both remain modes. A results file naming a mode that no longer exists is
     unreproducible archaeology.
@@ -1089,20 +1234,37 @@ assertion.
     comparing one model against itself and does *not* cancel across models. Read
     `citations_per_answer` and `citation_precision` beside it — see
     [Why the two citation columns disagree](#why-the-two-citation-columns-disagree).
-19. **Errors shrink the sample silently.** Excluded questions (decision 11) mean a run over 61
+19. **A golden-set edit propagates to some results and not others — asymmetrically.** When the
+    set gained four rows on 2026-08-25, the *generation* numbers followed automatically, because
+    `eval/citation_companions.py` re-scores from saved answers against the current set. The
+    *retrieval* table did not, because no equivalent re-scorer existed, and it stayed goldenv1
+    for three days without anything warning about it. It cost nothing that time — re-scoring
+    later showed v1 → v2 moved retrieval by **exactly zero** on all four retrievers — but the
+    asymmetry is the trap: half your numbers silently track the eval and half silently don't.
+    Retrieval results files save their candidate lists, so any past run can be re-scored against
+    any golden version without re-running it.
+20. **A results file's `label` is a human-typed claim; `served_by` is data.** Two runs labelled
+    `openrouter-…` were assumed pinned on the strength of the label. They were not: `served_by`
+    across their 69 cases reads `{Google: 38, Google AI Studio: 31}` — **blended mid-run**,
+    while the genuinely pinned runs read `{Google AI Studio: 69}`. A provider set of size > 1
+    *is* the definition of an unpinned run and needs no answer-diffing to establish. Design
+    decision 28 recorded exactly the right field; the mistake was reading the label instead of
+    it. The golden-set version has no such field yet, and with three versions live it is the
+    next thing to make self-describing.
+21. **Errors shrink the sample silently.** Excluded questions (decision 11) mean a run over 61
     questions looks like a run over 69. One archived file has metrics computed over 17 of 69 and
     looked entirely normal. Always report the denominator.
 
 **Retrieval**
 
-20. **In `hybrid` and `rerank` modes, `hit["score"]` is no longer a similarity.** It is an RRF
+22. **In `hybrid` and `rerank` modes, `hit["score"]` is no longer a similarity.** It is an RRF
     score (~0.03) or a cross-encoder logit (unbounded, often negative). Anything thresholding or
     comparing `score` across modes breaks silently.
-21. **`CrossEncoder.predict` defaults to `batch_size=32`.** Depth ≤32 is one batch; 33–63 costs
+23. **`CrossEncoder.predict` defaults to `batch_size=32`.** Depth ≤32 is one batch; 33–63 costs
     two, the second mostly padding. If you raise `FUSION_DEPTH`, go to 64, not 40.
-22. **Reranking latency varies with chunk length, not just candidate count** — batches pad to the
+24. **Reranking latency varies with chunk length, not just candidate count** — batches pad to the
     longest sequence present, so one 512-token chunk makes every chunk in that batch cost 512.
-23. **`src.retrieve`'s CLI shows only the first 400 characters of a ~2,400-character chunk**,
+25. **`src.retrieve`'s CLI shows only the first 400 characters of a ~2,400-character chunk**,
     which makes correct retrieval look wrong. Not yet fixed.
 
 ## Anti-goals — from the brief
@@ -1152,26 +1314,26 @@ Phase 1 complete. Phase 2 retrieval complete and measured. Phase 2 generation me
 - Generation runs on the 69-question set for both `vector` and `rerank`, local model
 - Generation latency broken down into prefill and decode
 - Provider abstraction: local Ollama or any OpenAI-compatible endpoint, by env var
+- **Paraphrase set re-scored against goldenv3 (2026-08-29)**, after syncing the three of its 17
+  rows whose targets the completeness review had left behind
+- **Run provenance is recorded rather than asserted** — every results file now carries a content
+  hash of the question set that scored it, the deployments that actually served it, and a
+  `descriptor` composed from those fields. All 39 historical files backfilled from data already
+  on disk (`eval/backfill_provenance.py`)
+- **Golden-set target completeness review (2026-08-28)** — 18 of 60 answerable rows gained
+  target pages, two of which had listed a page not containing the answer. Every published
+  retrieval and citation figure re-measured against the corrected set, from saved data, at no
+  cost. See [the completeness review](#the-golden-set-was-incomplete-and-correcting-it-moved-every-number).
 
 **Not yet built**
-
-- **The paraphrase experiment** — the largest open threat to every retrieval number here. The
-  golden set was written by someone reading the documents, so questions reuse document
-  vocabulary, and lexical overlap is exactly what BM25 scores. **BM25's lead may be an
-  authorship artifact.** Cheap to test and not yet done.
-- **Golden-set target completeness** — confirmed incomplete in at least one row. Row 9 lists
-  only p.41 while p.39 states the same threshold; the model answered from p.39, cited it, and
-  scored as a *citation failure*. The model was right and the golden set was wrong. 14 citation
-  failures remain unreviewed.
 - Prompt v2, targeting the false-abstention weakness, A/B'd against v1 with nothing else changed
 - Handling of the empanelment version conflict, which reranking makes worse rather than better
 - Faithfulness measurement — see the note under [Why these metrics](#why-these-metrics);
   it is deliberately unscored, which leaves a brief deliverable consciously open
-- The paraphrase experiment on golden-set vocabulary bias
 - Public deployment — planned in [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md)
 - CI running the eval per PR
 
-**Three times the measurement was the bug, not the system**
+**Four times the measurement was the bug, not the system**
 
 Each would have produced a confident, plausible, wrong number:
 
@@ -1184,15 +1346,21 @@ Each would have produced a confident, plausible, wrong number:
 - "13 of 14 citation failures had the evidence retrieved" was reported as a finding. It is the
   base rate — 51 of 52 answered questions had the evidence retrieved. Always compare a rate
   against its base rate before calling it a result.
+- A documented **reranker failure mode** — "adjacent pages crowd each other out", with a worked
+  example naming four page numbers — was an eval failure. All four pages answered the question;
+  the golden set listed one. The retracted paragraph is kept in place above.
 
-**Honest position on the headline number.** The +0.171 MRR is measured in-sample: 69
+**Honest position on the headline number.** The +0.180 MRR is measured in-sample: 69
 hand-written questions serving as both development and test set, with no held-out split,
-where a single question moves the hit rate by two points. No hyperparameter was tuned
+where a single question moves the hit rate by two points. It is also measured against a golden
+set that was **corrected by its own author after seeing which pages the models cited** — a
+defensible correction, verified page by page against the source text, but not an independent
+one. No hyperparameter was tuned
 against it — `RRF_K`, fusion depth and `k` are all at inherited defaults — but one
 architecture choice (feeding the reranker the fused pool) was made by reading test-set
-recall. Treat **+0.171** as an upper bound rather than an expected production figure.
+recall. Treat **+0.180** as an upper bound rather than an expected production figure.
 
-And note what the generation runs did to that number's significance: **the +0.171 did not
+And note what the generation runs did to that number's significance: **the +0.180 did not
 translate into better answers at all.** A retrieval gain is not a system gain, and this README
 would have claimed one if the generation runs had never been done.
 

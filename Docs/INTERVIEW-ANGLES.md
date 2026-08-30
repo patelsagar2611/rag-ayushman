@@ -712,22 +712,591 @@ headline number was measuring the setup rather than the system.
 
 ---
 
-# Backlog — entries still to be written
+# 18. Chunks never span a page boundary
 
-Earlier phases contain material of the same quality that predates this journal and should be
-backfilled from [HANDOFF.md](HANDOFF.md) §4 and §5:
+**The scenario.** Standard RAG chunking slides a window over the whole document, letting chunks
+straddle page breaks. That maximises context per chunk. It also means a chunk can contain text
+from pages 12 and 13, so a citation pointing at "page 12" may be quoting page 13.
 
-- Chunks never spanning a page boundary, so a citation always points at a page that genuinely
-  contains the text (design decision 1)
-- Fusion merging ranks rather than scores, avoiding a normalisation constant that would itself
-  need tuning (decision 11)
-- The false-abstention rate conditioned on the golden page having been retrieved (decision 18)
-- One build reaching every phase by flag, so Phase 1 and Phase 2 are scored by the same
-  harness (decision 19)
-- A single-digit fact check passing on a citation marker — a silent false pass (gotcha 20)
-- The brief's "two conflicting editions" being byte-identical, one document under two
-  filenames (gotcha 3)
-- Values living inside page images, invisible to text extraction and to document-level
-  triage (gotcha 5)
-- The candidate-pool decision, where the chosen option **lost** the quality comparison and was
-  taken on latency grounds for a free-hosting target (decision 22)
+**How we got to the answer.** Citations are the entire point of this project — the promise is
+that every claim carries a filename and page you can check. A citation that is *usually* right
+is a worse product than one that is *always* right, because a user who finds one wrong page
+stops trusting all of them. So chunking is constrained to page boundaries and every chunk
+carries exactly one page number.
+
+The cost is real and was accepted knowingly: a paragraph running across a page break is split in
+the index, and a short page yields a short chunk. Recorded as revisitable *if the eval shows
+answers cut in half at page boundaries* — it hasn't.
+
+**Defensive argument.** "I gave up cross-page context deliberately. My chunks never span a page
+boundary, so every chunk carries exactly one page number and a citation always points at a page
+that genuinely contains the text. The alternative gets you slightly better context and citations
+that are approximately right — and approximately-right citations are worse than none, because
+the user can't tell which ones to trust. I wrote down the condition that would make me reverse
+it: eval evidence of answers being truncated at page breaks. That hasn't appeared."
+
+**Show-off argument.** Openings: *"how did you approach chunking?"*, *"what's a constraint you
+imposed on yourself?"*
+> "My chunking rule is one most RAG tutorials would call a mistake — chunks never cross a page
+> boundary, so I lose context at every page break. I did it because citation accuracy was the
+> product, not a feature of it. If a citation can point at the wrong page even occasionally, a
+> user who catches one stops trusting all of them. Constraining chunks to pages makes wrong page
+> numbers structurally impossible rather than merely unlikely."
+
+---
+
+# 19. Fusion merges ranks, never scores
+
+**The scenario.** Combining a dense retriever with BM25 means reconciling their outputs. The
+obvious approach is a weighted sum of scores.
+
+**How we got to the answer.** The numbers aren't on the same scale — a cosine similarity around
+0.69 against a BM25 score around 12.55. Combining them needs a normalisation step, and **that
+normalisation is itself a tuned parameter**. Tuning it means fitting a constant to the 69
+evaluation questions and then reporting the fit as a measurement, which is the exact failure the
+eval exists to prevent.
+
+Reciprocal rank fusion needs no normalisation: it combines *positions*, which are already
+comparable. `RRF_K` was left at the published default of 60 rather than tuned, and that
+restraint is a claim the project can make.
+
+**Defensive argument.** "I fused ranks rather than scores because the scores are on
+incomparable scales — cosine similarity around 0.7 against BM25 around 12. Any weighted
+combination needs a normalisation constant, and I'd have had to tune that against my own
+evaluation set, which turns a measurement into a fit. Rank positions are comparable without one.
+I also left the RRF constant at its published default rather than tuning it, so I can honestly
+say no hyperparameter in this system was fitted to the test set."
+
+**Show-off argument.** Openings: *"how do you combine retrievers?"*, *"how do you avoid
+overfitting an eval set?"*
+> "The thing I'd flag about hybrid retrieval is that the obvious implementation quietly costs you
+> your evaluation. Weighted score fusion needs a normalisation constant because the two scores
+> are on different scales — and the only place to tune that constant is your eval set, which
+> means your headline number is partly a fit to the thing you're measuring against. Reciprocal
+> rank fusion sidesteps it entirely by combining positions. It's the boring choice that keeps
+> your numbers honest."
+
+---
+
+# 20. Two metrics that were measuring the wrong denominator
+
+**The scenario.** Two related mistakes, both of which produced confident, plausible, wrong
+numbers.
+
+**False abstention, unconditioned.** The rate of "the model refused to answer" counted every
+refusal against the model — including refusals where retrieval never surfaced the evidence.
+Declining to answer with no evidence in front of you is *correct behaviour*, not a failure. The
+metric was conditioned on the golden page having actually been retrieved, and the unconditioned
+version demoted to a secondary figure explicitly labelled "do not quote this".
+
+**A finding that was just the base rate.** "13 of 14 citation failures had the evidence
+retrieved" was written down as a result — it sounds like retrieval is fine and the model is at
+fault. But **51 of 52 answered questions had the evidence retrieved**. The failures matched the
+population almost exactly. There was no signal at all.
+
+**How we got to the answer.** Both are the same error: a rate is meaningless until compared
+against the rate you'd expect anyway. The second one is why the project later added explicit
+base-rate baselines to its citation metrics (entry 16) — the discipline generalised.
+
+**Defensive argument.** "I reported that 13 of 14 citation failures had the evidence retrieved,
+which reads as 'retrieval is fine, the model is the problem'. Then I checked the base rate: 51
+of 52 answered questions had the evidence retrieved. My failures matched the overall population
+— there was no finding. It's the same error as my unconditioned false-abstention rate, which
+counted refusals against the model even when retrieval had given it nothing to work with. Both
+taught me the same thing: always state what the number would be if nothing interesting were
+happening."
+
+**Show-off argument.** Openings: *"tell me about a wrong conclusion you caught"*, *"how do you
+know a metric is telling you something?"*
+> "I once wrote down that 13 of 14 of my failures had the evidence retrieved — which sounds like
+> a clean diagnosis pointing at the model. Then I checked the base rate: 51 of 52 of *all*
+> answered questions had the evidence retrieved. My failure population was identical to the
+> general population. I'd found nothing and nearly reported it as something. Now every rate in
+> the project is published next to what it would be by chance."
+
+---
+
+# 21. One build reaches every phase, by flag
+
+**The scenario.** The project has two measured phases. The natural way to preserve a baseline is
+to tag or branch the Phase 1 code and keep it around to re-run.
+
+**How we got to the answer.** That would mean Phase 1 numbers are produced by *one harness* and
+Phase 2 numbers by *another* — so any difference between them could be the retrieval change or
+could be a harness change, and there'd be no way to tell. The same trap as the unconditioned
+false-abstention rate: a definition quietly changing underneath a comparison.
+
+Instead, retrieval mode and `k` are runtime parameters, so `--retriever vector` reproduces Phase
+1 exactly with *today's* code. Prompt v1 was verified byte-identical to the `phase-1` git tag,
+so generation stays comparable too.
+
+**This property has to be actively defended**, and its limits are written down: it does not
+extend to a new prompt file (use the `PMJAY_PROMPTS` env var) and it *cannot* extend to
+re-chunking or an embedding-model swap, which change the index and force a full re-baseline.
+
+**Defensive argument.** "I never branched per phase. Retrieval mode is a flag, so today's code
+reproduces the Phase 1 baseline exactly — which means when I compare phases, the harness is
+held constant and the only variable is the thing I changed. Separate builds would have meant
+comparing numbers produced by two different scoring implementations. I also wrote down where the
+property breaks: anything that changes the index forces a full re-baseline, and no flag can
+paper over that."
+
+**Show-off argument.** Openings: *"how do you keep benchmarks comparable over time?"*, *"how do
+you manage experiment versions?"*
+> "I made a rule that one build has to reach every phase by flag — no per-phase branches. It
+> sounds like a code-hygiene preference; it's actually about measurement validity. If your Phase
+> 1 numbers came out of a tagged old build and your Phase 2 numbers out of the current one, a
+> difference between them might be your improvement or might be a scoring change you made in
+> between, and you can't separate them. I verified the prompt was byte-identical to the old tag
+> for the same reason."
+
+---
+
+# 22. A fact-check that passed on a citation marker
+
+**The scenario.** The eval verifies a model stated the right figure with a substring check —
+`must_contain: 5` should confirm the answer contains "5". It runs against the raw answer, which
+also contains citation markers `[1]`–`[5]`.
+
+So an answer reading *"…as set out in the guidelines [5]"* **passed** a check for the figure `5`
+while never stating the value. A silent false pass, and seven golden rows carried a bare digit —
+five of them values ≤ 5, and therefore reachable as citation markers.
+
+**How we got to the answer.** Citation markers are metadata, not content, so stripping them
+before the comparison is unambiguously correct and reintroduces no sensitivity to phrasing. Two
+details are load-bearing: the strip runs *after* citation parsing, which needs the markers; and
+it substitutes a **space** rather than nothing, so "the fee [3] is 48" cannot fuse into one
+token.
+
+**The fix can only lower the score, never raise it** — and since that metric is explicitly a
+floor rather than a target, a lower honest number is the correct outcome. It landed *before* the
+first full generation run, which is the point: fixing it afterwards would have meant discarding
+that baseline or carrying a known-inflated number forever.
+
+**Defensive argument.** "My fact-check ran against the raw answer, which contains citation
+markers — so a check for the figure 5 passed on an answer that cited source [5] and never stated
+the value. Seven of my rows had bare digits and five were small enough to be reachable that way.
+I strip citations before the comparison now, after parsing them and substituting a space so
+adjacent tokens can't fuse. The fix could only lower my scores, which is the right direction for
+a metric that's a floor rather than a target — and I fixed it before the run it would have
+contaminated, not after."
+
+**Show-off argument.** Openings: *"how do you validate an evaluation harness?"*, *"tell me about
+a bug in your own tooling"*
+> "My favourite bug in this project was in the eval, not the system. I check that answers state
+> the right number with a substring match — and the answers contain citation markers like [5].
+> So a check for the figure 5 passed on an answer that cited source 5 and never mentioned the
+> value at all. Silently, and in the flattering direction. Roughly a third of my checked rows
+> were vulnerable. The lesson I took is that evaluation code deserves the same scrutiny as
+> product code, and errors in it are worse because they're self-congratulatory."
+
+---
+
+# 23. The two conflicting documents were the same document
+
+**The scenario.** The project brief's premise was that two conflicting editions of the hospital
+empanelment guidelines exist, and a naive system would cite the superseded one. It named both
+files. Building version-conflict test cases was a headline deliverable.
+
+**How we got to the answer.** Both files were fetched and hashed. **They are byte-identical** —
+same sha256, same 1,481,305 bytes. One document served under two filenames, both the same 46-page
+December 2021 edition.
+
+Indexing both would have added ~65 duplicate chunks, skewed retrieval toward whatever they
+covered, and produced version-conflict eval cases that test a document against itself — which
+would have *passed*, convincingly, while measuring nothing.
+
+A genuine conflicting pair was then found: a 46-page December 2021 edition and a 64-page one
+whose cover states "Version – 2.0", sourced from a state health agency mirror. **Which is
+currently in force is still unconfirmed**, and is deliberately left open rather than inferred
+from filenames — inferring from filenames is exactly what produced the false pair.
+
+**Defensive argument.** "The brief told me two conflicting documents existed and named them. I
+hashed them: identical, one file under two names. If I'd trusted the premise I'd have indexed
+duplicates and built test cases comparing a document against itself — and they'd have passed. I
+found a genuinely conflicting pair afterwards, but I've left 'which edition is in force'
+explicitly unresolved rather than guessing from the filename dates, because guessing from
+filenames is what created the fake pair in the first place."
+
+**Show-off argument.** Openings: *"tell me about assumptions you checked"*, *"what surprised you
+about working with real-world documents?"*
+> "The first thing I did on the corpus was hash every file — and two documents the project spec
+> described as conflicting editions turned out to be byte-identical. Same file, two filenames on
+> the government portal. Had I taken the spec at face value, I'd have indexed duplicate content
+> and written test cases that compared a document to itself, which would have passed and told me
+> nothing. Requirements describing real-world data are a hypothesis, and hashing is a cheap way
+> to test one."
+
+---
+
+# 24. Document-level triage is not content-level coverage
+
+**The scenario.** Before building, a script checked whether the PDFs were text-native or scanned
+images needing OCR. It measured **average characters per page** and cleared all 11 as text-native.
+No OCR needed.
+
+**How we got to the answer.** Four evaluation questions were later written, verified against the
+PDFs by eye, and then found unanswerable — the values are rendered *inside images*: a chart, or a
+table saved as a graphic, on pages that are otherwise full of text.
+
+The evidence is specific rather than assumed. For the helpline number, the word "helpline" *is*
+extracted from page 30 while the number `14255` appears nowhere in the file.
+
+The triage script wasn't wrong; it answered a different question than the one that mattered.
+**An average over a page cannot see an image-embedded table sitting on a text-heavy page.**
+
+Those questions moved to a separate file rather than being deleted or scored. Scored, they'd be
+permanent retrieval failures capping the hit rate for reasons unrelated to retrieval quality, and
+immune to any Phase 2 improvement. Deleted, the finding would be lost. Kept aside, they are the
+concrete case for adding OCR later.
+
+**Defensive argument.** "I checked up front whether the corpus needed OCR, using average
+characters per page, and cleared all 11 documents. That check was measuring the wrong thing — an
+average over a page can't detect a table rendered as an image on a page that's otherwise text.
+I found out when questions I'd verified by eye turned out unanswerable: the word 'helpline'
+extracts from the page, the number doesn't exist in the file. I moved those to a known-gaps file
+rather than scoring them, because scored they'd cap my hit rate for a reason unrelated to
+retrieval — and rather than deleting them, because they're the evidence for adding OCR."
+
+**Show-off argument.** Openings: *"what went wrong with your data pipeline?"*, *"how do you
+validate document ingestion?"*
+> "I learned that document-level triage isn't content-level coverage. I checked whether my PDFs
+> needed OCR by measuring characters per page, and everything passed. Then questions I'd verified
+> by reading the PDF came back unanswerable — because the numbers were inside images sitting on
+> otherwise text-heavy pages. The average can't see that. What made it diagnosable is that I could
+> show the surrounding word extracts fine while the number appears nowhere in the file, so it
+> wasn't a retrieval problem at all."
+
+---
+
+# 25. The option we chose lost the quality comparison
+
+**The scenario.** A reranker can only reorder what it's given, so the candidate pool sets its
+ceiling. Three pools were measured with everything else identical:
+
+| pool | hit@5 | MRR | latency | pool recall |
+|---|---|---|---|---|
+| `hybrid` (kept) | 95.0% | 0.795 | **2.0 s** | 96.7% |
+| `bm25` | 95.0% | **0.808** | 3.7 s | 98.3% |
+| `union` | **98.3%** | 0.806 | 6.7 s | **100%** |
+
+**How we got to the answer.** Hybrid was kept — and it **lost**. The union reduces retrieval to a
+single failing question and hybrid does not. The reason for keeping it is entirely latency: the
+target is a public demo on free hosting where the cross-encoder is projected to run ~4× slower
+than locally, and 6.7 s of retrieval before generation even starts is not a usable product.
+
+That reasoning is recorded in the design decisions in a deliberately blunt form: *anyone
+reversing this should reverse it on latency evidence, not because they think hybrid retrieves
+better — it does not.* Both losing arms remain reachable by flag rather than deleted, because a
+results file naming a mode that no longer exists is unreproducible archaeology.
+
+Two things that comparison taught, neither visible in the aggregate:
+
+- **Recall is a ceiling, not a score.** BM25's recall lead was +2 questions and −1, not a strict
+  improvement — the pools aren't nested. And the net +1 became net *zero* after reranking,
+  because a pool gain is optional while a pool loss is mandatory.
+- **Fusion ranks *and truncates*, and in a reranking pipeline only the truncation matters.** RRF
+  merges up to 60 chunks, cuts to 30, and then the reranker re-sorts by its own score — discarding
+  RRF's ordering entirely. So fusion contributes nothing downstream while its truncation still
+  loses pages.
+
+**Defensive argument.** "I kept the hybrid pool and it lost the quality comparison — the union
+pool has better coverage and reduces retrieval to one failing question. I kept hybrid because
+it's three times faster and the deployment target is free hosting where the cross-encoder runs
+about four times slower again. I wrote that down bluntly, that anyone reversing the decision
+should do it on latency evidence rather than believing hybrid retrieves better, because it
+doesn't. The most useful thing I learned from that comparison is that recall is a ceiling rather
+than a score — the pool with higher recall didn't produce better results, because a recall gain
+is optional for the reranker to exploit while a recall loss is unrecoverable."
+
+**Show-off argument.** Openings: *"tell me about a trade-off"*, *"a time you chose the worse
+option"*, *"how do you weigh quality against performance?"*
+> "I shipped the component that lost my own benchmark. Three candidate pools for my reranker: the
+> one I kept has the worst coverage and is three times faster than the best one. The deciding
+> factor was that my deployment target is free hosting where that stage runs four times slower
+> again, and seven seconds before the model even starts generating isn't a product. What I made
+> sure to do was write it down as 'chosen on latency, not quality' — because in six months
+> someone reads 'we kept hybrid' and assumes it won. It didn't."
+
+---
+
+# 26. The reranker failure that turned out to be an eval failure
+
+**The scenario.** The README's *"Where reranking still fails"* section listed four named failure
+modes, each with a worked example. One of them read:
+
+> **Adjacent pages of the same document crowd each other out.** Row 30's top five are
+> `grievance_redressal.pdf` pages 23, 24, 22, 25 and — fifth — the golden page 16.
+
+The picture is vivid: the cross-encoder pulls in a cluster of near-duplicate pages from one
+chapter and buries the answer at rank 5. It was written up as evidence that reranking makes the
+context window homogeneous, and it sat in the permanent record as a known weakness of the system.
+
+Reviewing the golden set for target completeness, I pulled the text of those four pages. All four
+state the rule the question asks for — *"if either party is not satisfied with DGNO's decision,
+then they can appeal to DGRC within 30 days of the DGNO order"* — in the grievance-handling matrix
+that runs across that whole chapter.
+
+**The reranker had returned five correct pages and been scored 1 for 5.**
+
+**How we got to the answer.** The detector that found it was not aimed at this. I was looking for
+golden-set incompleteness by a different route: for every row, collect every page the models
+*cited* that the golden set does not list, counted by how many independent runs cited it. A page
+cited by twelve of thirteen runs across three model families is not one model hallucinating — it
+is the models reading a page the question author forgot to list. Row 30 surfaced with four such
+pages, each cited by nine or ten runs.
+
+What makes the case airtight is that this row was never a citation failure. Row 30 scored a
+golden hit in **13 of 13** runs, because the models cited page 16 *as well*. So the row looked
+healthy on the headline metric and was quietly wrong on two others — `citation_precision`, which
+counts the four correct-but-unlisted pages as wrong citations, and the retrieval metrics, where
+four of the five retrieved pages were being scored as misses.
+
+Two things were rejected on the way. The first was to trust the README: the entry was specific,
+had a worked example, and named real page numbers, which is exactly the shape of a finding that
+does not get re-checked. The second was to treat the four pages as duplicates that should be
+excluded on principle. They are not duplicates in the way that matters: they are different rows
+of a matrix covering different grievance types, each independently stating the 30-day appeal
+window. A user given any one of them has been correctly answered.
+
+**Then the example got worse for me, not better.** Checking the *other* arm, dense retrieval
+returned **the same five pages** in a different order:
+
+```
+row 30   vector  window: p.23  p.16  p.22  p.25  p.24   -> cited all five  -> scored 0.20
+         rerank  window: p.23  p.24  p.22  p.25  p.16   -> cited only p.16 -> scored 1.00
+```
+
+The windows are identical. So this was never an example of reranking making a window
+homogeneous — there was no difference in homogeneity to observe. The only difference is what
+the *model* did with the same five chunks, and the metric gave **0.20 to the answer that cited
+five correct pages and 1.00 to the answer that cited one of them.**
+
+So the correction cuts deeper than "one example was wrong". The *mechanism* the README describes
+is real and confirmed elsewhere — row 25 remains a clean case of reranking filling four of five
+slots with correct pages and the model citing the fifth. But row 30 was never evidence for it,
+and the thing it is actually evidence for is a different defect entirely: **the old metric
+punished breadth.** That is the exact inverse of the known `citation_correctness` bias, which
+*rewards* citing broadly. Both citation columns were unreliable, in opposite directions, at the
+same time.
+
+**The generalisation, which is the actual finding.** Eighteen of sixty answerable rows turned out
+to have a defensible missing target, and `citation_precision` — the metric that had just replaced
+`citation_correctness` as the headline attribution number after entry 9 — is the metric most
+exposed to it, because every correct-but-unlisted page counts against it.
+
+**A prediction I registered here, and got wrong.** I wrote that the bias would not be uniform
+across arms — that reranking pulls more of these pages into the window, so it had more opportunity
+to be penalised, and that correcting the set would therefore *compress* the precision gap. The
+re-scoring says the opposite. Correcting the targets raised precision for both arms by about
+seventeen points, but it raised the **`vector`** arm more, so the gap **widened** on both 7B
+models: −8.6 → −10.6 locally and −2.1 → −5.2 on the unquantised hosted copy. On `flash-lite` it
+moved 0.1 of a point.
+
+The mechanism, measured rather than reasoned about the second time. For each arm: of the
+citations my eval scored *wrong*, what fraction turn out to be right once the targets are fixed?
+
+| | citations | scored wrong before | now correct | **recovery rate** |
+|---|---|---|---|---|
+| local `qwen` — `vector` | 70 | 31 | 18 | **58.1%** |
+| local `qwen` — `rerank` | 77 | 39 | 15 | **38.5%** |
+| `flash-lite` — `vector` | 81 | 29 | 21 | **72.4%** |
+| `flash-lite` — `rerank` | 85 | 30 | 21 | **70.0%** |
+
+When the dense arm cited a page my eval called wrong, **my eval was the thing that was wrong 58%
+of the time**. When the reranked arm did, only 38%. Reranking's mistakes were more often real
+mistakes. And on `flash-lite` both arms recover identically, which is precisely why its delta did
+not move — the effect is specific to the small models, matching the model-dependence this project
+had already measured from a different direction.
+
+The incomplete golden set had been **flattering** reranking, not penalising it. I had the sign
+backwards because I reasoned from a plausible story about window composition instead of computing
+a recovery rate, which took one query over data already on disk.
+
+That is the third consecutive experiment in this project where the evaluation, not the system,
+turned out to be the weak link — after the citation base-rate error and the golden-set vocabulary
+bias.
+
+**Defensive argument.** "My README documented a reranker failure mode with a worked example, and
+the example was wrong. The question asks how many days you have to appeal a grievance decision;
+the reranker returned four pages I had scored as misses and all four state the 30-day rule. My
+eval listed one target page for a fact the document states five times. I found it with a detector
+that inverts the usual assumption — instead of asking whether the model cited the right page, I
+collected every page the models cited that my golden set did *not* list, and counted how many
+independent runs cited each one. Twelve of thirteen runs agreeing on an unlisted page is not
+hallucination, it's my eval being incomplete. Nineteen of sixty rows had that problem. The
+important part isn't the fix, it's what it did to the headline. I predicted the correction would
+shrink my reported precision penalty for reranking, because reranking puts more of these pages in
+the window and so had more chances to be marked wrong. I was wrong — correcting it made the
+penalty *larger* on both 7B models, because the dense-retrieval arm gained more. Its scattered
+window meant the pages it cited off-target were more often genuinely correct pages I hadn't
+listed. So the incomplete eval had been flattering reranking the whole time. I kept both the wrong
+version and the failed prediction visible rather than quietly fixing the numbers, because how a
+result was corrected is part of the result."
+
+**Show-off argument.** Openings: *"tell me about a time you were wrong"*, *"how do you know your
+evaluation is any good?"*, *"what would you do differently?"*
+> "I had a section in my README titled 'where reranking still fails', with four named failure
+> modes and worked examples. One of them was wrong — and not wrong in a subtle way. I'd written
+> that the reranker crowds the answer out with near-duplicate pages from the same chapter, and
+> shown the top five for one question with the correct page sitting at rank 5. When I actually
+> read the other four pages, all four answered the question. The reranker had gone five for five
+> and my eval had scored it one for five. What worries me more than the mistake is how I found
+> it: not by re-reading my own documentation, which I'd have believed, but by building a detector
+> that assumed the *models* might be right — collecting every page they cited that my golden set
+> didn't list. Nineteen of my sixty questions had a missing target. That's the third time on this
+> project that the measurement was the bug rather than the system, and I've stopped treating my
+> eval set as ground truth. It's a hypothesis with a version number."
+
+---
+
+# 27. The label said pinned; the data said blended
+
+**The scenario.** Four hosted evaluation runs of the same model sit in `eval/results/`, and the
+README reports two of them as a pinned-provider replication — the claim being that routing the
+same model through an aggregator, pinned to one deployment, reproduces the direct-endpoint run
+exactly. Re-scoring everything against a corrected golden set, I picked the pair whose `label`
+field read `openrouter-phase1-vector-69q-goldenv2-gemini-3.1-flash-lite` and computed the numbers.
+
+They did not match the direct-endpoint run. The vector arm came out 94.6% against 93.6%, and
+citations-per-answer differed in the third digit. Either the README's replication claim was wrong,
+or I had the wrong files.
+
+**How we got to the answer.** The slow way first, and I did take it: diff all 69 answers between
+the two files. **19 of 69 differ** — which is the exact figure the README already attributes to an
+*unpinned* run in its reproducibility gotcha. So these were the unpinned runs, mislabelled by
+omission: the label names the aggregator but never says whether the pin took.
+
+The fast way was sitting in the file the whole time. Every hosted run records `served_by` per
+question, from design decision 28. Counted across the 69 cases:
+
+```
+20260826T182707Z   served_by = {Google: 38, Google AI Studio: 31}   <- blended mid-run
+20260827T045345Z   served_by = {Google AI Studio: 69}               <- pinned
+20260826T210353Z   served_by = {Phala: 69}                          <- pinned
+20260825T193407Z   served_by = {None: 69}, model id "models/gemini" <- native endpoint
+```
+
+**A provider set of size greater than one *is* the definition of an unpinned run.** No diffing, no
+inference, one aggregation over data already on disk. Re-run with the genuinely pinned pair, the
+README's claim held exactly: 93.6% → 93.9%, identical to the direct endpoint on the corrected
+golden set as it had been on the old one.
+
+The rejected option was to rename the files, which is what "mislabelled" suggests. That treats the
+symptom. The real defect is that a results file's identity is split between fields the code writes
+and a `label` string a human types, and I read the human's. Renaming produces a *better* typed
+label, which is still a typed label.
+
+What the failure exposed as genuinely missing is one field further along the same axis. With three
+versions of the golden set now live, **which eval scored a run is recorded nowhere except that same
+hand-typed label** — the files literally say `goldenv2` in a string. The fix that generalises is to
+record a content hash of the golden set in `config`, promote `served_by` to a config-level set so
+pinning is visible without scanning cases, and derive the label from those fields rather than
+accepting one by hand.
+
+**Defensive argument.** "I once spent an hour diffing 69 model outputs to work out whether a
+benchmark run had been pinned to a single serving deployment. The answer was already in the file:
+I record the serving provider on every request, and that run showed 38 responses from one
+deployment and 31 from another — blended mid-run, which is what unpinned means. I'd read the
+filename label, which a human had typed and which named the aggregator without saying whether the
+pin held. The lesson wasn't 'rename the files'. It was that run identity was split between fields
+the code writes and a string a person types, and I'd trusted the string. The generalisation is the
+part I care about: the same file records which *eval set* scored it the same untrustworthy way,
+and I now have three versions of that eval set. So the fix is a content hash of the golden set in
+every results file, and a label derived from the recorded fields instead of typed alongside them."
+
+**Show-off argument.** Openings: *"how do you keep experiments reproducible?"*, *"tell me about
+debugging something that turned out to be your own bookkeeping"*, *"what does good ML infra look
+like to you?"*
+> "The most useful field in my results files is one I almost didn't add — I record which serving
+> deployment answered every single request, not just which model I asked for. A model id on a
+> hosted aggregator isn't one thing; it can be nine deployments at two price points, picked per
+> request. That field is what let me prove a benchmark run had been blended across two deployments
+> mid-run: 38 responses from one, 31 from the other. What's slightly embarrassing is that I
+> established the same fact first by diffing 69 model outputs, because I'd trusted a filename label
+> a human typed over the data the code recorded. That's the actual lesson — anything about a run
+> that a person types is a claim, and anything the code writes is evidence. I'm now applying it to
+> the one piece of run identity still stored as a typed claim, which is which version of my
+> evaluation set produced the number."
+
+---
+
+# 28. Fixing one eval set silently broke its paired control
+
+**The scenario.** This project has two question sets. `golden_set.csv` is the baseline;
+`paraphrase_set.csv` is a **paired control** — the same 17 facts, rewritten in lay language,
+deliberately pointing at the *same target pages*, so that phrasing is the only variable and any
+difference in score is attributable to it.
+
+A completeness review then corrected the golden set, adding target pages to 18 rows. Three of
+those rows are among the 17 the paraphrase set pairs with. Nothing warned about it, nothing
+failed, and both files still validated cleanly on their own.
+
+**The pairing was broken.** The original arm was being scored against a page list that included
+`empanelment_dec2021.pdf` p.15; the lay arm, asking the same question, was scored against a list
+that did not. The experiment's one guarantee — that only the wording differs — had quietly
+stopped holding, and the resulting gap would have been reported as a phrasing effect.
+
+**How we got to the answer.** Not by noticing it directly. The review's write-up needed a line
+saying whether the paraphrase figures were current, and checking that meant comparing each
+paraphrase row's targets against the golden row it derives from. Four rows disagreed; three
+substantively.
+
+The instinct was to re-run and report. Rejected — re-running would have produced *numbers*, and
+numbers computed on a broken pairing look exactly like numbers computed on a sound one. The
+targets had to be synced first, which meant the fix belonged in the CSV before the run, not in a
+caveat after it.
+
+The re-scored experiment then contradicted a claim the README had been making, and had made
+*more* strongly earlier the same day:
+
+```
+published (mismatched targets)   hybrid 0.402  <  vector 0.443   "fusion drags it BELOW vector"
+re-scored (paired targets)       hybrid 0.461  ~  vector 0.453   tied, inside noise
+```
+
+The headline finding was untouched — BM25 still collapses from 0.971 to 0.159 and finds the right
+page first in 1 of 17 lay-phrased questions. But the *secondary* claim, that fusing in a dead
+retriever drags the result below plain dense retrieval, was an artifact of the mismatch. What
+survives is weaker and still worth saying: hybrid's large advantage on document-phrased questions
+evaporates on lay phrasing, so fusion buys nothing there. It does not go negative.
+
+**The general lesson, which is the reason this is an entry.** A derived evaluation artifact has a
+dependency on its parent, and CSV files do not declare dependencies. Every consumer of the golden
+set had to be updated when it changed, and the ones that were code — `citation_companions.py`
+re-scores from the current set on every invocation — updated themselves. The one that was *data*
+did not, and there was no mechanism by which it could. That is the same asymmetry as gotcha 19,
+where a golden-set edit propagated automatically to the generation numbers and silently failed to
+reach the retrieval table, arriving here in a second form.
+
+**Defensive argument.** "I have a paired control set — the same evaluation questions rewritten in
+everyday language, pointing at the same answer pages, so phrasing is the only variable. Then I
+corrected the main set, and three of the paired rows were in that correction. Nothing broke;
+both files still validated. But the control was no longer controlling, because the two arms were
+being scored against different answers, and the gap between them would have been reported as a
+phrasing effect. I caught it while checking whether a published table was still current. Syncing
+the targets and re-running changed one of my own conclusions: I'd written that fusion drags
+retrieval below plain dense search on lay phrasing, and properly paired they're tied — the real
+finding is just that fusion's advantage disappears. The lesson I took is that a derived eval
+artifact has a dependency its file format can't express. My scoring *code* re-reads the golden set
+every run so it can't go stale; my derived *data* had no such mechanism, and that asymmetry has
+now bitten me twice."
+
+**Show-off argument.** Openings: *"how do you design an experiment?"*, *"tell me about a control
+you had to fix"*, *"what breaks when your evaluation data changes?"*
+> "The subtlest bug I've hit on this project wasn't in code — it was two CSV files drifting apart.
+> I run a paired experiment: 17 questions in the documents' own vocabulary, the same 17 rewritten
+> the way a real user would ask, same target pages, so the only variable is phrasing. Then I
+> corrected the main question set and three of those 17 rows were in the correction. Both files
+> still passed validation independently; the pairing between them is a relationship neither file
+> can express. So my control arm was being scored against a stricter answer key than my treatment
+> arm, and the difference would have been published as a phrasing effect. Fixing it actually cost
+> me a conclusion — one of my secondary claims turned out to be an artifact of the mismatch. What
+> I'd build differently is to stop storing the derived set as an independent file and derive it at
+> load time from the parent, so it cannot drift."
+
+---
+
+*Every entry from the project's earlier phases has now been backfilled. New findings get an entry
+in the session that produces them — see the process rule in the
+[README](../README.md#important--the-engineering-journal-is-a-required-deliverable).*

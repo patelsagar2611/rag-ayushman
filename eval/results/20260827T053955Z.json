@@ -14,7 +14,10 @@
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
-    "n_questions": 17
+    "n_questions": 17,
+    "question_set_sha": "3db71603ce58",
+    "question_set_rows": 17,
+    "served_by": null
   },
   "metrics": {
     "n_total": 17,
@@ -801,5 +804,6 @@
       "gen_stats": {},
       "error": ""
     }
-  ]
+  ],
+  "descriptor": "bm25-retrieval-17q-paraphrase_set@3db71603ce58"
 }

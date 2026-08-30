@@ -1,6 +1,7 @@
 {
-  "timestamp": "20260827T054201Z",
-  "label": "vocab-original-rerank-17q-partial",
+  "timestamp": "20260829T191916Z",
+  "label": "vocab-original-rerank-17q-goldenv3",
+  "descriptor": "rerank-retrieval-17q-golden_set@3648c3657e23-partial",
   "config": {
     "k": 5,
     "retriever": "rerank",
@@ -8,16 +9,16 @@
     "llm_provider": null,
     "llm_model": null,
     "llm_upstream_pin": null,
-    "only_rows": "6,9,10,11,16,18,26,29,32,38,44,47,51,52,59,65,69",
+    "only_rows": "6,9,10,16,29,32,38,44,47,51,59,65,69,11,26,18,52",
     "question_set": "golden_set.csv",
+    "question_set_sha": "3648c3657e23",
+    "question_set_rows": 69,
+    "served_by": null,
     "retrieval_only": true,
     "embed_model": "BAAI/bge-small-en-v1.5",
     "chunk_target_chars": 2400,
     "chunk_overlap_chars": 400,
-    "n_questions": 17,
-    "question_set_sha": "84864818a4a4",
-    "question_set_rows": 69,
-    "served_by": null
+    "n_questions": 17
   },
   "metrics": {
     "n_total": 17,
@@ -27,8 +28,8 @@
     "hit_rate@3": 1.0,
     "hit_rate@5": 1.0,
     "mrr": 0.9705882352941176,
-    "retrieve_ms_p50": 4112.222099999599,
-    "retrieve_ms_p95": 4365.686720000485
+    "retrieve_ms_p50": 2467.8337000000283,
+    "retrieve_ms_p95": 2626.934719999963
   },
   "cases": [
     {
@@ -132,6 +133,10 @@
         [
           "empanelment_v2_0.pdf",
           22
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          15
         ]
       ],
       "first_hit_rank": 1,
@@ -177,6 +182,10 @@
         [
           "empanelment_v2_0.pdf",
           23
+        ],
+        [
+          "empanelment_dec2021.pdf",
+          16
         ]
       ],
       "first_hit_rank": 1,
@@ -596,6 +605,11 @@
           2.5289
         ],
         [
+          "hbp_2_2_manual.pdf",
+          14,
+          0.406
+        ],
+        [
           "grievance_redressal.pdf",
           12,
           -0.5436
@@ -609,11 +623,6 @@
           "grievance_redressal.pdf",
           11,
           -4.2036
-        ],
-        [
-          "grievance_redressal.pdf",
-          5,
-          -6.8281
         ]
       ],
       "answer": "",
@@ -766,6 +775,10 @@
         [
           "antifraud_guidebook_2024.pdf",
           47
+        ],
+        [
+          "antifraud_guidebook_2024.pdf",
+          48
         ]
       ],
       "first_hit_rank": 1,
@@ -804,6 +817,5 @@
       "gen_stats": {},
       "error": ""
     }
-  ],
-  "descriptor": "rerank-retrieval-17q-golden_set@84864818a4a4-partial"
+  ]
 }
