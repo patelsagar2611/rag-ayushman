@@ -10,8 +10,21 @@ __pycache__/
 data/raw/
 data/processed/
 
-# Chroma persistent store: rebuildable via src/index.py
-chroma/
+# Chroma persistent store: COMMITTED, deliberately.
+#
+# It was ignored as "rebuildable via src/index.py", which is true and was the
+# wrong trade for a deployed app. Rebuilding embeds 872 chunks and costs 30-60 s
+# on every cold start of a Space that sleeps when idle -- paid by a visitor, on
+# every wake. 16 MB in git buys that back.
+#
+# Verified to travel: the sqlite store and HNSW segment are written on Windows and
+# read on Linux. Opened in a python:3.12-slim container, count = 872, and the HNSW
+# segment answered a query -- so the index does not need rebuilding on the host.
+#
+# The cost is real and accepted: it is a binary blob that rewrites wholesale on
+# every re-index, so history bloats if the corpus is re-indexed often. Revisit if
+# that starts happening; the alternative is committing chunks.jsonl (1.5 MB) and
+# paying the rebuild at startup.
 
 # Local config
 .env

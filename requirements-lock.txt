@@ -1,0 +1,147 @@
+# Generated environment -- DO NOT HAND-EDIT.
+#
+# The full transitive closure of requirements.txt, captured inside the target
+# environment: python:3.12-slim (Debian, glibc >= 2.28), CPython 3.12, pip 25.0.1,
+# linux_x86_64. Regenerate by re-running the acceptance container, never by
+# editing this file, and never with `pip freeze` on Windows -- that emits
+# Windows-resolved versions and platform-only packages that break a Linux build.
+#
+# WHY THIS FILE EXISTS. requirements.txt pins 9 direct dependencies; the
+# environment that actually runs is 111 packages. The other 102 are chosen by pip
+# at install time from whatever satisfies the declared ranges THAT DAY. Four of
+# them had already moved away from the versions every published number was
+# measured on:
+#
+#     transformers    5.15.0 -> 5.16.1
+#     tokenizers      0.22.2 -> 0.23.1
+#     huggingface-hub 1.27.0 -> 1.29.0
+#     onnxruntime     1.28.0 -> 1.29.0
+#
+# tokenizers and transformers sit directly under both the BGE embedder and the
+# cross-encoder, so this is the hot path, and the failure mode is silent.
+#
+# WHAT WAS DONE ABOUT IT. Measured rather than assumed. All four retrievers were
+# re-run inside the container against the live golden set and compared to the
+# committed goldenv3 baselines: 16 metrics, largest absolute difference
+# 0.000000 -- vector, bm25, hybrid and rerank all reproduce exactly. So the drift
+# is immaterial to retrieval, and this file records the environment that was
+# proven equivalent rather than pinning defensively against a risk that was
+# never demonstrated.
+#
+# The --extra-index-url line is NOT decoration: pip freeze does not emit it, and
+# without it torch==2.13.0+cpu cannot be resolved at all (that local-version
+# suffix exists only on the PyTorch index). A lockfile that cannot be installed
+# is not a lockfile.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+altair==6.2.2
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.14.2
+attrs==26.1.0
+bcrypt==5.0.0
+blinker==1.9.0
+build==1.6.0
+certifi==2026.7.22
+charset-normalizer==3.5.1
+chromadb==1.5.9
+click==8.5.0
+durationpy==0.11
+filelock==3.32.4
+flatbuffers==25.12.19
+frozenlist==1.8.0
+fsspec==2026.7.0
+googleapis-common-protos==1.75.2
+grpcio==1.83.1
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httptools==0.8.0
+httpx==0.28.1
+huggingface_hub==1.29.0
+idna==3.19
+importlib_resources==7.1.0
+itsdangerous==2.2.0
+Jinja2==3.1.6
+joblib==1.5.3
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+kubernetes==36.0.3
+markdown-it-py==4.2.0
+MarkupSafe==3.0.3
+mdurl==0.1.2
+mmh3==5.3.0
+mpmath==1.3.0
+multidict==6.7.1
+narwhals==2.25.0
+networkx==3.6.1
+numpy==2.5.2
+oauthlib==3.3.1
+onnxruntime==1.29.0
+opentelemetry-api==1.44.0
+opentelemetry-exporter-otlp-proto-common==1.44.0
+opentelemetry-exporter-otlp-proto-grpc==1.44.0
+opentelemetry-proto==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
+orjson==3.12.0
+overrides==7.7.0
+packaging==26.3
+pandas==3.0.5
+pillow==12.3.0
+pip==25.0.1
+propcache==0.5.2
+protobuf==7.36.0
+pyarrow==24.0.0
+pybase64==1.5.0
+pydantic==2.13.5
+pydantic_core==2.46.5
+pydantic-settings==2.15.0
+pydeck==0.9.3
+Pygments==2.21.0
+pymupdf==1.28.2
+PyPika==0.51.1
+pyproject_hooks==1.2.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.2
+python-multipart==0.0.32
+PyYAML==6.0.3
+rank-bm25==0.2.2
+referencing==0.37.0
+regex==2026.7.19
+requests==2.34.2
+requests-oauthlib==2.0.0
+rich==15.0.0
+rpds-py==2026.6.3
+safetensors==0.8.0
+scikit-learn==1.9.0
+scipy==1.18.1
+sentence-transformers==5.7.0
+setuptools==84.0.0
+shellingham==1.5.4
+six==1.17.0
+starlette==1.3.1
+streamlit==1.61.1
+sympy==1.14.0
+tenacity==9.1.4
+threadpoolctl==3.6.0
+tokenizers==0.23.1
+toml==0.10.2
+torch==2.13.0+cpu
+tqdm==4.70.0
+transformers==5.16.1
+truststore==0.10.4
+typer==0.27.2
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+urllib3==2.7.0
+uvicorn==0.52.4
+uvloop==0.22.1
+watchdog==6.0.0
+watchfiles==1.2.0
+websocket-client==1.9.1
+websockets==16.1.1
+yarl==1.24.5

@@ -1,8 +1,22 @@
-# Install CPU-only torch FIRST, or pip resolves it from PyPI as a
-# sentence-transformers dependency and pulls the ~2.5 GB CUDA build:
+# CPU-only torch, resolvable from THIS FILE ALONE -- Hugging Face Spaces builds
+# from requirements.txt and nothing else, so the old two-step install (torch from
+# the PyTorch index first, then this file) is not available there.
 #
-#   pip install torch --index-url https://download.pytorch.org/whl/cpu
-#   pip install -r requirements.txt
+# --extra-index-url is a HINT, not a constraint: pip considers both indexes and
+# picks by version precedence, so a newer torch on PyPI would win and this line
+# would do nothing on its own. The "+cpu" local-version suffix is what makes it
+# binding -- that suffix exists ONLY on the PyTorch index, so resolution either
+# finds the CPU wheel or fails loudly.
+#
+# Verified 2026-08-30 by resolving the Linux/cp312 graph with --dry-run --report:
+# picks torch-2.13.0+cpu-cp312-cp312-manylinux_2_28_x86_64.whl from the PyTorch
+# index, with ZERO nvidia-*/cuda/triton packages in a 111-package closure. The
+# absence of those packages is the real signal, not the version string.
+#
+# manylinux_2_28 means the host image needs glibc >= 2.28. Debian bookworm (2.36)
+# and Ubuntu 22.04 (2.35) both clear it.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0+cpu
 
 chromadb==1.5.9
 sentence-transformers==5.7.0
@@ -14,5 +28,7 @@ pyyaml==6.0.3
 python-dotenv==1.2.2
 
 # Routes TLS verification through the Windows cert store. Several .gov.in hosts
-# present a chain Windows trusts but certifi does not.
+# present a chain Windows trusts but certifi does not. No-op on Linux, where
+# certifi is fine -- kept because src/download.py imports it unconditionally and
+# the corpus fetch is a Windows-side operation.
 truststore==0.10.4

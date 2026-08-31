@@ -1297,6 +1297,277 @@ you had to fix"*, *"what breaks when your evaluation data changes?"*
 
 ---
 
+# 29. `--platform` is an exact tag match, not a compatibility range
+
+**The scenario.** Hugging Face Spaces installs from `requirements.txt` and nothing else, so the
+project's two-step local install — CPU-only torch from the PyTorch index first, then everything
+else — is unavailable there. Left alone, pip resolves torch from PyPI as a `sentence-transformers`
+dependency and pulls the ~2.5 GB CUDA build. This was identified as the single biggest build risk
+and resolved in isolation before anything else was touched.
+
+**How we got to the answer.** Two separate problems, and the second was nearly invisible.
+
+The first is that `--extra-index-url` is a *hint*, not a constraint: pip considers both indexes and
+picks by version precedence, so a newer torch on PyPI simply wins and the flag does nothing. The
+fix is the `+cpu` local-version suffix, which exists only on the PyTorch index — so resolution
+either finds the CPU wheel or fails loudly. That much was reasoned out in advance.
+
+The second was not. Rather than pay for a Space build to test it, the graph was resolved for the
+target platform from the development machine with `pip install --dry-run --report`, which computes
+the full plan and downloads nothing. But `--platform` on pip is an **exact wheel-tag match**, not a
+compatibility range. Pip does not reason that a `manylinux_2_28` wheel runs happily on a glibc 2.36
+host — it installs a wheel only if its tag is literally in the list you supplied. So supplying one
+guessed tag returns *"no matching distribution"*, which is indistinguishable from *"this wheel does
+not exist"* — and the obvious next move from there is to loosen the pin, landing straight back on
+the CUDA wheel.
+
+Four plausible tags were supplied instead of one, on the prior that a 2026 torch build would have
+moved off `manylinux2014` (a glibc 2.17 floor from 2012). The `--report` JSON records the exact URL
+pip chose, and the filename was the answer: `manylinux_2_28_x86_64`. A single-tag attempt with the
+obvious guess would have failed.
+
+That produced a *new* deployment constraint that had not been written down anywhere: the host image
+needs **glibc >= 2.28**. Confirmed afterwards in a container at glibc 2.41, with the caveat recorded
+that this is a newer base than Spaces is likely to run — which is still a valid pass, because the
+requirement is a floor and glibc is backward-compatible.
+
+**The sharpest part is which test actually proves anything.** The intuitive check,
+`torch.cuda.is_available()`, returns `False` on any machine without a GPU — *including one where the
+2.5 GB CUDA build installed perfectly*. It would have passed while the exact failure being guarded
+against had occurred. The real signal is the **absence of `nvidia-*` packages** in the resolved
+closure: those are dependencies of the CUDA build and appear whether or not a GPU exists. Zero of
+them, in a closure of 111 packages, is what closes the question.
+
+**Defensive argument.** "Spaces builds from `requirements.txt` alone, so the CPU-only torch install
+had to be expressible in one file. `--extra-index-url` is a hint rather than a constraint, so I
+pinned `torch==2.13.0+cpu` — that local-version suffix only exists on the PyTorch index, which makes
+resolution either find the right wheel or fail loudly instead of silently substituting. I verified it
+with a dry-run resolve against the target platform before spending a build, and I passed several
+manylinux tags rather than one, because pip's `--platform` is an exact tag match and a wrong guess
+returns 'no distribution found' — which looks exactly like 'the wheel doesn't exist'. The report told
+me it was `manylinux_2_28`, which turned into a documented glibc floor for the host. And the check I
+trust isn't `cuda.is_available()` — that returns False on any CPU box, including one where the CUDA
+build installed fine. It's that zero `nvidia-*` packages appear in the closure."
+
+**Show-off argument.** Openings: *"tell me about a deployment problem"*, *"how do you de-risk
+something before you ship it"*, or anything about dependency management.
+> "The one I'd pick is small and cost nothing, which is the point. My app needs PyTorch but only on
+> CPU, and the default resolution pulls a 2.5 GB CUDA build that would blow the image budget. The
+> usual advice is `--extra-index-url`, and that advice is wrong — it's a hint, so pip weighs both
+> indexes and a newer PyPI version just wins. What actually binds it is pinning the `+cpu` local
+> version, because that suffix only exists on one index. Then rather than testing it by pushing and
+> waiting on a build, I resolved the target platform's graph locally with `--dry-run --report`, which
+> plans the install without downloading it. That surfaced something I'd have got wrong: pip's
+> platform flag is an exact tag match, not a compatibility range, so guessing one tag gives you a
+> false negative that reads as 'this wheel doesn't exist'. And the acceptance test people reach for —
+> `torch.cuda.is_available()` — proves nothing, because it's False on any machine without a GPU even
+> if you installed the CUDA build. The real check is that no `nvidia-*` packages appear at all."
+
+---
+
+# 30. The sanitiser corrupted the thing it was protecting, and the run exited 0
+
+**The scenario.** A bash acceptance script authored on Windows was to be executed inside a Linux
+container. A stray CRLF would make bash fail on line 1, so the invocation was defensively piped
+through a carriage-return strip first. The run completed, reported **exit code 0**, and every
+meaningful section had failed.
+
+**How we got to the answer.** The output was full of words like `impot`, `toch`, `gep` and
+`equiements`. The guard had deleted every literal letter **`r`**, not carriage returns.
+
+The cause is a quoting boundary: PowerShell 5.1 re-quotes arguments when handing them to a native
+executable, and the escaped quote inside the command string was consumed. `tr` received the argument
+`r`. The command crossed three parsers — PowerShell, then Docker, then bash — and each one is
+entitled to reinterpret backslashes. Nothing warned.
+
+Two compounding failures made it worse than a typo.
+
+**The exit code was inherited, not constructed.** `set -u` does not catch command failures, so with
+six of seven sections broken the script still exited 0, because its last statement was an `echo`.
+This project already carries a gotcha in exactly this shape — piping to `grep` replaces the exit
+code and once masked a hard crash as `exit 0`. Same lesson, new costume: **a script's exit status is
+a claim it has to earn.** The rewrite gives every check an explicit PASS/FAIL, tallies them, and
+exits non-zero if any failed.
+
+**The first verification attempt reproduced the bug.** Checking whether the file really had CRLFs,
+a `grep -c` for a carriage return reported 74 — every line. That was itself wrong, matching the
+letter `r` for the same reason. Only a byte-level count settled it: **0 CR bytes, 74 LF**. The file
+had been clean Unix all along, so the guard was not merely harmful, it was never needed. A
+pattern-based check was unreliable for diagnosing a problem *about* pattern mangling; the
+authoritative check had to operate on bytes.
+
+**Defensive argument.** "I added a defensive CRLF strip to a script before running it in a container,
+and it silently deleted every letter 'r' in the file, because the argument crossed PowerShell, Docker
+and bash and one of them ate the backslash. The run still exited 0, because the exit code came from
+the last echo rather than from anything the script had verified. Two things came out of it. I don't
+add a guard against a condition I haven't confirmed exists — I checked afterwards and the file had
+zero CR bytes, so the guard was pure risk. And an acceptance script has to construct its own exit
+status: mine now tallies explicit passes and failures and exits non-zero on any. The related trap is
+that my first check was a grep for a carriage return, which returned a confidently wrong answer by
+matching the letter — you can't diagnose a mangling problem with a tool subject to the same
+mangling. A byte count is what settled it."
+
+**Show-off argument.** Openings: *"tell me about a bug that wasted your time"*, *"a time your own
+tooling misled you"*, or anything about defensive programming.
+> "My favourite recent one is a defensive measure that caused the exact outage it was preventing. I
+> was running a Windows-authored shell script inside a Linux container and added a CRLF strip, just
+> in case. It deleted every letter 'r' in the script — `import` became `impot`, `grep` became `gep` —
+> because the argument crossed three parsers and one of them consumed the backslash. What actually
+> worries me isn't the quoting; it's that the run reported success. Six of seven checks had failed
+> and the exit code was 0, because it came from the last echo. So the fix wasn't better escaping, it
+> was making the script earn its exit status — every check reports pass or fail, and the script exits
+> non-zero if any failed. And there's a coda: my first attempt to verify the file had CRLFs used a
+> grep for a carriage return, which told me all 74 lines had them. That was the same bug again — it
+> matched the letter. The file had zero CR bytes. You can't diagnose a mangling problem with a tool
+> that's subject to the mangling."
+
+---
+
+# 31. The plan assumed a build step the platform does not have
+
+**The scenario.** The deployment plan, written a day earlier, contained a task: *fetch both models at
+build time and warm them at startup, so no visitor ever pays for a download* — and argued that doing
+so made an open question moot, namely whether a Space wake is a restart (model cache survives) or a
+rebuild (it does not). The app loads two models, `bge-small` at 133 MB and a cross-encoder at 90 MB,
+and today the cross-encoder downloads lazily on the first reranked query.
+
+**How we got to the answer.** Reading the platform's actual extension points before designing around
+them. A Streamlit-SDK Space has exactly two hooks: `requirements.txt`, which pip consumes, and
+`packages.txt`, which apt consumes. **Neither can execute project code**, and downloading a model
+means running `SentenceTransformer(...)`. Only the Docker SDK provides a `Dockerfile` with a `RUN`
+line that can bake weights into an image layer.
+
+So on the chosen SDK, "build time" and "startup" are the same moment, and the plan's claim that
+baking it in made the restart-vs-rebuild question moot **does not hold** — the question stays open
+and has to be measured.
+
+The choice was put to the owner rather than taken, because it is a real trade:
+
+- **Streamlit SDK, warm at import** — load both models inside a `@st.cache_resource` at module scope,
+  so the download happens during container start rather than lazily mid-session. Keeps the SDK the
+  plan assumed. The cost is that whether a cold-start visitor still watches the download depends on
+  whether Spaces marks the app ready before or after the first script run — unverified, and a
+  measurement rather than something to reason out.
+- **Docker SDK, prefetch in a RUN layer** — weights genuinely baked into the image, and explicit
+  control of the base image's Python version. Costs a Dockerfile as a new artifact to maintain.
+
+Streamlit SDK was chosen, on the grounds that it reaches the deployment's *measurement* phase sooner,
+and that measurement is what settles two other open decisions. Switching to Docker stays available if
+the startup number shows visitors actually paying the download.
+
+**The transferable finding is not about Spaces.** A task list written in prose can encode a platform
+capability that nobody checked, and it reads as authoritative afterwards precisely because it is
+written down. This one would have been discovered while implementing it, at the point where it is
+most expensive to change course.
+
+**Defensive argument.** "My deployment plan said to fetch the models at build time so no visitor pays
+for the download. When I went to implement it I checked what the platform actually offers, and a
+Streamlit-SDK Space has two hooks — a pip file and an apt file. Neither runs code, and downloading a
+model means running code. Only the Docker SDK has a build step that can. So on my SDK, build time and
+startup are the same moment, and the plan's claim that this made the restart-versus-rebuild question
+moot was wrong — that question is still open. I chose to warm both models at import so the download
+lands in container start rather than mid-session, and I kept the Docker route available, but I wrote
+down that whether a cold-start visitor still waits is unverified rather than pretending it's solved."
+
+**Show-off argument.** Openings: *"tell me about a plan that didn't survive contact"*, *"how do you
+handle a spec that turns out to be wrong"*, or anything on deployment platforms.
+> "I'd written a deployment plan with a step that said 'bake the models into the image at build time
+> so no user pays for the download', and it read as settled because it was written down. When I got
+> to it, I checked what the platform actually exposes rather than assuming, and the SDK I'd chosen has
+> exactly two extension points — a requirements file and an apt file. Neither executes code. Fetching
+> a model is executing code. So the step was impossible as written; only the Docker SDK has a real
+> build stage. What I find interesting is the failure mode of my own plan — I'd also written that
+> baking the models in made a separate open question moot, and that conclusion silently depended on
+> the impossible step. One wrong assumption had closed a question that was still open. I picked the
+> lighter option, warming at import so the download moves into container start, and I explicitly
+> re-opened the question I'd prematurely closed rather than carrying the plan's conclusion forward."
+
+---
+
+# 32. The container throttled the CPU but never told the library
+
+**The scenario.** The deployment target is a 2-vCPU Hugging Face Space, and the whole of
+deployment phase D-2 hangs on one number: what a reranked query costs there. The existing figure
+was a projection written from reasoning — *"expect ~20–30 s instead of 6 s"* — with no measurement
+behind it, and two open decisions depended on it: whether the demo defaults to reranking, and
+whether the cross-encoder needs int8 quantisation. Rather than wait for the Space to exist, the
+pipeline was run in a container capped with `--cpus=2`.
+
+**How we got to the answer.** The first version of that measurement would have been wrong, and the
+tell was a debug line printed almost by accident: `host cpus visible to python: 8`.
+
+`--cpus=2` is a **cgroup CPU quota** — the container gets two cores' worth of *time*. It does not
+change what the kernel reports, so `os.cpu_count()` still returns the host's 8, and torch sizes its
+intra-op thread pool from that. It chose 4 threads (torch uses physical cores, not logical), and
+those 4 threads then contended for a quota of 2. That is not a simulation of a 2-vCPU box; it is a
+simulation of something *worse* — a real 2-vCPU machine would run 2 threads with no oversubscription.
+
+So the measurement was run as four arms under the same `--cpus=2` budget, varying only the thread
+count, over 20 questions each:
+
+```
+mode     threads      p50        p95
+rerank   default    7,615 ms   8,120 ms
+rerank   pinned 2   3,974 ms   4,242 ms      -47.8%
+vector   default      109 ms     182 ms
+vector   pinned 2       39 ms      54 ms     -64%
+```
+
+**Pinning the thread count nearly halves reranked retrieval, and cuts dense retrieval to a third.**
+Same code, same models, same CPU budget. The only change is not asking for more parallelism than
+the container is allowed to deliver — the surplus threads spend their time being descheduled.
+
+Two consequences, and the second matters more than the first.
+
+**The projection changed.** The faithful figure is ~4.0 s of retrieval plus the measured ~0.5 s of
+hosted generation — about **4.5 s end to end**, against a pre-registered threshold of ~5 s for
+switching the demo's default retrieval mode. The pessimistic arm would have read 8.1 s and closed
+that question in the wrong direction. It is still a projection and is recorded as one: two cores
+under a cgroup quota are not two of a cloud provider's shared vCPUs, and there is no cold start,
+network I/O or noisy neighbour in it. What changed is that the decision became live instead of
+looking hopeless, and that int8 quantisation — which would have forced a full re-baseline of all
+four retrievers — is not needed yet.
+
+**Thread count became a deployment parameter.** `torch.set_num_threads()` now belongs in the
+deployed app, set from an environment variable. Shipping without it would have cost ~3.6 s per
+query on a machine that had no obvious defect, and the natural suspect would have been the
+cross-encoder itself — the component that was *already* known to be slow, and therefore the one
+that would have absorbed the blame. A performance bug hiding behind a legitimately expensive
+component is close to undiscoverable by intuition.
+
+The setting is deliberately an **env var defaulting to 2, not a hardcoded 2**, because the value
+that is right for a 2-vCPU host is wrong for an 8-core development machine. And it is set in
+`app.py` and **not** in the retrieval module: every committed evaluation number was measured under
+torch's default threading, and changing that inside the pipeline would silently re-baseline the
+entire project. It is a property of the deployed product, not of the retriever.
+
+**Defensive argument.** "I needed to know what a query would cost on a 2-vCPU host before the host
+existed, so I ran the pipeline in a container capped at 2 CPUs. That measurement was nearly wrong.
+`--cpus` is a cgroup quota, not a visible core count, so the library still saw the host's 8 cores
+and sized its thread pool from them — 4 threads sharing 2 cores' worth of time. I caught it because
+I'd printed the visible CPU count, and I ran the measurement as four arms varying only thread count.
+Pinning to 2 cut reranked retrieval by 48%, from 7.6 s to 4.0 s. So the honest projection is ~4.5 s
+end to end rather than ~8, and the thread count became something I set explicitly in the deployed
+app — from an env var, because the right value differs between the server and my laptop, and in the
+UI layer rather than the retrieval layer, because changing it in the pipeline would have
+re-baselined every number I've published."
+
+**Show-off argument.** Openings: *"tell me about performance work"*, *"how do you test something
+before the infrastructure exists"*, or anything about containers and resource limits.
+> "There's a trap in benchmarking inside a container that I nearly walked into. I wanted to know how
+> my reranker would behave on a 2-vCPU host before I had one, so I ran it with `--cpus=2`. But that
+> flag is a CPU-time quota, not a core count — the kernel still reports every host core, so PyTorch
+> sized its thread pool from 8 cores and spawned 4 threads to share 2 cores' worth of time. That's
+> not a 2-vCPU box, it's worse than one, because you've added contention on top of the throttle. I
+> only noticed because I'd printed the visible CPU count in the setup line. When I pinned threads to
+> 2, latency dropped 48% — 7.6 s to 4.0 s — which moved my end-to-end projection from about 8
+> seconds to 4.5, and 5 was my threshold for a product decision. What I take from it isn't really
+> about containers: it's that the slow component was already the prime suspect, so a genuine
+> configuration bug would have hidden behind it indefinitely. Nobody investigates the thing they've
+> already explained."
+
+---
+
 *Every entry from the project's earlier phases has now been backfilled. New findings get an entry
 in the session that produces them — see the process rule in the
 [README](../README.md#important--the-engineering-journal-is-a-required-deliverable).*
