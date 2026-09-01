@@ -4,6 +4,7 @@ Run with:  streamlit run app.py
 """
 
 import os
+import time
 
 import streamlit as st
 
@@ -285,8 +286,18 @@ if question:
             "Reranking, then generating…" if mode.startswith("rerank")
             else "Retrieving and generating…"
         )
+        # Wall clock around the WHOLE call. stats["total_ms"] covers only the LLM
+        # request, so using it as "total" hid retrieval entirely -- and retrieval
+        # is where the modes actually differ. On the deployed app that made
+        # reranking look 20x FASTER than dense retrieval: rerank showed 1.1 s
+        # (a warm LLM call, its ~3.5 s of cross-encoder work invisible) against
+        # vector's 22.2 s (a cold first LLM call, its 36 ms of retrieval
+        # invisible). Both numbers were correct and the comparison they invited
+        # was backwards.
+        started = time.perf_counter()
         with st.spinner(spinner):
             text, hits, stats = answer(question, k=k, mode=mode)
+        wall_ms = (time.perf_counter() - started) * 1000
     except requests.exceptions.ConnectionError:
         # The error has to name the backend actually in use. This branch used to
         # tell every user to check their Ollama tray icon, which is nonsense on
@@ -329,22 +340,41 @@ if question:
         # instrumentation. The deployed backend is hosted, so this was the case
         # EVERY visitor would have seen; it stayed invisible locally because the
         # local backend is the one provider that does report the split.
+        # Retrieval is derived rather than measured separately: the wall clock
+        # covers retrieval + generation, and generation is the one the provider
+        # reports. Subtracting is honest here because nothing else happens
+        # between the two.
+        gen_ms = stats.get("total_ms") or 0
+        retrieve_ms = max(wall_ms - gen_ms, 0.0)
+        line = (
+            f"**{wall_ms / 1000:.1f}s total** — "
+            f"retrieval {retrieve_ms / 1000:.1f}s (`{mode}`), "
+            f"generation {gen_ms / 1000:.1f}s"
+        )
         split_reported = (stats.get("prompt_eval_ms") or 0) > 0
-        line = f"{stats['total_ms'] / 1000:.1f}s total"
         if split_reported:
             line += (
                 f" — prompt {stats['prompt_eval_ms'] / 1000:.1f}s "
                 f"({stats['prompt_eval_tokens']} tok), "
-                f"generation {stats['eval_ms'] / 1000:.1f}s "
+                f"decode {stats['eval_ms'] / 1000:.1f}s "
                 f"({stats['eval_tokens']} tok)"
             )
         elif stats.get("prompt_eval_tokens"):
             line += (
-                f" — {stats['prompt_eval_tokens']} prompt tok, "
-                f"{stats['eval_tokens']} generated "
-                f"(this provider reports no prefill/decode split)"
+                f" ({stats['prompt_eval_tokens']} prompt tok, "
+                f"{stats['eval_tokens']} generated; "
+                "this provider reports no prefill/decode split)"
             )
         st.caption(line)
+        # The first hosted call after a cold start pays DNS and a TLS handshake on
+        # top of inference -- measured at 7.7 s locally and 22.2 s on the deployed
+        # app, against 1.1-2.3 s warm. Saying so is better than letting a visitor
+        # conclude the system is slow.
+        if gen_ms > 6000:
+            st.caption(
+                ":grey[The first request after the app wakes includes connection "
+                "setup to the language model. Later questions are much faster.]"
+            )
 
     # The score is labelled with what it actually is. In hybrid it is an RRF score
     # (~0.03) and in rerank a cross-encoder logit that is often negative -- neither
