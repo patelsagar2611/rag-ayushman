@@ -1,0 +1,29 @@
+# Streamlit configuration. COMMITTED -- unlike .streamlit/secrets.toml, which is
+# gitignored and must never be committed.
+
+[server]
+# Disable the local sources watcher.
+#
+# Its job is hot-reload during development: it walks every loaded module looking
+# for local files that changed. That walk calls hasattr(module, "__path__") on
+# each one -- and `transformers` uses LAZY attribute loading, so that innocent
+# hasattr triggers a real import of whatever submodule it touches. It reached
+# transformers.models.zoedepth (a depth-estimation model this project never
+# uses), which imports torchvision, which is deliberately not installed. Result:
+# a long traceback in the logs on every start, for a module nothing here needs.
+#
+# Streamlit catches it, so the app runs -- but it is noise on a deployment where
+# hot-reload is useless anyway: Community Cloud restarts the app on a git push
+# rather than relying on this watcher.
+#
+# Local development note: with this off, editing a file no longer auto-reruns the
+# app; hit "Rerun" or restart. Override per-machine with
+#     streamlit run app.py --server.fileWatcherType auto
+fileWatcherType = "none"
+
+# The deployed app is never opened from the machine that runs it.
+headless = true
+
+[browser]
+# Usage stats off by default; the Dockerfile passes the same flag on its CMD.
+gatherUsageStats = false

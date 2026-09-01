@@ -5,6 +5,8 @@ Run with:  streamlit run app.py
 
 import os
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 
 import streamlit as st
 
@@ -101,6 +103,15 @@ st.title("PM-JAY document assistant")
 st.caption(
     "Answers come only from the National Health Authority PM-JAY corpus, "
     "with the file and page behind every claim."
+)
+st.info(
+    "**Portfolio demo on free hosting.** Live questions run against a free "
+    "language-model tier with a shared daily budget, so they are capped. The "
+    "suggested questions are answered in advance and always available. "
+    "This reports what the source documents say — it is not medical or legal "
+    "advice, and two editions of the empanelment guidelines in the corpus "
+    "contradict each other on several rules.",
+    icon="ℹ️",
 )
 
 
@@ -275,12 +286,110 @@ with st.sidebar:
     if LIVE_SHA:
         st.caption(f"question set `{LIVE_SHA}`")
 
-question = st.text_input(
-    "Question",
+# ---------------------------------------------------------------------------
+# Quota protection.
+#
+# The deployment runs on a free tier of ~200,000 tokens/day and each live query
+# costs ~2,600 prompt tokens -- about 80 questions per DAY for the whole world.
+# The daily cap is invisible until it is hit: it appears only in a 429 body and
+# never in a response header (gotcha 16), so it cannot be paced against.
+#
+# Three defences, weakest to strongest:
+#   1. Precomputed showcase answers, so the common path costs nothing at all.
+#   2. A per-session cap, which stops one visitor draining it by accident.
+#   3. A global daily counter, which bounds the worst case.
+#
+# What is NOT here is IP-based limiting: unreliable behind a proxy, unpersistable
+# on free hosting, and it would mean storing a visitor identifier on a health
+# assistant where questions are themselves sensitive.
+# ---------------------------------------------------------------------------
+SESSION_LIMIT = 8
+DAILY_LIMIT = 60
+SHOWCASE_PATH = Path("config/showcase.json")
+
+
+@st.cache_resource
+def usage_counter():
+    """Process-wide live-call counter, shared across sessions.
+
+    HONEST LIMITATIONS, because a rate limit that is trusted more than it deserves
+    is worse than none: this lives in memory, so it resets whenever the app
+    restarts or sleeps, and it counts only what THIS process served. It bounds the
+    common case; it is not a guarantee.
+    """
+    return {"day": None, "count": 0}
+
+
+def quota_state():
+    counter = usage_counter()
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if counter["day"] != today:
+        counter["day"], counter["count"] = today, 0
+    used_session = st.session_state.get("live_calls", 0)
+    return counter, used_session
+
+
+@st.cache_data
+def showcase():
+    """Precomputed answers, keyed by (question, mode, k).
+
+    Absent file is not an error -- it means nobody has run
+    `python -m eval.make_showcase` yet, and every question falls through to a
+    live call. The app must work either way.
+    """
+    try:
+        data = json.loads(SHOWCASE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}, [], {}
+    index = {(e["question"], e["mode"], e["k"]): e for e in data.get("entries", [])}
+    questions = list(dict.fromkeys(e["question"] for e in data.get("entries", [])))
+    provenance = {k: v for k, v in data.items() if k != "entries"}
+    return index, questions, provenance
+
+
+SHOWCASE_INDEX, SHOWCASE_QUESTIONS, SHOWCASE_META = showcase()
+
+
+PICK_YOUR_OWN = "— ask your own question below —"
+
+if SHOWCASE_QUESTIONS:
+    chosen = st.selectbox(
+        "Suggested questions",
+        [PICK_YOUR_OWN] + SHOWCASE_QUESTIONS,
+        help="These are rows from the 69-question evaluation set, answered in "
+             "advance so they cost no quota. Ask your own below for a live run.",
+    )
+else:
+    chosen = PICK_YOUR_OWN
+
+typed = st.text_input(
+    "Ask your own",
     placeholder="What is the maximum annual cover per family under PM-JAY?",
 )
 
+# A suggested question wins only while nothing has been typed, so the text box
+# is never silently ignored.
+question = typed.strip() or (chosen if chosen != PICK_YOUR_OWN else "")
+
 if question:
+    precomputed = SHOWCASE_INDEX.get((question, mode, k))
+    counter, used_session = quota_state()
+
+    if precomputed is None and used_session >= SESSION_LIMIT:
+        st.warning(
+            f"You have asked {used_session} live questions this session, which is "
+            "the per-visitor limit on this demo. The suggested questions above "
+            "still work — they are answered from disk and cost nothing."
+        )
+        st.stop()
+    if precomputed is None and counter["count"] >= DAILY_LIMIT:
+        st.warning(
+            "This demo has reached its daily budget for live questions. The "
+            "suggested questions above still work. Live questions resume "
+            "tomorrow (UTC)."
+        )
+        st.stop()
+
     try:
         spinner = (
             "Reranking, then generating…" if mode.startswith("rerank")
@@ -294,10 +403,22 @@ if question:
         # vector's 22.2 s (a cold first LLM call, its 36 ms of retrieval
         # invisible). Both numbers were correct and the comparison they invited
         # was backwards.
-        started = time.perf_counter()
-        with st.spinner(spinner):
-            text, hits, stats = answer(question, k=k, mode=mode)
-        wall_ms = (time.perf_counter() - started) * 1000
+        if precomputed is not None:
+            # Served from disk: no LLM call, and no retrieval either, because the
+            # chunks were stored with the answer. Labelled below, because an
+            # instant response would otherwise be read as system speed -- which
+            # is exactly the misreading the timing fix existed to prevent.
+            text = precomputed["answer"]
+            hits = precomputed["hits"]
+            stats = precomputed.get("stats") or {}
+            wall_ms = None
+        else:
+            started = time.perf_counter()
+            with st.spinner(spinner):
+                text, hits, stats = answer(question, k=k, mode=mode)
+            wall_ms = (time.perf_counter() - started) * 1000
+            st.session_state["live_calls"] = used_session + 1
+            counter["count"] += 1
     except requests.exceptions.ConnectionError:
         # The error has to name the backend actually in use. This branch used to
         # tell every user to check their Ollama tray icon, which is nonsense on
@@ -345,12 +466,20 @@ if question:
         # reports. Subtracting is honest here because nothing else happens
         # between the two.
         gen_ms = stats.get("total_ms") or 0
-        retrieve_ms = max(wall_ms - gen_ms, 0.0)
-        line = (
-            f"**{wall_ms / 1000:.1f}s total** — "
-            f"retrieval {retrieve_ms / 1000:.1f}s (`{mode}`), "
-            f"generation {gen_ms / 1000:.1f}s"
-        )
+        if wall_ms is None:
+            # Precomputed. Report what the answer COST when it was generated, not
+            # the zero it costs to read from disk.
+            line = (
+                f"**Precomputed answer** — served from disk, no model call. "
+                f"When generated it took {gen_ms / 1000:.1f}s of generation"
+            )
+        else:
+            retrieve_ms = max(wall_ms - gen_ms, 0.0)
+            line = (
+                f"**{wall_ms / 1000:.1f}s total** — "
+                f"retrieval {retrieve_ms / 1000:.1f}s (`{mode}`), "
+                f"generation {gen_ms / 1000:.1f}s"
+            )
         split_reported = (stats.get("prompt_eval_ms") or 0) > 0
         if split_reported:
             line += (
@@ -370,7 +499,7 @@ if question:
         # top of inference -- measured at 7.7 s locally and 22.2 s on the deployed
         # app, against 1.1-2.3 s warm. Saying so is better than letting a visitor
         # conclude the system is slow.
-        if gen_ms > 6000:
+        if wall_ms is not None and gen_ms > 6000:
             st.caption(
                 ":grey[The first request after the app wakes includes connection "
                 "setup to the language model. Later questions are much faster.]"

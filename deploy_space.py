@@ -49,7 +49,7 @@ DEFAULT_TARGET = REPO / ".space"
 # eval/ is NOT optional. app.py imports question_set_fingerprint and GOLDEN from
 # eval.run_eval, and reads eval/results/*.json to show each retrieval mode's measured
 # figures -- so the harness and the committed results ship with the app.
-DIRS = ["src", "eval", "config", "chroma"]
+DIRS = ["src", "eval", "config", "chroma", ".streamlit"]
 FILES = ["app.py", "Dockerfile", ".dockerignore"]
 
 IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", ".pytest_cache")

@@ -1,0 +1,1049 @@
+{
+  "generated_utc": "2026-09-01T11:11:29Z",
+  "prompt_version": 1,
+  "llm_provider": "openai",
+  "llm_backend": "google",
+  "llm_model": "models/gemini-3.1-flash-lite",
+  "entries": [
+    {
+      "question": "What is cover amount under PM JAY for family floater basis?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "PM-JAY covers secondary and tertiary care costs of up to Rs. 5,00,000 annually for each entitled family [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 7,
+          "score": 0.7150691151618958,
+          "chunk_id": "empanelment_dec2021_p0007_00",
+          "text": "1\n1. Introduction\n1. Introduction\n1.1.\t The Government of India launched the Ayushman Bharat Pradhan Manti Jan Arogya Yojana (PM-JAY) \nin September 2018. The core aim of this scheme is to reduce the financial burden on the poorest and \nmost vulnerable population and ensure their access to quality health services, to accelerate India’s \nprogress towards the achievement of Universal Health Coverage (UHC). PM-JAY covers the bottom \n40 percent of the Indian population or about 10.74 crore households. The inclusion of households is \nbased on the deprivation and occupational criteria of the Socio-Economic Caste Census 2011 (SECC \n2011) for rural and urban areas. PM-JAY covers secondary and tertiary care costs of up to Rs. 5,00,000 \nannually for each entitled family, provided through a network of public and empaneled private \nhospitals.\n1.2.\t The service provider network under PM-JAY includes government healthcare facilities having 5 or \nmore beds capable of providing inpatient services and large numbers of empaneled private hospitals \nacross states where PM-JAY is implemented. This deemed empanelment of public providers under the \nPM-JAY provides them with an unprecedented opportunity to mobilize and independently manage \nrevenues earned through claims for treatment provided to PM-JAY beneficiaries. Private hospitals \nempaneled under PM-JAY are expected to benefit from economies of scale for PM-JAY beneficiaries \nand assured timely payment within the stipulated timeline through a web-based system.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 4,
+          "score": 0.7026616334915161,
+          "chunk_id": "beneficiary_identification_p0004_00",
+          "text": "Page 3 of 15 \n \nBeneficiary Identification Guidelines \niii. \nStates which are primarily covering AB PM-JAY beneficiaries are encouraged to create multiple \nservice locations where beneficiaries can check if they are covered. These include: \n• \nContact points or kiosks set up at CSCs, PHCs, Gram Panchayat, etc \n• \nEmpanelled Hospital \n• \nSelf-check via mobile or web \n• \nOr any other contact point as deemed fit by States \n \nD. Beneficiary identification will include the following broad steps: \ni. \nThe operator searches through the AB PM-JAY list to determine if the person is covered. \nii. \nSearch can be performed by Name and Location, Ration Card No or Mobile number (collected \nduring data drive) or ID printed on the letter sent to family or RSBY URN \niii. \nIf the beneficiary’s name is found in the AB PM-JAY list, Aadhaar (or an alternative government \nID) and Ration Card (or an alternative family ID) is collected against the Name / Family. Other \nfamily IDs include the following options: \n• \nGovernment certified list of members \n• \nRSBY Card: Document image (RSBY Card) to be uploaded \n• \nPM Letter: Document image (PM Letter) to be uploaded  \n• \nState Specific Requirement \nIn case of unavailability of either of the abovementioned family IDs, the state can decide to accept \nan Individual ID mentioning at least father/ mother/ spouse’s name as a family ID. This will be \naccepted only in such cases where both individual’s name and father/ mother/ spouse’s name \nmatch as that in SECC/ RSBY/ State Scheme data. \niv. \nThe system determines a confidence score (threshold score defined by the system but not visible \nto operator/Pradhan Mantri Arogya Mitra) for the link based on how close the name / location / \nfamily members between the AB PM-JAY record and documents is provided. \nv. \nThe operator sends the linked record for approval to the Insurance Company / Trust. The \nbeneficiary will be advised to wait for approval from the insurance company/ trust. \nvi. \nThe insurance company / Trust will setup a Beneficiary approval team that works on fixed service \nlevel agreements on turnaround time. The AB PM-JAY details and the information from the ID is \npresented to the verifier. The insurance company / Trust can either approve or recommend a case \nfor rejection with reason. \nvii. \nAll cases recommended for rejection will be scrutinised by a State team that works on fixed s",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 14,
+          "score": 0.701185941696167,
+          "chunk_id": "beneficiary_identification_p0014_00",
+          "text": "Page 13 of 15 \n \nBeneficiary Identification Guidelines \nThe operator is presented with the confidence score between the Beneficiary Identity document and the \nRSBY record.  \n \n7 \nLinking Family Identification document with the AB PM-JAY Family \n \nOne or more Family Identity Cards can be linked with each AB PM-JAY Family. While Ration cards will be \nthe primary family document, States can define additional family documents that can be used. SECC \nsurvey was conducted on the basis of households and there are possibilities where the household could \nhave multiple ration cards.  \nLinking a family identification document strengthens the beneficiary identification process as we can create \na confidence score based on the names in family identification document and AB PM-JAY record.  \n \nRation Card or Other Government Family ID     \nBeneficiary Identity Document \nAB PM-JAY Beneficiary Record \nNames of family \nmembers \nRAM, GEETHA, \nGOVIND, \nMEENAKUMARI \nNames of family \nmembers \nGEETHA, \nMEENAKUMARI, RAM \nFAMILY MATCH CONFIDENCE SCORE: 92% \n \nLinking the family identification document will be mandatory ONLY if the same document is also the ID \nused by the state to cover a larger base. Operators are encouraged to upload the family document if the \nname match confidence score is low, but they believe the 2 records are the same \nIntegration with an online family card database is recommended. In this scenario, the operator will enter \nthe Family ID No (from the IDs mentioned earlier) and will be able to fetch the names of the family members \nfrom the online database.  \nIf an integration is not possible, the operator will enter the names of the family members as written in the \nID card and upload a scan of the ID card for verification.  \n \n8 \nApproval by Insurance Company/Trust \n \nThe State can appoint either the Insurance Company or Trust to perform the verification of the data of \nidentified beneficiaries. The team needs to work with a strong Service Level Agreements (SLA) on \nturnaround time. Approvals are expected to be provided within 30 minutes back to the operator on a 24x7 \nbasis.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 15,
+          "score": 0.6999765634536743,
+          "chunk_id": "beneficiary_identification_p0015_00",
+          "text": "Page 14 of 15 \n \nBeneficiary Identification Guidelines \nThe Approver is presented the Beneficiary Identity Document and the AB PM-JAY (or RSBY) record side \nby side for validation along with the confidence score. The lowest confidence score records are presented \nfirst.  \nIf the operator has uploaded the Family Identity document, it is also displayed along with the Confidence \nScore. \nThe Approver has only 2 choices for each case – Approve or Recommend for Rejection with Reason \nThe System maintains a track of which Operator is Approving / Recommending for rejection. The Insurance \nCompany/Trust can analyze the approval or rejection pattern of each of the operators.  \n \nA \nAcceptance of Rejection Request by State (applicable only in case of Insurance Company \nmode of implementation) \n \nThe State should setup a team that reviews all the cases recommended for Rejection. The team \nreviews the data provided and the reason it has been recommended for rejection. If the State agrees \nwith the Insurer, it can reject the case. \nIf the State disagrees with the Insurer, it can approve the case. The person in the state making the \ndecision is also tracked in the system. The State review role is also SLA based and a turnaround is \nexpected in 24 hours on working hour basis.  \n \nB \nAddition of Family Members \n \nThe AB PM-JAY scheme allows addition of new family members if they became part of the family \neither due to marriage or by birth. In order to add a family member, at least one of the existing family \nmembers needs to be verified and the identity document used for the verification must be Aadhaar.  \nTo add the additional member, the family must produce: \n• \nThe name of the additional member in a State approved family document like Ration Card OR \n• \nA birth certificate linking the member to the family OR \n• \nA marriage certificate linking the member to the family OR \n• \nAn Adoption certificate to identified family member is available. \n \nNote: Any family member can be added in existing SECC family in-spite of his/her date of birth is after \nor before 2011 and addition of members is not limited only to new born and newly married, any member \ncan be added to existing SECC family provided member can establish relation with a PMJAY verified \nbeneficiary and the identity document used for the verification must be Aadhaar.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "operation_manual.pdf",
+          "page": 5,
+          "score": 0.692663311958313,
+          "chunk_id": "operation_manual_p0005_00",
+          "text": "5 | P a g e \n \n \nI. Introduction of AB PM-JAY \n \nAyushman Bharat Pradhan Mantri Jan Arogya Yojana (AB PM-JAY) is the world’s largest health \nassurance scheme fully financed by the government. It is the flagship scheme of the \nGovernment of India, launched on 23rd Sep 2018, to achieve the vision of Universal Health \nCoverage (UHC). The scheme possesses the potential to bring a paradigm shift in the \nhealthcare sector of the nation and aims at reducing the financial burden on poor and vulnerable \ngroups arising out of catastrophic hospital episodes. \n \nThe scheme aims to create a system of healthcare facilities that meet the immediate \nhospitalization needs of the eligible beneficiary family in a cashless manner thus insulating the \nfamily from the associated financial crisis.  \n \nThree years further on, the scheme has empanelled ~26,000 private & public hospitals which \ninclude a wide array of facilities. Even though, the primary responsibility of healthcare providers \nis to provide treatment to patients, services to PM-JAY beneficiaries must be provided in \nalignment with the contours of the scheme and in compliance with PM-JAY’s fundamental \nprinciples, policy and practice. \n \nFor hospitals empanelment, the empanelment committees at the national, state and district \nlevels have defined a set of guidelines to be followed and requirements that need to be fulfilled \nfor the empanelment process. Once empanelled, the hospitals (also referred as Empanelled \nHealthcare Providers) are provided with required handholding support regarding Information \nTechnology (IT) systems, training, Information Education and Communication (IEC), health \nbenefit packages, quality, etc.  \n \nThe scheme has many unique features, some of which are illustrated below:",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1397.3038000040106,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2654,
+        "eval_ms": 0.0,
+        "eval_tokens": 32,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is the minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "The minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY is at least 10 [1], [4]. However, for hospitals located in Aspirational Districts, the requirement is 5 inpatient beds [2]. \n\nExemptions to the minimum bed requirement may be granted for specific types of hospitals:\n*   In general criteria, exemptions may be given for \"single-speciality hospitals like Eye ,ENT and Standalone Dialysis Centres\" [1] or \"dental and day-care procedure hospitals like Eye, ENT, and Standalone Dialysis Centres\" [4].\n*   In Aspirational Districts, the 5-bed requirement applies \"unless providing day-care packages covered under PM-JAY\" [2].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 40,
+          "score": 0.7837280035018921,
+          "chunk_id": "empanelment_v2_0_p0040_00",
+          "text": "Page  40  of  64  \nAnnex 1: Detailed Empanelment Criteria \n \nMinimum Criteria \n \nA Hospital would be empaneled as a network private hospital with the approval of the \nrespective State Health Authority5 if it adheres with the following minimum criteria: \na) Should have at least 10 inpatient beds with adequate spacing and supporting staff as per \nnorms. \ni. \nExemption may be given for single-speciality hospitals like Eye ,ENT and \nStandalone Dialysis Centres. \nii. \nGeneral ward - @80sq ft per bed, or more in a Room with Basic amenities- bed, \nmattress, linen, water, electricity, cleanliness, patient friendly common washroom \netc. Non AC but with fan/Cooler and heater in winter \nb) It should have adequate and qualified medical and nursing staff (doctors6 & nurses7), \nphysically in charge round the clock; (necessary certificates to be produced during \nempanelment). \nc) Fully equipped and engaged in providing Medical and Surgical services, commensurate to \nthe scope of service/ available specialties and number of beds. \ni. \nRound-the-clock availability (or on-call) of a Surgeon and Anesthetist where surgical \nservices/ day care treatments are offered. \nii. \nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and \nAnaesthetist where maternity services are offered. \n \n5 In order to facilitate the effective implementation of AB PM-JAY, State Governments shall set up the State Health Authority (SHA) \nor designate this function under any existing agency/ trust designated for this purpose, such as the state nodal agency or a trust \nset up for the state insurance program.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 30,
+          "score": 0.7573899030685425,
+          "chunk_id": "empanelment_dec2021_p0030_00",
+          "text": "24\nGuidelines on Hospital Empanelment and De-Empanelment\n2. \tCriterion for Aspirational Districts\n\t\nCriterion for HCPs empanelment in Aspirational Districts as per the listed districts by NITI Aayog \n(Annexure 4) following relaxations are provided. All the criteria remain the same for Aspirational \nDistricts as mentioned above apart from the following:\ni.\t\nMinimum number of inpatient beds required for empanelment, should have 5 inpatient beds \nwith adequate spacing and supporting staff as per norms unless providing day-care packages \ncovered under PM-JAY.\nii.\t\nMinimum number of doctors and nursing staff required for empanelment, Doctor-1 (minimum \nQualification MBBS). \niii. Requirements of licences and certificates – Hospital registration certificate as per state law is \nmandatory, if applicable.\niv. Requirement of equipment according to the defined scope of services -Hospital needs to be \nfully equipped.\nv.\t\nRequirement of equipment and services in emergency- life saving and resuscitation equipment \nas required by facility.\nvi.\t Position of the ICU/HDU -The unit is to be situated in the same building or referral linkage with \nhospitals where ICU/HDU facility is available (mandatory self-declaration) through an MoU or tie \nup.\nvii.\t Requirement of space for AB PM-JAY kiosk - Provide space for a working desk for AB PM-JAY \nbeneficiary management (AB PM-JAY non-medical coordinator) at the hospital main entrance \narea.\nviii.\t Criteria for dialysis services for nephrology and urology surgery facility - dialysis unit either \ninhouse or tie-up.\nix.\t Criteria for OT Services with staff requirement- Fully equipped Operation Theatre of its own with \nqualified nursing staff (Minimum qualification - ANM Course) under its employment round the \nclock.\nx.\t\nCasualty should be equipped with minimum Emergency Tray. \n3.\t Advanced Criteria\n\t\n",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 12,
+          "score": 0.750576913356781,
+          "chunk_id": "empanelment_v2_0_p0012_00",
+          "text": "Page  12  of  64  \nfor application. Every hospital needs to visit the web portal and create an account for \nthemselves. \n \nThe hospital/healthcare provider must show willingness to empanel the hospital under PM-\nJAY by visiting the web portal using URL https://hospitals.pmjay.gov.in . After agreeing on \nthis section, the system will provide an opportunity to create an account for the hospital. \nThis section includes of the following information to be provided by the hospital: \n \n• State of the hospital \n• District of the hospital \n• Name of the hospital \n• Hospital parent type: \no Single hospital \no Group of hospitals \n• Hospital type: \no Public Hospital \no Private (for profit) hospital \no Private (not for profit) hospital \no Government of India \no Temporary Empanelment – HEM Lite \n• Contact person mobile number \n• Contact person email id",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 27,
+          "score": 0.7361698150634766,
+          "chunk_id": "empanelment_dec2021_p0027_00",
+          "text": "21\nAnnexure 1\nCriteria for Empanelment\nThis annexure contains the basic minimum criteria for empanelment for all the healthcare service \nproviders. It also covers the criteria in Aspirational Districts and additional criteria for empanelment of \nspecialties under the scheme. \n1. Minimum Criteria\n\t\nA hospital would be empanelled as a network private hospital with the approval of the respective \nState Health Agency3 if it adheres with the following minimum criteria:\na)\t\nShould have at least 10 inpatient beds with adequate spacing and supporting staff as per norms:\ni.\t\nExemption may be given for dental and day-care procedure hospitals like Eye, ENT, and \nStandalone Dialysis Centres.\nii.\t\nGeneral ward - @80sq ft per bed, or more in a room with basic amenities- bed, mattress, \nlinen, water, electricity, cleanliness, patient friendly common washroom etc. Non-AC but \nwith fan/cooler and heater in winter\nb) It should have adequate and qualified medical and nursing staff (doctors4 & nurses5), physically \nin charge round the clock; (necessary certificates to be produced during empanelment). The \nstate should have specific guidelines on the number of hospitals a doctor can work. \nc)\t\nFully equipped and engaged in providing medical and surgical services, commensurate to the \nscope of service/available specialties and number of beds:\ni.\t\nRound-the-clock availability (or on-call) of a Surgeon and Anaesthetist where surgical \nservices/day care treatments are offered.\nii.\t\nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and Anaesthetist \nwhere maternity services are offered.\n3\t\nIn order to facilitate the effective implementation of AB PM-JAY, state governments shall set up the State Health Authority \n(SHA) or designate this function under any existing agency/trust designated for this purpose, such as the State Nodal Agency \nor a trust set up for the state insurance program.\n4 \nQualified doctors are a MBBS approved as per the Clinical Establishment Act/state government rules & regulations as \napplicable from time to time.\n5 \nQualified nurse per unit per shift shall be available as per requirement laid down by the Nursing Council/Clinical Establishment \nAct/State government rules & regulations as applicable from time to time. Norms vis a vis bed ratio may be spelt out.\nAnnexure 1",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "antifraud_guidebook_2024.pdf",
+          "page": 78,
+          "score": 0.7309747934341431,
+          "chunk_id": "antifraud_guidebook_2024_p0078_00",
+          "text": "64\nAyushman Bharat Pradhan Mantri Jan Arogya Yojana (AB PM-JAY): Anti-Fraud Framework Practitioners’ Guidebook\nAvailability of implants and prosthesis register at the time of \nvisit (Y/N)\nAvailability of pre-anaesthesia documents at the time of visit \n(Y/N)\nAvailability of requested patient files (Y/N)\nUndertaking by hospital\nThis is to certify that the information provided by me/us about ____________________________\n_____________, is true to the best of my/our knowledge and is based on documentation and process \nfollowed in this hospital/institution. I/We had not suppressed any information or fact. Further, I/We \nunderstand that, in case the information provided is found to be incorrect and based on suppression of \nfacts, the hospital stands to forfeit its claims.\nName & Signature of authorized person from hospital and Date with seal of hospital \nName & Signature of Auditing Doctor and date\n4. Medical Audit Form\nA. Hospital Details \n1\nDate of investigation \n \n2\nName of Hospital \n \n3\nAddress of Hospital\n \n4\nHospital ID (if available)\n \n5\nType of hospital (Public/Private) \n \n6\nNumber of AB PM-JAY beneficiaries admitted in the hospital as \nper TMS\n \n7\nNumber of AB PM-JAY beneficiaries admitted in the hospital \n \nB. Hospital Infrastructure \nYes \nNo \nRemarks \n8\nHospital Existence\n \n9\nResponse from Hospital (Co-operative/Non Co-operative/\nIndifferent)\n \n10\nIs hospital registered with DGHS?\n \n11\nAvailability of PMAM kiosk\n \n12\nLocation of PMAM kiosk (Easily Visible/Far inside) \n \n13\nPromotional boards prominently displayed \n \n14\nTotal no of Beds",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1865.9217999957036,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2306,
+        "eval_ms": 0.0,
+        "eval_tokens": 159,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is primary identity document for family member under PM-JAY?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "Aadhaar will be primary identity document for a family member that has to be produced under the AB PM-JAY scheme [2].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 14,
+          "score": 0.7946784496307373,
+          "chunk_id": "beneficiary_identification_p0014_00",
+          "text": "Page 13 of 15 \n \nBeneficiary Identification Guidelines \nThe operator is presented with the confidence score between the Beneficiary Identity document and the \nRSBY record.  \n \n7 \nLinking Family Identification document with the AB PM-JAY Family \n \nOne or more Family Identity Cards can be linked with each AB PM-JAY Family. While Ration cards will be \nthe primary family document, States can define additional family documents that can be used. SECC \nsurvey was conducted on the basis of households and there are possibilities where the household could \nhave multiple ration cards.  \nLinking a family identification document strengthens the beneficiary identification process as we can create \na confidence score based on the names in family identification document and AB PM-JAY record.  \n \nRation Card or Other Government Family ID     \nBeneficiary Identity Document \nAB PM-JAY Beneficiary Record \nNames of family \nmembers \nRAM, GEETHA, \nGOVIND, \nMEENAKUMARI \nNames of family \nmembers \nGEETHA, \nMEENAKUMARI, RAM \nFAMILY MATCH CONFIDENCE SCORE: 92% \n \nLinking the family identification document will be mandatory ONLY if the same document is also the ID \nused by the state to cover a larger base. Operators are encouraged to upload the family document if the \nname match confidence score is low, but they believe the 2 records are the same \nIntegration with an online family card database is recommended. In this scenario, the operator will enter \nthe Family ID No (from the IDs mentioned earlier) and will be able to fetch the names of the family members \nfrom the online database.  \nIf an integration is not possible, the operator will enter the names of the family members as written in the \nID card and upload a scan of the ID card for verification.  \n \n8 \nApproval by Insurance Company/Trust \n \nThe State can appoint either the Insurance Company or Trust to perform the verification of the data of \nidentified beneficiaries. The team needs to work with a strong Service Level Agreements (SLA) on \nturnaround time. Approvals are expected to be provided within 30 minutes back to the operator on a 24x7 \nbasis.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 12,
+          "score": 0.7743252515792847,
+          "chunk_id": "beneficiary_identification_p0012_00",
+          "text": "Page 11 of 15 \n \nBeneficiary Identification Guidelines \n \n4 \nIdentity Document for a Family Member \n \nAadhaar will be primary identity document for a family member that has to be produced under the AB PM-\nJAY scheme. When the beneficiary comes to a contact point, the QR code on the Aadhaar card is scanned \n(or an e-KYC is performed) to capture all the details of the Aadhaar. A demographic authentication is \nperformed with UIDAI to ensure the information captured is authentic. A live photograph of the member is \ntaken to be printed on the e-card.  \nIf the AB PM-JAY family member does not have an Aadhaar card and the contact point is a location where \nno treatment is provided, the operator will inform the beneficiary that he is eligible and can get treatment \nonly once without an Aadhaar or an Aadhaar enrolment slip. They may be requested to apply for an \nAadhaar as quickly as possible. A list of the closest Aadhaar enrolment centres is provided to the \nbeneficiary \nThe AB PM-JAY family member does not have an Aadhaar card and the contact point is a Hospital or place \nof treatment then: \nA. A signed declaration is taken from the Beneficiary that he does not possess an Aadhaar card and \nunderstands he will need to produce an Aadhaar or an Aadhaar enrolment slip prior to the next \ntreatment \nB. The beneficiary must produce an ID document from the list of approved ids by the State \nC. The operator captures the type of ID and the fields as printed on the ID including the Name, Father’s \nName (if available), Age, Gender and Address fields.  \nD. A scan of the ID produced is uploaded into the system for verification. \nE. A photo of the beneficiary is taken. \nF. The information from this alternate ID is used instead of Aadhaar for matching against the AB PM-JAY \nrecord.  \n \n5 \nSearching the AB PM-JAY Database \n \n",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 15,
+          "score": 0.7530571222305298,
+          "chunk_id": "beneficiary_identification_p0015_00",
+          "text": "Page 14 of 15 \n \nBeneficiary Identification Guidelines \nThe Approver is presented the Beneficiary Identity Document and the AB PM-JAY (or RSBY) record side \nby side for validation along with the confidence score. The lowest confidence score records are presented \nfirst.  \nIf the operator has uploaded the Family Identity document, it is also displayed along with the Confidence \nScore. \nThe Approver has only 2 choices for each case – Approve or Recommend for Rejection with Reason \nThe System maintains a track of which Operator is Approving / Recommending for rejection. The Insurance \nCompany/Trust can analyze the approval or rejection pattern of each of the operators.  \n \nA \nAcceptance of Rejection Request by State (applicable only in case of Insurance Company \nmode of implementation) \n \nThe State should setup a team that reviews all the cases recommended for Rejection. The team \nreviews the data provided and the reason it has been recommended for rejection. If the State agrees \nwith the Insurer, it can reject the case. \nIf the State disagrees with the Insurer, it can approve the case. The person in the state making the \ndecision is also tracked in the system. The State review role is also SLA based and a turnaround is \nexpected in 24 hours on working hour basis.  \n \nB \nAddition of Family Members \n \nThe AB PM-JAY scheme allows addition of new family members if they became part of the family \neither due to marriage or by birth. In order to add a family member, at least one of the existing family \nmembers needs to be verified and the identity document used for the verification must be Aadhaar.  \nTo add the additional member, the family must produce: \n• \nThe name of the additional member in a State approved family document like Ration Card OR \n• \nA birth certificate linking the member to the family OR \n• \nA marriage certificate linking the member to the family OR \n• \nAn Adoption certificate to identified family member is available. \n \nNote: Any family member can be added in existing SECC family in-spite of his/her date of birth is after \nor before 2011 and addition of members is not limited only to new born and newly married, any member \ncan be added to existing SECC family provided member can establish relation with a PMJAY verified \nbeneficiary and the identity document used for the verification must be Aadhaar.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 4,
+          "score": 0.748541533946991,
+          "chunk_id": "beneficiary_identification_p0004_00",
+          "text": "Page 3 of 15 \n \nBeneficiary Identification Guidelines \niii. \nStates which are primarily covering AB PM-JAY beneficiaries are encouraged to create multiple \nservice locations where beneficiaries can check if they are covered. These include: \n• \nContact points or kiosks set up at CSCs, PHCs, Gram Panchayat, etc \n• \nEmpanelled Hospital \n• \nSelf-check via mobile or web \n• \nOr any other contact point as deemed fit by States \n \nD. Beneficiary identification will include the following broad steps: \ni. \nThe operator searches through the AB PM-JAY list to determine if the person is covered. \nii. \nSearch can be performed by Name and Location, Ration Card No or Mobile number (collected \nduring data drive) or ID printed on the letter sent to family or RSBY URN \niii. \nIf the beneficiary’s name is found in the AB PM-JAY list, Aadhaar (or an alternative government \nID) and Ration Card (or an alternative family ID) is collected against the Name / Family. Other \nfamily IDs include the following options: \n• \nGovernment certified list of members \n• \nRSBY Card: Document image (RSBY Card) to be uploaded \n• \nPM Letter: Document image (PM Letter) to be uploaded  \n• \nState Specific Requirement \nIn case of unavailability of either of the abovementioned family IDs, the state can decide to accept \nan Individual ID mentioning at least father/ mother/ spouse’s name as a family ID. This will be \naccepted only in such cases where both individual’s name and father/ mother/ spouse’s name \nmatch as that in SECC/ RSBY/ State Scheme data. \niv. \nThe system determines a confidence score (threshold score defined by the system but not visible \nto operator/Pradhan Mantri Arogya Mitra) for the link based on how close the name / location / \nfamily members between the AB PM-JAY record and documents is provided. \nv. \nThe operator sends the linked record for approval to the Insurance Company / Trust. The \nbeneficiary will be advised to wait for approval from the insurance company/ trust. \nvi. \nThe insurance company / Trust will setup a Beneficiary approval team that works on fixed service \nlevel agreements on turnaround time. The AB PM-JAY details and the information from the ID is \npresented to the verifier. The insurance company / Trust can either approve or recommend a case \nfor rejection with reason. \nvii. \nAll cases recommended for rejection will be scrutinised by a State team that works on fixed s",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 12,
+          "score": 0.7360658645629883,
+          "chunk_id": "beneficiary_identification_p0012_01",
+          "text": "of ID and the fields as printed on the ID including the Name, Father’s \nName (if available), Age, Gender and Address fields.  \nD. A scan of the ID produced is uploaded into the system for verification. \nE. A photo of the beneficiary is taken. \nF. The information from this alternate ID is used instead of Aadhaar for matching against the AB PM-JAY \nrecord.  \n \n5 \nSearching the AB PM-JAY Database \n \nThe AB PM-JAY database will be searched based on the information provided in the Member Identity \ndocument. AB PM-JAY is based on SECC and it is likely that spellings for Name, Fathers Name and even \ntowns and villages will be different between the AB PM-JAY record and the identity document. A beneficiary \nwill be eligible for AB PM-JAY if the Name and Location parameters in the beneficiary identity document \ncan be regarded as similar to the Name and Location parameters in the AB PM-JAY record.  \nThe Search system automatically provides a confidence score between the two.",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1439.6276999978,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2583,
+        "eval_ms": 0.0,
+        "eval_tokens": 28,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "If any party to a grievance is not satisfied, then how many days it has to appeal that decision?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "If any party to a grievance is not satisfied with the decision of a grievance redressal committee, it may appeal against the decision within \"30 days\" [2]. \n\nRegarding specific appeal paths:\n*   If a party is not satisfied with a DGNO’s or SGNO’s decision, they can appeal to the DGRC or SGRC \"within 30 days of the DGNO/SGNO order\" [3].\n*   If a party is not satisfied with a DGRC decision, they can appeal to the SGRC \"within 30 days\" [1], [3], [4], [5].\n*   If a party is not satisfied with an SGRC order, they shall approach the SAA \"within 30 days of the SGRC order\" [4].\n*   If a party is not satisfied with a DGNO’s decision, they can appeal to the DGRC \"within 30 days of the DGNO\" [3] or \"within 30 days of the DGNO order\" [4], [5].\n\nIf an appeal is not filed within the \"30-day period\", the aggrieved party loses its right to appeal [2].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "grievance_redressal.pdf",
+          "page": 23,
+          "score": 0.7943038940429688,
+          "chunk_id": "grievance_redressal_p0023_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n22 \n \n \n \n \ngrievance for \nDGRC \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to \nresolve the grievance. \n• SGRC decision shall be final and \nbinding \n5 \nBeneficiary \nDistrict \nauthorities \n• Grievance not addressed by the \nconcerned officer \nSGNO \n15 days of \nreceipt of \ngrievance for \nSGNO \n30 days of \nreceipt of \ngrievance for \nSGRC \n• If either party is not satisfied with \nDGRC order, they shall approach the \nSGRC \n• Decision of SGRC on such cases \nshall be final and binding.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "grievance_redressal.pdf",
+          "page": 16,
+          "score": 0.7498365640640259,
+          "chunk_id": "grievance_redressal_p0016_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n15 \n  \n \n7.2 Process of Redressal through the Relevant Grievance Committee \nAll the cases which are appealed against the orders of grievance officer must be \nplaced before   the concerned grievance redressal committee. \n \na. The Convener of the relevant Grievance Redressal Committee shall place the \ngrievance before the Grievance Redressal Committee for its decision at its next \nmeeting \n \nb. Each grievance shall be addressed by the relevant Grievance Redressal \nCommittee within a period of 30 days of the receipt of the grievance. \nDepending on the urgency of the case, the Grievance Redressal Committee \nmay decide to meet earlier for a speedier resolution of the grievance \n \nc. The relevant Grievance Redressal Committee shall arrive at a logical decision \nwithin 30 days of receipt of the grievance. All such decisions shall be based on \nthe principles of natural justice (including giving the parties a reasonable \nopportunity to be heard) and be taken by majority vote of its members present \n \nd. If any party to a grievance is not satisfied with the decision of the relevant \nGrievance Redressal Committee, it may appeal against the decision within 30 \ndays to the higher Grievance Redressal Committee or other authority having \npowers of appeal \n \ne. If an appeal is not filed within 30-day period, the aggrieved party shall lose its \nright to appeal, and the decision of the original Grievance Redressal Committee \nshall be final and binding \n \nf. A Grievance Redressal Committee or any other authority having powers of \nappeal shall dispose of an appeal within 30 days of receipt of the appeal. Such \ndecision shall be given after following the principles of natural justice, \nincluding giving the parties a reasonable opportunity to be heard. The decision \nof the Grievance Redressal Committee or other authority having powers of \nappeal shall be final and binding",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "grievance_redressal.pdf",
+          "page": 22,
+          "score": 0.7439979910850525,
+          "chunk_id": "grievance_redressal_p0022_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n21 \n \n \n \n \n• Non-availability of Arogya Mitra \n• Non-Cooperation of Arogya \nMitra \n• Misconduct by Hospital Staff \n3 \nBeneficiary \nInsurance \ncompany / \nTPA \n• Demanding money for approval \nof pre-authorization \n• Misconduct by IC/ISA/TPA \nrepresentative \nDGNO / \nSGNO \n15 days of \nreceipt of \ngrievance for \nDGNO/SGNO \n \n30 days of \nreceipt of \ngrievance for \nDGRC \n• If grievance is not resolved by \nDGNO/SGNO within 15 days, case \nshall be referred to DGRC/SGRC. \n• If either party is not satisfied with \nDGNO’s/SGNO’s decision, then they \ncan appeal to DGRC/SGRC within 30 \ndays of the DGNO/SGNO order \n• DGRC/SGRC shall have 30 days to \nresolve the grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to \nresolve the grievance. \n• SGRC decision shall be final and \nbinding \n4 \nBeneficiary \nCommon \nService \nCentre (CSC) \n• Demanding extra money (above the \napproved cost of Rs. 30) for issuing \nAyushman card \n• Card issued to another family \n• Card not provided to beneficiary \n• Poor Quality of Service \nDGNO \n15 days of \nreceipt of \ngrievance for \nDGNO \n30 days of \nreceipt of \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of the \nDGNO \n• DGRC shall have 30 days to \nresolve the grievance.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "grievance_redressal.pdf",
+          "page": 25,
+          "score": 0.7426154613494873,
+          "chunk_id": "grievance_redressal_p0025_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n24 \n \n \n \n \n• Decision of the SGRC shall be final \nand binding. \n7 \nHealth Care \nProvider \nInsurance \nCompany / \nISA / TPA \n/SHA \n• Claims rejected by Insurer/SHA in \nfull or partial claim amount not \npaid \n• Demanding Money for Claim \nSettlement \n• Misconduct by ISA/TPA/ SHA \nRepresentatives \n• Non-cooperation by Insurer/ISA/ \nSHA \n• Delay in claim payment \nDGNO \n/SGNO/ \nSAA \n \n15 days of \nreceipt of \ngrievance for \nDGNO/SGNO\n/SAA \n30 days of \nreceipt of \ngrievance for \nDGRC \n \n30 days of \nreceipt of \ngrievance for \nSAA \n \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of \nthe DGNO order \n• DGRC shall have 30 days to resolve \nthe grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n•  SGRC shall have 30 days to resolve \nthe grievance \n• If either party is not satisfied with \nSGRC order, they shall approach \nthe SAA within 30 days of the \nSGRC order.  \n• The decision of SAA shall be final \nand binding. \n8 \nHealth Care \nProvider \nInsurer/ISA/ \nD istrict \nEmpanelment \n• Demanding money for \nempanelment \n• Not empaneled despite meeting all \nthe criteria \nSGRC \n30 days of \nreceipt of \ngrievance \n• SGRC shall have 30 days to resolve \nthe grievance \n• If either party is not satisfied with \n• SGRC order, they shall approach",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "grievance_redressal.pdf",
+          "page": 24,
+          "score": 0.7377302646636963,
+          "chunk_id": "grievance_redressal_p0024_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n23 \n \n \n6 \nHealth Care \nProvider \nBeneficiary \n• Misconduct or harassment by the \nbeneficiary \n• Any other \nDGNO \n15 days of \nreceipt of \ngrievance for \nDGNO \n30 days of \nreceipt of \ngrievance for \nDGRC \n• If grievance is not resolved by DGNO \nwithin 15 days, case shall be referred \nto DGRC. \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of \nthe DGNO order \n• DGRC shall have 30 days to resolve \nthe grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to resolve \n• the grievance",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 2470.679800004291,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2167,
+        "eval_ms": 0.0,
+        "eval_tokens": 259,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is per day price for bed if patient is admitted to ICU with ventilator support?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "The per day price for a bed in an Intensive care requiring ventilator support is ₹ 4,500 [5].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "antifraud_guidebook_2024.pdf",
+          "page": 79,
+          "score": 0.6914786100387573,
+          "chunk_id": "antifraud_guidebook_2024_p0079_00",
+          "text": "65\nAnnexure 3: Checklists and Reporting Formats\n15\nNumber of Beds in general ward\n \n16\nAdequate distance (4 feet) maintained between two beds \n \n17\nIs HDU available? \n \n18\nNumber of Beds in HDU\n \n19\nIs ICU available? \n \n20\nNumber of Beds in ICU\n \n21\nIs the ICU well equipped \n \n A\nStandard ICU bed\n \n B\nEquipment/monitor for the constant monitoring for vitals \n \nC\nEmergency crash cart \n \n D\nDefibrillator\n \n E\nVentilators\n \n F\nSuction pumps\n \n G\nBedside oxygen facility\n \n H\nAir conditioning \n \n22\nIs OT available? \n \n23\nNo of OT\n \n24\nNo of OT tables\n \n25\nOT sterilization facility functional \n \n26\nAdequate lights (general level illumination) is provided in  \neach OT\n \n27\nAir conditioning is provided in each OT\n \n28\nIs the OT well equipped \n \n A\nAnaesthetic machine \n \n B\nVentilator\n \n C\nLaryngoscopes (Adult/Pediatric)\n \n D\nEndotracheal tubes/laryngeal masks\n \n E\nAirways/Nasal tubes \n \n F \nSuction apparatus and connectors, \n \n G\nOxygen \n \n H\nDrugs for emergency situations\n \n I\nMonitoring equipment including ECG, ETCO2 (where \napplicable)",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 42,
+          "score": 0.6603522300720215,
+          "chunk_id": "empanelment_v2_0_p0042_00",
+          "text": "Page  42  of  64  \nii. \nSuction, oxygen supply and compressed air should be provided for each bed. \niii. \nFurther High Dependency Unit (HDU) - where such packages are mandated \nshould have the following equipment: \n1. Piped gases \n2. Multi-sign Monitoring equipment \n3. Infusion of ionotropic support \n4. Equipment for maintenance of body temperature \n5. Weighing scale \n6. Manpower for 24x7 monitoring \n7. Emergency cash cart \n8. Defibrillator. \n9. Equipment for ventilation. \n10. In case there is common Paediatric ICU then Paediatric \nequipments, e.g.: paediatric ventilator, Paediatric probes, \nmedicines and equipment for resuscitation to be available. \niv. \nHDU (high dependency unit) should also be equipped with all the \nequipment and manpower as per HDU norms. \ni) Records Maintenance: Maintain complete records as required on day-to-day basis and is \nable to provide necessary records of hospital / patients to the Society/Insurer or his \nrepresentative as and when required. \ni. \nWherever automated systems are used it should comply with MoHFW/ \nNHA EHR guidelines (as and when they are enforced) \nii. \nAll AB PM-JAY cases must have complete records maintained \niii. \nShare data with designated authorities for information as mandated. \nj) Legal requirements as applicable by the local/state health authority. \nk) Adherence to Standard treatment guidelines/ Clinical Pathways for procedures as \nmandated by NHA from time to time. \nl) Registration with the Income Tax Department. \nm) NEFT enabled bank account \nn) Telephone/Fax \no) Safe drinking water facilities. \np) Uninterrupted (24 hour) supply of electricity and generator facility with required capacity \nsuitable to the bed strength of the hospital.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "antifraud_guidelines.pdf",
+          "page": 23,
+          "score": 0.6515536308288574,
+          "chunk_id": "antifraud_guidelines_p0023_01",
+          "text": "d capacity of the provider in a month. \n24. Excessive ICU (Intensive Care Unit) admission. \n25. High number of admission at the end of the Policy Cover Period. \n26. Claims for medical management admission for exactly 24 hours to cover OPD treatment, \nexpensive investigations.  \n27. Claims with Length of Stay (LOS) which is in significant variance with the average LoS for a \nparticular ailment. \n \nDiagnosis Specific Triggers \n28. Diagnosis and treatment contradict each other. \n29. Diagnostic and treatment in different geographic locations. \n30. Claims for acute medical Illness which are uncommon e.g. encephalitis, cerebral malaria, monkey \nbite, snake bite etc. \n31. Ailment and gender mismatch. \n32. Ailment and age mismatch. \n33. Multiple procedures for same beneficiary – blocking of multiple packages even though not \nrequired.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 9,
+          "score": 0.6427981853485107,
+          "chunk_id": "hbp_2_2_manual_p0009_00",
+          "text": "Page 8 of 64 \n \n \n• \nPre and post hospitalization expenses: Expenses incurred for consultation, diagnostic tests and \nmedicines prior to admission of the patient in the same hospital and cost of diagnostic tests and \nmedicines up to 15 days after discharge from the hospital for the same ailment / surgery.  \n• \nAny other expenses related to Daycare treatment provided to the beneficiary by an EHCP. \nIf NHA finds a treatment being booked under unspecified surgical procedure repeatedly, or some \ntreatment is required to be included within the national HBP, to address a pressing health problem which \nis or have become widely prevalent, then NHA may add such treatment(s) under national HBP. \nThe benefits under the ABPM-JAY cover shall, subject to the available ABPM-JAY sum Insured, be \navailable to the beneficiary on a cashless and paperless basis at any EHCP.  \n1.4 \nPayment in special cases during hospital admission \nOnce a patient is admitted under Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (PM-JAY) in an \nEHCP, in normal course the patient will be discharged by the hospital after completing the treatment. \nHence in majority of cases, the payment to the hospital will be done based on the package booked and \nrates prescribed for that package. \nHowever, in some cases, this may not happen due to various reasons e.g. patient may leave against \nmedical advice, patient may die within the hospital or patient may need to be referred to another hospital. \nIn these special cases clarity needs to be provided to both hospitals and the payers (State Health \nAgency/ Insurance Company) regarding payments to the hospitals.These guidelines provide details of \npayments to be done in these special cases. \nThe basic principles to be followed in implementation of these guidelines are as follows \n• \nThe hospital will be paid partial amount only if the hospital provides information about deviation from \nnormal course to the respective SHA / ISA / Insurer through the IT platform as soon as possible but \nnot later than 24 hours of the deviation. The time limit may be relaxed to 72 hours for public hospitals \n• \nAdditionally, in each of these cases payment will be done only after a successful audit by the SHA / \nInsurer. \n• \nThe audit process shall be completed by the SHA/ Insurer within 15 days of receiving the information \nfrom the hospital. \n• \nIt is expected that these deviatio",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 18,
+          "score": 0.6390348672866821,
+          "chunk_id": "hbp_2_2_manual_p0018_00",
+          "text": "Page 17 of 64 \n \n \n2.2.2 Stratification \nStratification has been introduced to further drill down into procedures based on criteria such as type of \nanesthesia, bed category on admission, surgical technique etc. Stratification enables price differentiation \nof the procedure to better accommodate the nuances of the procedure performed and improve the \nassociated payment. \nFor example, the procedure of ‘Incision and Drainage of Abscess’ is split into two stratified packages with \na price differential of ₹ 5,000 between them. \ni. \nIncision and Drainage of Abscess under Local Anaesthesia \nii. \nIncision and Drainage of Abscess under General Anaesthesia \nSignificance for the user: While total price calculation would remain at the back end of the TMS, the \nend user may be required to feed in certain details of the procedure that would otherwise have been \nassumed. For example, following selection of the procedure to be performed, the TMS may ask for \ndetails such as the type of anesthesia anticipated. There may also be certain criteria that the TMS would \npick up automatically from patient details to distinguish between requirement of a pediatric / adult \nprocedure, but these back-end assumptions may be further vetoed by the treating physician based on his \nclinical judgment. However, such overridden assumptions may trigger a medical audit, and it is \nrecommended that a strong paper trail be maintained to justify such cases. \n2.2.3 Stratification in Medical Packages \nAll Medical packages in HBP 2.1 are featured as stratified packages based on the bed category of patient \nadmission. The bed category for admission and will need to be chosen at the time of selecting a \ndiagnosis. \nThe price of medical packages will continue to be calculated on the basis of the bed category, multiplied \nby the number of bed days for the patient.The per day price for bed categories will be as follows: \ni. \n₹ 1,800 for Routine Ward \nii. \n₹ 2,700 for High Dependency unit \niii. \n₹ 3,600 for Intensive care not requiring ventilator support \niv. \n₹ 4,500 for Intensive care requiring ventilator support \nSignificance for the user: There is no significant change at the user end on account of this feature of \nthe HBP 2.0, HBP 2.1 &HBP 2.2. The TMS will continue to calculate the final price of the medical \npackage at the back end based on patient bed category and number of days’ stay.",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1853.4925999992993,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2445,
+        "eval_ms": 0.0,
+        "eval_tokens": 25,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "By what timeline, mortality report section 5.1 and 5.2 has to be filled by the hospital and sent?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "Section 5.1 and 5.2 are to be filled by the hospitals and sent at the time of beneficiaries’ death (within 48 hrs) [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 35,
+          "score": 0.7763946056365967,
+          "chunk_id": "field_investigation_manual_p0035_00",
+          "text": "Field Investigation and Medical Audit Manual | 31 \nAnnexure 5.1: Mortality Report   \nSource: www.sast.gov.in  \nSection 5.1. and 5.2. is to be filled by the hospitals and sent at the time of beneficiaries’ death (within 48 \nhrs) and 5.3 to be submitted at claim submission by the hospital  \n5.1 Death Summary (A brief note)  \n• \nHospital Name \n• \nHospital ID \n• \nPatient ID (e-card number) \n• \nPatient Characteristics \n• \nName \n• \nAge \n• \nSex  \n• \nLength of Admission in days  \n• \nClinical Diagnosis (es) on Admission  \n• \nClinical diagnosis(es) on Death \n• \nEmergency or Elective \n• \nDate of Admission:  \n• \nDate of Death:  \n \n5.2 Progress of the patient during hospitalization  \n• \nAbnormal Investigations:  \n• \nHematology, Biochemistry, Radiology, Microbiology Others  \n• \nWhat was the treatment provided?  \n• \nWere there any clinical errors, omissions, process problems that hindered the process of giving good \nquality care?  \n• \nWere there identifiable clinical risks/incidents?  \n• \nWere there any of the clinical risks/incidents due to delay in Diagnosis, Delay in Treatment, Medical \nClinical Errors, Nursing Clinical Errors, Medication Errors, Process Errors  \n• \nPlease give further details below \n• \nWere all standard protocols followed? \n• \nWhat according to the treating doctor is the cause of death and contributing factors? \n• \nAny other remarks",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 36,
+          "score": 0.7214312553405762,
+          "chunk_id": "field_investigation_manual_p0036_00",
+          "text": "32  Field Investigation and Medical Audit Manual \n5.3 The Hospital would prepare ‘MORTALITY REPORT ’ as mentioned below :  \nSection A: General Information:  \n• \nPatient details:  \n• \nName:  \n• \nAge:  \n• \nSex:  \n• \nDOA:  \n• \nDate of Surgery:  \n• \nDiagnosis:  \n• \nTreatment given:   \n• \nSurgery/Procedure/ Radiotherapy/ Chemotherapy/ Others (specify)  \n• \nHospital name:  \n• \nName of Treating Doctor  \nSection B -  Case summary:  \nPlease provide a summary of the Case in the form of narrative – including complaints at the time of \nadmission, chronology of events up to death of the patient -  \nSection C: Case Assessment  \n1. Were there any areas of CONCERN or ADVERSE EVENTS in the management of this patient?  - \nYes No  \n2. Was surgery performed? Yes/ No  \n3. Were there any areas of Concern, or Adverse Events in any of the following?  \nOperation/procedure was performed, or treatment provided?\n  \nYes  \nNo \nNA  \nPre-anesthetic checkup/fitness for surgery/treatment  \n \n \n \nDecision to operate  \n \n \n  \nChoice of operation  \n \n \n  \nTiming of operation (too late, too soon, wrong time of day)  \n \n \n   \nIntra-operative process  \nProblems in functioning of OT  \nGrade / experience of surgeon deciding  \nGrade / experience of surgeon operating  \nPost-operative period",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "antifraud_guidebook_2024.pdf",
+          "page": 91,
+          "score": 0.6987744569778442,
+          "chunk_id": "antifraud_guidebook_2024_p0091_00",
+          "text": "77\nAnnexure 3: Checklists and Reporting Formats\nSection D: R ecord of cause of death Hospital mortality review findings \nPrimary cause of death: ________________________________________________________ \nICD code: __________________________________________________________________ \nSecondary cause of death: ______________________________________________________ \nICD Code: __________________________________________________________________ \nAntecedent cause of death: _____________________________________________________ \nICD code: ______________________________________________________________ \nFINAL RECOMMENDATIONS (if any) OF THE MORTALITY REVIEW \n1. ________________________________________________________________________ \n2. ________________________________________________________________________ \n3. ________________________________________________________________________\nAttestation by: \nS.No.\nName \nDesignation \nSignature \n1\n2\n3\nDate:\n9. Mortality Audit Report (By SHA)\nSection A: General Information \nPatient details: \nName: \n \nAge:  \n \n \n \nSex:  \n \n \n \nPre-auth No.:\n \nDOA:   \n \n \nDOD: \nDiagnosis: \nReviewing Doctor: \nPlease provide a summary of the Case in the form of narrative \n_________________________________________________________________________",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 39,
+          "score": 0.692101240158081,
+          "chunk_id": "field_investigation_manual_p0039_00",
+          "text": "Field Investigation and Medical Audit Manual | 35 \nAnnexure 5.2: Mortality Audit Report (By SHA) \n  \nSection A: General Information  \nPatient details:  \nName:  \n \nAge:    \n  \n  \nSex:    \n  \nPre-auth No.  \n \nDOA:   \n  \n  \nDOD:  \nDiagnosis:  \nReviewing Doctor:  \nPlease provide a summary of the Case in the form of narrative  \n  \n \n___________________________________________________________  \nSection B: Case Note Assessment   \nWere there any areas of CONSIDERATION, of CONCERN or ADVERSE \nEVENTS in the management of this patient?  \nYes   \nNo  \n   \n1 Describe the most significant event:  \n \nWas surgery performed?  Yes   \n  \nNo  \nWere there any Areas of Consideration, of Concern, or Adverse Events in \nany of the following areas if an operation was performed?   \n  \nDiscussion points    \n  \n  \n  \n  \n  \n    Yes  \n \n No   N/A  \nPre anaesthetic check up/fitness for surgery  \nDecision to operate",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 17,
+          "score": 0.6887702345848083,
+          "chunk_id": "field_investigation_manual_p0017_00",
+          "text": "Fraud Investigation and Medical Audit Manual | 13 \n2. Mortality Audit  \nAs per Guidelines, 100% of the mortality cases should be audited. The hospitals is required to provide \nall the relevant information as specified in Annexure 5.1 and the same would be reviewed and verified \nby State Mortality and Morbidity Committee (setup under SHA) . Based on the review gaps would be \nidentified and necessary actions would be taken to improve patient safety and quality of care.  (Annexure \n5.2).  \n \nPrimary objective of mortality audit is to  \n• \nEliminating preventable medical mistakes,    \n• \nGuarding against the impact of human error and    \n• \nEstablishing systems to safeguard beneficiary’s health and well‐being. \n \n2.1. Process flow for Mortality Audit  \n \nEvery death occurring in the Empanelled Health Care Provider (EHCP) should have a mortality \nreport prepared by the hospital. Each EHCP should submit a mortality report to SHA at the time of \nclaims submission within 7 days (Refer Annexure 5.1 for Mortality Report). State Mortality and \nMorbidity Committee to conduct desk/ field mortality audit of all mortality cases (Refer Annexure \n5.2 for Mortality Audit Report). \n.",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 2180.4320000010193,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 1865,
+        "eval_ms": 0.0,
+        "eval_tokens": 36,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "How much incentive will hospital receive with full NABH accreditation?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "Hospitals with full NABH accreditation receive a 15% incentive [1], [3].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 51,
+          "score": 0.7536118626594543,
+          "chunk_id": "hbp_2_2_manual_p0051_00",
+          "text": "Page 50 of 64 \n \n \nS. No. \nCriteria \nIncentive \n(Over and above base \nprocedure rate) \n1 \nEntry level NABH \n10% \n2 \nFull NABH accreditation \n15% \n3 \nSituated in Delhi or some other Metro \n10% \n4 \nAspirational district \n10% \n5 \nRunning PG / DNB course in the empanelled specialty \n10% \n \nThese percentage incentives are added by compounding rather than in simple way. Thus, for a \npackage costing Rs. 10,000 otherwise, the payment made for a hospital with full NABH accreditation \nin an aspirational district will be ₹10,000 x 1.15 x 1.10 = ₹12,650. It will not be calculated as ₹10,000 \nx 1.25 = ₹12,500 \n \n27. What are the Aspirational districts? \nA. 117 Aspirational districts have been identified by NITI Aayog based upon composite indicators \nfrom Health & Nutrition, Education, Agriculture & Water Resources, Financial Inclusion and Skill \nDevelopment and Basic Infrastructure which have an impact on Human Development Index. \n \n28. What are the Metros? \nA. The Metros include Delhi (UA) (including Faridabad, Ghaziabad, NOIDA and Gurugram), Greater \nMumbai (UA), Kolkata (UA), Chennai (UA), Bangalore / Bengaluru (UA), Ahmedabad (UA), \nHyderabad (UA) and Pune (UA). \n[Cities classified as “X” in Ministry of Finance’s OM No. 2/5/2014-E.II(B) dated 21.07.2015] \n \n29. What is an Add-on Procedure? \nA. Certain packages which can be booked with a primary package at a 100% reimbursement contrary \nto the existing principle of 50% reimbursement of the second package. These packages are defined \nas Add-on Packages. \n \n30. What are Stand-Alone Procedures? \nA. For Fraud prevention and control, some packages have been identified that cannot be booked in \ncombination with any other package / procedure. These are termed as stand-alone packages in the \nHBP 2.0",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "operation_manual.pdf",
+          "page": 17,
+          "score": 0.7398208379745483,
+          "chunk_id": "operation_manual_p0017_00",
+          "text": "17 | P a g e \n \nNABH’s Full Accreditation/JCI accreditation can apply for AB PMJAY Gold quality certification \ndirectly. Hospitals which are not certified by any accreditation body need to apply for bronze \ncertificate in order to get the quality certification. After completion of six months from the date of \nreceiving the certificate, hospitals can also upgrade to Silver and later to Gold. Also, a Guideline \non the step-wise process for non-empanelled hospitals for AB PM-JAY Quality certificate is \ndeveloped by NHA to promote quality certification in hospitals. \n \n \n \nFor further details regarding the guidelines and process, please visit the website on the link, \nhttps://pmjay.gov.in/resources/documents and refer to the Hospital Empanelment & Quality \nAssurance section for AB PM-JAY Quality guidelines  \nAB PM-JAY Quality certification portal: https://pmjay.qcin.org/Index \n  \n \n6. Health Benefit Packages (HBP) \n \nHealth Benefit Packages in this social health insurance scheme, not only define the scope of \nservices but also determine the extent of financial risk protection to the beneficiaries. It is \nenvisaged that the HBP cover diseases with high incidence/prevalence rates and the diseases \nwhich contribute to the maximum Out of Pocket expenditure (OOPE). \n \nThe benefits within this Scheme under the basic risk covered are provided on a cashless basis \nto the beneficiaries up to the limit of Rs. 5,00,000/ and includes: \n Hospitalization expense \n Day-care treatment (as applicable) \n Follow-up care \n Pre and post hospitalization expenses \n New-born child/children \n \nKey specialities covered under the HBP master package are as follows: \n \nSpecialities covered in HBP packages \nBurns Management \nOphthalmology \nCardiology \nOral and Maxillofacial Surgery \nCardiothoracic & Vascular surgery \nOrthopaedics \nEmergency Room Package \nOrgan & Tissue Transplant \nGeneral Medicine \nOtorhinolaryngology \nGeneral Surgery \nPaediatric Medical management \nInfectious Diseases \nPaediatric surgery \nInterventional Neuroradiology \nPlastic & Reconstructive Surgery \nMedical Oncology \nPolytrauma",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "operation_manual.pdf",
+          "page": 7,
+          "score": 0.7301179766654968,
+          "chunk_id": "operation_manual_p0007_00",
+          "text": "7 | P a g e \n \nIII. Benefits for EHCPs under AB PM-JAY \n \nBecause of the scale of coverage of the scheme, Ayushman Bharat (AB PM-JAY) is a unique \nprogramme owing to the numerous stakeholders involved. The scheme offers several \nadvantages to the key stakeholders of the scheme, i.e., beneficiaries, service providers, SHAs, \nTPA & insurance agencies. AB PM-JAY is one of the schemes that promotes participation of \nprivate hospitals in Government scheme similar to public hospitals. Some of the unique aspects \nof the scheme are mentioned below: \n \nIncentives for Hospitals: Hospitals will receive incentives over and above basic package rates. \nThe hospitals with better quality standards will be rewarded for the same based on the incentive \nmechanisms shown below. However, the given incentive structure is indicative and might vary \nacross states: \n \nS. No \nCriteria \nIncentive* \n1 \nAB PM-JAY Bronze Quality certification \n            5% \n2 \nNational Level NQAS Certified EHCPs” \n           15% \n3 \nEntry Level NABH \n10% \n4 \nFull NABH accreditation \n15% \n5 \nSituated in Metro City# \n10% \n6 \nAspirational District$ \n10% \n7 \nRunning PG/DNB course in the empanelled specialities \n10% \n*Incentive structure is indicative and may vary across States. \n#Metro cities include Delhi (Including Faridabad, Ghaziabad, Noida, Gurugram), Greater Mumbai, \nKolkata, Chennai, Bangalore, Ahmedabad, Hyderabad and Pune \n$ as per the listed districts by NITI Aayog \n“NQAS incentive will be applicable from 1st April, 2022 \n \nLarge Patient base: Ayushman Bharat PM-JAY is the largest health assurance scheme in the \nworld which aims at providing a health cover of Rs. 5 lakhs per family per year for secondary \nand tertiary care hospitalization across public and private empanelled hospitals in India to over \n10.74 crores poor and vulnerable families (approximately 50 crore beneficiaries) that form the \nbottom 40% of the Indian population. The scheme provides a large patient base to hospitals and \nhelps them to fill their unfilled/unoccupied beds. Hospitals may achieve higher revenue without \nspending additional fixed costs on the infrastructure.  \n \n",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 9,
+          "score": 0.6767784357070923,
+          "chunk_id": "hbp_2_2_manual_p0009_00",
+          "text": "Page 8 of 64 \n \n \n• \nPre and post hospitalization expenses: Expenses incurred for consultation, diagnostic tests and \nmedicines prior to admission of the patient in the same hospital and cost of diagnostic tests and \nmedicines up to 15 days after discharge from the hospital for the same ailment / surgery.  \n• \nAny other expenses related to Daycare treatment provided to the beneficiary by an EHCP. \nIf NHA finds a treatment being booked under unspecified surgical procedure repeatedly, or some \ntreatment is required to be included within the national HBP, to address a pressing health problem which \nis or have become widely prevalent, then NHA may add such treatment(s) under national HBP. \nThe benefits under the ABPM-JAY cover shall, subject to the available ABPM-JAY sum Insured, be \navailable to the beneficiary on a cashless and paperless basis at any EHCP.  \n1.4 \nPayment in special cases during hospital admission \nOnce a patient is admitted under Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (PM-JAY) in an \nEHCP, in normal course the patient will be discharged by the hospital after completing the treatment. \nHence in majority of cases, the payment to the hospital will be done based on the package booked and \nrates prescribed for that package. \nHowever, in some cases, this may not happen due to various reasons e.g. patient may leave against \nmedical advice, patient may die within the hospital or patient may need to be referred to another hospital. \nIn these special cases clarity needs to be provided to both hospitals and the payers (State Health \nAgency/ Insurance Company) regarding payments to the hospitals.These guidelines provide details of \npayments to be done in these special cases. \nThe basic principles to be followed in implementation of these guidelines are as follows \n• \nThe hospital will be paid partial amount only if the hospital provides information about deviation from \nnormal course to the respective SHA / ISA / Insurer through the IT platform as soon as possible but \nnot later than 24 hours of the deviation. The time limit may be relaxed to 72 hours for public hospitals \n• \nAdditionally, in each of these cases payment will be done only after a successful audit by the SHA / \nInsurer. \n• \nThe audit process shall be completed by the SHA/ Insurer within 15 days of receiving the information \nfrom the hospital. \n• \nIt is expected that these deviatio",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 13,
+          "score": 0.6725685596466064,
+          "chunk_id": "hbp_2_2_manual_p0013_00",
+          "text": "Page 12 of 64 \n \n \nward category \nDeath on table \n75% of total package amount \nAs per LOS prior to incision | 75% of \npackage price post incision \nDeath after surgery \n100% of package amount \nNo change to existing clause \nReferral before surgery \nNo payment \nPayment as per length of stay and \nward category \nReferral after PAC \nNo fixed percentage for referring \nReferred hospital may raise a new \npre-auth \n15% of package price to referring \nEHCP | 85% to referred EHCP \nReferral after surgery \n75% of total package amount to \nreferring \nhospital \nReferred hospital may raise a new \npre-auth \n75% of total package amount to \nreferring \nhospital \nReferred hospital may raise a new \npre-auth \nPostponed \n/ \ncancelled \nsurgery \ncases \nNo payment \nPayment as per length of stay and \nward category \n \nIn case of unforeseen eventsor pandemic situations,if scheduled surgeries may be postponed and \nthe patient may be discharged without surgery, in those scenarios, claims may be processedas per \npartial payment policy i.e. payment as per length of stay and ward category. \n*This is primarily applicable for NHCPs and public hospitals and for private hospitals, concurrence \nmay be sought from NAFU. \n1.5 \nUnspecified surgical packages \nTo ensure that PM-JAY beneficiaries are not denied care, for treatments/procedures that do not feature \nin the listed interventions, there is an exclusive provision that has been enabled in the TMS (transaction \nmanagement system) for blocking such treatments, subject to satisfying certain defined criteria (as \nmentioned)  \n1.5.1 Using an unspecified package \nCriteria for treatments that can be availed under unspecified \n• \nOnly for surgical treatments",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 3216.29060000123,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2892,
+        "eval_ms": 0.0,
+        "eval_tokens": 20,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What should be minimum revenue of hospital to be eligible for empanelment application?",
+      "mode": "vector",
+      "k": 5,
+      "answer": "I cannot answer this from the provided sources.",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 40,
+          "score": 0.7861887216567993,
+          "chunk_id": "empanelment_v2_0_p0040_00",
+          "text": "Page  40  of  64  \nAnnex 1: Detailed Empanelment Criteria \n \nMinimum Criteria \n \nA Hospital would be empaneled as a network private hospital with the approval of the \nrespective State Health Authority5 if it adheres with the following minimum criteria: \na) Should have at least 10 inpatient beds with adequate spacing and supporting staff as per \nnorms. \ni. \nExemption may be given for single-speciality hospitals like Eye ,ENT and \nStandalone Dialysis Centres. \nii. \nGeneral ward - @80sq ft per bed, or more in a Room with Basic amenities- bed, \nmattress, linen, water, electricity, cleanliness, patient friendly common washroom \netc. Non AC but with fan/Cooler and heater in winter \nb) It should have adequate and qualified medical and nursing staff (doctors6 & nurses7), \nphysically in charge round the clock; (necessary certificates to be produced during \nempanelment). \nc) Fully equipped and engaged in providing Medical and Surgical services, commensurate to \nthe scope of service/ available specialties and number of beds. \ni. \nRound-the-clock availability (or on-call) of a Surgeon and Anesthetist where surgical \nservices/ day care treatments are offered. \nii. \nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and \nAnaesthetist where maternity services are offered. \n \n5 In order to facilitate the effective implementation of AB PM-JAY, State Governments shall set up the State Health Authority (SHA) \nor designate this function under any existing agency/ trust designated for this purpose, such as the state nodal agency or a trust \nset up for the state insurance program.",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 27,
+          "score": 0.7737197875976562,
+          "chunk_id": "empanelment_dec2021_p0027_00",
+          "text": "21\nAnnexure 1\nCriteria for Empanelment\nThis annexure contains the basic minimum criteria for empanelment for all the healthcare service \nproviders. It also covers the criteria in Aspirational Districts and additional criteria for empanelment of \nspecialties under the scheme. \n1. Minimum Criteria\n\t\nA hospital would be empanelled as a network private hospital with the approval of the respective \nState Health Agency3 if it adheres with the following minimum criteria:\na)\t\nShould have at least 10 inpatient beds with adequate spacing and supporting staff as per norms:\ni.\t\nExemption may be given for dental and day-care procedure hospitals like Eye, ENT, and \nStandalone Dialysis Centres.\nii.\t\nGeneral ward - @80sq ft per bed, or more in a room with basic amenities- bed, mattress, \nlinen, water, electricity, cleanliness, patient friendly common washroom etc. Non-AC but \nwith fan/cooler and heater in winter\nb) It should have adequate and qualified medical and nursing staff (doctors4 & nurses5), physically \nin charge round the clock; (necessary certificates to be produced during empanelment). The \nstate should have specific guidelines on the number of hospitals a doctor can work. \nc)\t\nFully equipped and engaged in providing medical and surgical services, commensurate to the \nscope of service/available specialties and number of beds:\ni.\t\nRound-the-clock availability (or on-call) of a Surgeon and Anaesthetist where surgical \nservices/day care treatments are offered.\nii.\t\nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and Anaesthetist \nwhere maternity services are offered.\n3\t\nIn order to facilitate the effective implementation of AB PM-JAY, state governments shall set up the State Health Authority \n(SHA) or designate this function under any existing agency/trust designated for this purpose, such as the State Nodal Agency \nor a trust set up for the state insurance program.\n4 \nQualified doctors are a MBBS approved as per the Clinical Establishment Act/state government rules & regulations as \napplicable from time to time.\n5 \nQualified nurse per unit per shift shall be available as per requirement laid down by the Nursing Council/Clinical Establishment \nAct/State government rules & regulations as applicable from time to time. Norms vis a vis bed ratio may be spelt out.\nAnnexure 1",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 3,
+          "source_file": "operation_manual.pdf",
+          "page": 13,
+          "score": 0.7613012194633484,
+          "chunk_id": "operation_manual_p0013_00",
+          "text": "13 | P a g e \n \nscheme. Empanelment is one such key aspect which while balancing adequate access would \nalso ensure appropriate patient safety and quality. \n \nCriteria for Empanelment for EHCPs \nConsidering the supply side characteristics, two types of empanelment criteria have been \nevolved.  \n \n General criteria – For hospitals that provide non-specialised general medical and surgical \ncare with or without ICU and emergency services. \n \n Speciality criteria (for clinical specialities) – For each speciality, a specific set of criteria \nhas been identified. Under PM-JAY, a hospital is not allowed to select the risk, which means \nit cannot apply for selected specialities and must agree to offer all specialities to PM-JAY \nbeneficiaries that are offered by it. However, to offer a specialised clinical service, the \nhospital must have necessary specific infrastructure and HR in place as mentioned in the \nspecial criteria developed under PM-JAY for the same. \n \n \nFor further details regarding the guidelines and process, please visit the website on the link, \nhttps://pmjay.gov.in/resources/documents \nand \nrefer \nto \nthe \nHospital \nnetwork \n& \nEmpanelment and Quality Assurance   \nLink for HEM portal \nhttps://hospitals.pmjay.gov.in/empApplicationHome.htm?actionVal=loginPage \n \n \n \n \n2. Hospital Empanelment Module (HEM) \n \nA web-based platform Hospital Empanelment Module (HEM) has been developed for \nregistration of a healthcare provider willing to get empanelled under the flagship program \nAB PM-JAY. Every hospital needs to visit the web portal and create an account for themselves \nand must show a willingness to empanel itself. The system allows registering the hospital, after \nthe hospital's consent for empanelment. Further, HEM creates an account with an exclusive \nhospital reference number and password. Using these credentials, the hospital has to login into \nthe system to start filling the application form with the following sections: \n \nUser section \nCivil infrastructure \nHospital basic information \nMedical infrastructure \nFinancial details \nGeneral services \nSpecialities offered \nMan-power details \nLicenses and certifications \n \n \nFurther, HEM portal will be helpful for the EHCPs in case they need to update (change of contact \ndetails, change in specialities etc.) on the aforesaid information after empanelment by using \nHEM login credentials. \n \n",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 12,
+          "score": 0.7561063766479492,
+          "chunk_id": "empanelment_v2_0_p0012_00",
+          "text": "Page  12  of  64  \nfor application. Every hospital needs to visit the web portal and create an account for \nthemselves. \n \nThe hospital/healthcare provider must show willingness to empanel the hospital under PM-\nJAY by visiting the web portal using URL https://hospitals.pmjay.gov.in . After agreeing on \nthis section, the system will provide an opportunity to create an account for the hospital. \nThis section includes of the following information to be provided by the hospital: \n \n• State of the hospital \n• District of the hospital \n• Name of the hospital \n• Hospital parent type: \no Single hospital \no Group of hospitals \n• Hospital type: \no Public Hospital \no Private (for profit) hospital \no Private (not for profit) hospital \no Government of India \no Temporary Empanelment – HEM Lite \n• Contact person mobile number \n• Contact person email id",
+          "pre_rerank_rank": null
+        },
+        {
+          "rank": 5,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 30,
+          "score": 0.7479714155197144,
+          "chunk_id": "empanelment_dec2021_p0030_00",
+          "text": "24\nGuidelines on Hospital Empanelment and De-Empanelment\n2. \tCriterion for Aspirational Districts\n\t\nCriterion for HCPs empanelment in Aspirational Districts as per the listed districts by NITI Aayog \n(Annexure 4) following relaxations are provided. All the criteria remain the same for Aspirational \nDistricts as mentioned above apart from the following:\ni.\t\nMinimum number of inpatient beds required for empanelment, should have 5 inpatient beds \nwith adequate spacing and supporting staff as per norms unless providing day-care packages \ncovered under PM-JAY.\nii.\t\nMinimum number of doctors and nursing staff required for empanelment, Doctor-1 (minimum \nQualification MBBS). \niii. Requirements of licences and certificates – Hospital registration certificate as per state law is \nmandatory, if applicable.\niv. Requirement of equipment according to the defined scope of services -Hospital needs to be \nfully equipped.\nv.\t\nRequirement of equipment and services in emergency- life saving and resuscitation equipment \nas required by facility.\nvi.\t Position of the ICU/HDU -The unit is to be situated in the same building or referral linkage with \nhospitals where ICU/HDU facility is available (mandatory self-declaration) through an MoU or tie \nup.\nvii.\t Requirement of space for AB PM-JAY kiosk - Provide space for a working desk for AB PM-JAY \nbeneficiary management (AB PM-JAY non-medical coordinator) at the hospital main entrance \narea.\nviii.\t Criteria for dialysis services for nephrology and urology surgery facility - dialysis unit either \ninhouse or tie-up.\nix.\t Criteria for OT Services with staff requirement- Fully equipped Operation Theatre of its own with \nqualified nursing staff (Minimum qualification - ANM Course) under its employment round the \nclock.\nx.\t\nCasualty should be equipped with minimum Emergency Tray. \n3.\t Advanced Criteria\n\t\n",
+          "pre_rerank_rank": null
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 2930.470500003139,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2440,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is cover amount under PM JAY for family floater basis?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "The benefit cover under the scheme is INR 5,00,000 on a family floater basis [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "stg_manual.pdf",
+          "page": 7,
+          "score": 3.038577079772949,
+          "chunk_id": "stg_manual_p0007_01",
+          "text": "practitioners. If implemented properly, STGs can be \ninclusive in their application (1).\nThe HWCs herald a whole new scene in increasing \nresponsiveness of health care services and in reaching \nthe needs of marginalized sections of society with primary \nhealth care teams. Several Sub health Centers (SHCs), \nPrimary Health Centers (PHCs) and Urban Health Centers \n(UHCs) are going to be made into Health Wellness \nCenters by 2022.\nThe second component under Ayushman Bharat is the \nPradhan Mantri Jan Arogya Yojana or AB PM-JAY as \nit is popularly known. This scheme was launched on 23rd \nSeptember 2018 in Ranchi, Jharkhand by the Hon’ble \nPrime Minister of India, Shri Narendra Modi. National \nHealth Authority (NHA) is the Nodal Agency set up for \nscheme implementation and oversight.\nAB PM-JAY is the largest health assurance scheme in the \nworld which aims at providing a health cover of Rs. 5 \nlakhs per family per year for secondary and tertiary care \nhospitalization to over 10.74 crores poor and vulnerable \nfamilies (approximately 50 crore beneficiaries) that form \nthe bottom 40% of the Indian population. \nThe primary objectives for launching AB PM-JAY were to \nensure \ncomprehensive \ncoverage \nfor \ncatastrophic \nillnesses, reduce catastrophic out-of-pocket expenditure, \nimprove access to hospitalisation care, reduce unmet \nneeds, and to converge various health insurance schemes \nacross the States.\nThe benefit cover under the scheme includes INR \n5,00,000 on a family floater basis which can be used by \none or all members of the family. AB PM-JAY has been \ndesigned in such a way that there is no cap on family size \nor age of members. In addition, pre-existing diseases are \ncovered from the very first day. This means that any \neligible person suffering from any medical condition \nbefore being covered by AB PM-JAY will now be able to \nget treatment for all those medical conditions as well \nunder this scheme right away without any waiting period.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 2,
+          "source_file": "operation_manual.pdf",
+          "page": 7,
+          "score": 1.453157901763916,
+          "chunk_id": "operation_manual_p0007_00",
+          "text": "7 | P a g e \n \nIII. Benefits for EHCPs under AB PM-JAY \n \nBecause of the scale of coverage of the scheme, Ayushman Bharat (AB PM-JAY) is a unique \nprogramme owing to the numerous stakeholders involved. The scheme offers several \nadvantages to the key stakeholders of the scheme, i.e., beneficiaries, service providers, SHAs, \nTPA & insurance agencies. AB PM-JAY is one of the schemes that promotes participation of \nprivate hospitals in Government scheme similar to public hospitals. Some of the unique aspects \nof the scheme are mentioned below: \n \nIncentives for Hospitals: Hospitals will receive incentives over and above basic package rates. \nThe hospitals with better quality standards will be rewarded for the same based on the incentive \nmechanisms shown below. However, the given incentive structure is indicative and might vary \nacross states: \n \nS. No \nCriteria \nIncentive* \n1 \nAB PM-JAY Bronze Quality certification \n            5% \n2 \nNational Level NQAS Certified EHCPs” \n           15% \n3 \nEntry Level NABH \n10% \n4 \nFull NABH accreditation \n15% \n5 \nSituated in Metro City# \n10% \n6 \nAspirational District$ \n10% \n7 \nRunning PG/DNB course in the empanelled specialities \n10% \n*Incentive structure is indicative and may vary across States. \n#Metro cities include Delhi (Including Faridabad, Ghaziabad, Noida, Gurugram), Greater Mumbai, \nKolkata, Chennai, Bangalore, Ahmedabad, Hyderabad and Pune \n$ as per the listed districts by NITI Aayog \n“NQAS incentive will be applicable from 1st April, 2022 \n \nLarge Patient base: Ayushman Bharat PM-JAY is the largest health assurance scheme in the \nworld which aims at providing a health cover of Rs. 5 lakhs per family per year for secondary \nand tertiary care hospitalization across public and private empanelled hospitals in India to over \n10.74 crores poor and vulnerable families (approximately 50 crore beneficiaries) that form the \nbottom 40% of the Indian population. The scheme provides a large patient base to hospitals and \nhelps them to fill their unfilled/unoccupied beds. Hospitals may achieve higher revenue without \nspending additional fixed costs on the infrastructure.  \n \n",
+          "pre_rerank_rank": 11
+        },
+        {
+          "rank": 3,
+          "source_file": "antifraud_guidebook_2024.pdf",
+          "page": 13,
+          "score": 1.2149853706359863,
+          "chunk_id": "antifraud_guidebook_2024_p0013_00",
+          "text": "xi\n﻿ \u0018 ﻿﻿ About Practitioners’ Guidebook\nAbout Practitioners’ \nGuidebook\nAyushman Bharat Pradhan Mantri Jan Arogya \nYojana (AB PM-JAY) offers annual hospitalization \ncover of INR 5,00,000 per family to more than 10 \ncrore beneficiary families, that is approximately \nmore than 40 percent of the country’s population. \nThis unprecedented effort of the Government \nof India is likely to have a significant impact on \nthe poor and vulnerable population’s access to \nsecondary and tertiary hospital care. \nThe National Health Authority (NHA) has \ndeveloped \na \nrobust \nnational \nanti-fraud \nframework to prevent integrity violations within \nAB PM-JAY. This Anti-Fraud Management \nPractitioners’ Guidebook has been designed as \na comprehensive reference Guidebook for of all \nsuch efforts and a ready reckoner for AB PM-JAY \npractitioners in their efforts to prevent, detect, \nmitigate associated risks and deter fraud. \nThe purpose of Guidebook is to help State Anti-\nFraud Unit (SAFU) team plan, implement and \nprioritize operational level actions required to be \ntaken at their end for effective fraud control in \ntheir respective State/UT. However, its purpose \nis not to substitute thorough knowledge and \nunderstanding of original guidelines, manuals and \ndashboards etc. in their entirety, reference links \nfor which are also provided in the Guidebook. \nThis Guidebook does not aim to provide all the \ninformation each State Health Agency (SHA) \nmay require. This Guidebook may also not be \napplicable to all SHAs uniformly in all aspects and \nit is not possible for National Health Authority \nto understand the applicability and particular \nneeds of each State and/or user which utilises the \nunderstated guidelines. \nEach SHA should conduct its own assessment \nand analysis and should check the applicability \nof guidelines as compiled under this Guidebook \nfor its reference and where necessary add/\nobtain independent advice from Competent \nAuthorities.\nA word of caution to be exercised - as Guidelines, \nIT systems and processes are modified/added \nto address emerging fraud scenarios, and also \nthat legal provisions are evolving and will become \napplicable as per the applicable laws. SHA should \nalso ensure the applicability of laws, statutes \nand/or precedence as may be applicable at State \nlevel in addition to the ones listed. It is important \nfor SAFU members to keep themselves abre",
+          "pre_rerank_rank": 10
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 7,
+          "score": 0.9942592978477478,
+          "chunk_id": "empanelment_dec2021_p0007_00",
+          "text": "1\n1. Introduction\n1. Introduction\n1.1.\t The Government of India launched the Ayushman Bharat Pradhan Manti Jan Arogya Yojana (PM-JAY) \nin September 2018. The core aim of this scheme is to reduce the financial burden on the poorest and \nmost vulnerable population and ensure their access to quality health services, to accelerate India’s \nprogress towards the achievement of Universal Health Coverage (UHC). PM-JAY covers the bottom \n40 percent of the Indian population or about 10.74 crore households. The inclusion of households is \nbased on the deprivation and occupational criteria of the Socio-Economic Caste Census 2011 (SECC \n2011) for rural and urban areas. PM-JAY covers secondary and tertiary care costs of up to Rs. 5,00,000 \nannually for each entitled family, provided through a network of public and empaneled private \nhospitals.\n1.2.\t The service provider network under PM-JAY includes government healthcare facilities having 5 or \nmore beds capable of providing inpatient services and large numbers of empaneled private hospitals \nacross states where PM-JAY is implemented. This deemed empanelment of public providers under the \nPM-JAY provides them with an unprecedented opportunity to mobilize and independently manage \nrevenues earned through claims for treatment provided to PM-JAY beneficiaries. Private hospitals \nempaneled under PM-JAY are expected to benefit from economies of scale for PM-JAY beneficiaries \nand assured timely payment within the stipulated timeline through a web-based system.",
+          "pre_rerank_rank": 12
+        },
+        {
+          "rank": 5,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 3,
+          "score": 0.11366289108991623,
+          "chunk_id": "field_investigation_manual_p0003_00",
+          "text": "Field Investigation and Medical Audit Manual |  \nFOREWORD \nNational Health Authority \nMinistry of Health and Family Welfare Government of India \n \n \n  \nAyushman Bharat – Pradhan Mantri Jan Arogya Yojana (PM-JAY) endeavours to offer secondary and \ntertiary health coverage of Rs 5,00,000 to more than 10 crore beneficiary families, accounting for more than \n40 percent of India’s population at empanelled hospitals. This unprecedented effort of the Government of \nIndia is likely to have a significant positive impact on the poor and vulnerable population’s access to high \nquality healthcare.   \nGlobal experience shows that integrity violations in health insurance programs are high. Fraud in such \nprograms not only results in financial losses but have a much greater impact on people’s health. The ultimate \nresponsibility to effectively detect, prevents, and deter fraud lies with the State Health Agencies (SHA). \nStrong anti-fraud efforts are important not only from the perspective of reducing the adverse impact on \nscheme finances and for safeguarding beneficiary health but also to mitigate any reputational risk faced by \nthe SHA, state and the scheme resulting from fraud. Hence, SHA’s anti-fraud efforts are key for ensuring \neffective implementation of PM-JAY and it is critical that a “zero tolerance” approach to fraud be internalized \nand permeate all aspects of management of the scheme.   \nWith this spirit, the National Health Authority has previously developed Anti-Fraud Guidelines, released by \nHon’ble Health Minister on 29th August 2018 laying down the overall vision and roadmap for combating \nfraud and abuse that could be perpetrated under PM-JAY. To bring uniformity and consistency in antifraud \nactions and build capacity in SHAs, NHA is proud to share the updated version of the Field Investigation \nand Medical Audit Manual for PM-JAY. We sincerely hope that state governments participating in PM-JAY \nwill find this updated manual helpful in the management of anti-fraud activities in their respective States.  \n  \nDr. Indu Bhushan   \nChief Executive Officer   \nNational Health Authority",
+          "pre_rerank_rank": 19
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1335.329500005173,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2711,
+        "eval_ms": 0.0,
+        "eval_tokens": 26,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is the minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "For a hospital to be empanelled under PM-JAY, the minimum requirement is at least 10 inpatient beds [1, 3]. However, for hospitals located in Aspirational Districts, the minimum requirement is 5 inpatient beds, unless the hospital is providing day-care packages covered under PM-JAY [2].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 40,
+          "score": 6.702600955963135,
+          "chunk_id": "empanelment_v2_0_p0040_00",
+          "text": "Page  40  of  64  \nAnnex 1: Detailed Empanelment Criteria \n \nMinimum Criteria \n \nA Hospital would be empaneled as a network private hospital with the approval of the \nrespective State Health Authority5 if it adheres with the following minimum criteria: \na) Should have at least 10 inpatient beds with adequate spacing and supporting staff as per \nnorms. \ni. \nExemption may be given for single-speciality hospitals like Eye ,ENT and \nStandalone Dialysis Centres. \nii. \nGeneral ward - @80sq ft per bed, or more in a Room with Basic amenities- bed, \nmattress, linen, water, electricity, cleanliness, patient friendly common washroom \netc. Non AC but with fan/Cooler and heater in winter \nb) It should have adequate and qualified medical and nursing staff (doctors6 & nurses7), \nphysically in charge round the clock; (necessary certificates to be produced during \nempanelment). \nc) Fully equipped and engaged in providing Medical and Surgical services, commensurate to \nthe scope of service/ available specialties and number of beds. \ni. \nRound-the-clock availability (or on-call) of a Surgeon and Anesthetist where surgical \nservices/ day care treatments are offered. \nii. \nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and \nAnaesthetist where maternity services are offered. \n \n5 In order to facilitate the effective implementation of AB PM-JAY, State Governments shall set up the State Health Authority (SHA) \nor designate this function under any existing agency/ trust designated for this purpose, such as the state nodal agency or a trust \nset up for the state insurance program.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 30,
+          "score": 6.17567253112793,
+          "chunk_id": "empanelment_dec2021_p0030_00",
+          "text": "24\nGuidelines on Hospital Empanelment and De-Empanelment\n2. \tCriterion for Aspirational Districts\n\t\nCriterion for HCPs empanelment in Aspirational Districts as per the listed districts by NITI Aayog \n(Annexure 4) following relaxations are provided. All the criteria remain the same for Aspirational \nDistricts as mentioned above apart from the following:\ni.\t\nMinimum number of inpatient beds required for empanelment, should have 5 inpatient beds \nwith adequate spacing and supporting staff as per norms unless providing day-care packages \ncovered under PM-JAY.\nii.\t\nMinimum number of doctors and nursing staff required for empanelment, Doctor-1 (minimum \nQualification MBBS). \niii. Requirements of licences and certificates – Hospital registration certificate as per state law is \nmandatory, if applicable.\niv. Requirement of equipment according to the defined scope of services -Hospital needs to be \nfully equipped.\nv.\t\nRequirement of equipment and services in emergency- life saving and resuscitation equipment \nas required by facility.\nvi.\t Position of the ICU/HDU -The unit is to be situated in the same building or referral linkage with \nhospitals where ICU/HDU facility is available (mandatory self-declaration) through an MoU or tie \nup.\nvii.\t Requirement of space for AB PM-JAY kiosk - Provide space for a working desk for AB PM-JAY \nbeneficiary management (AB PM-JAY non-medical coordinator) at the hospital main entrance \narea.\nviii.\t Criteria for dialysis services for nephrology and urology surgery facility - dialysis unit either \ninhouse or tie-up.\nix.\t Criteria for OT Services with staff requirement- Fully equipped Operation Theatre of its own with \nqualified nursing staff (Minimum qualification - ANM Course) under its employment round the \nclock.\nx.\t\nCasualty should be equipped with minimum Emergency Tray. \n3.\t Advanced Criteria\n\t\n",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 3,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 27,
+          "score": 5.101255416870117,
+          "chunk_id": "empanelment_dec2021_p0027_00",
+          "text": "21\nAnnexure 1\nCriteria for Empanelment\nThis annexure contains the basic minimum criteria for empanelment for all the healthcare service \nproviders. It also covers the criteria in Aspirational Districts and additional criteria for empanelment of \nspecialties under the scheme. \n1. Minimum Criteria\n\t\nA hospital would be empanelled as a network private hospital with the approval of the respective \nState Health Agency3 if it adheres with the following minimum criteria:\na)\t\nShould have at least 10 inpatient beds with adequate spacing and supporting staff as per norms:\ni.\t\nExemption may be given for dental and day-care procedure hospitals like Eye, ENT, and \nStandalone Dialysis Centres.\nii.\t\nGeneral ward - @80sq ft per bed, or more in a room with basic amenities- bed, mattress, \nlinen, water, electricity, cleanliness, patient friendly common washroom etc. Non-AC but \nwith fan/cooler and heater in winter\nb) It should have adequate and qualified medical and nursing staff (doctors4 & nurses5), physically \nin charge round the clock; (necessary certificates to be produced during empanelment). The \nstate should have specific guidelines on the number of hospitals a doctor can work. \nc)\t\nFully equipped and engaged in providing medical and surgical services, commensurate to the \nscope of service/available specialties and number of beds:\ni.\t\nRound-the-clock availability (or on-call) of a Surgeon and Anaesthetist where surgical \nservices/day care treatments are offered.\nii.\t\nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and Anaesthetist \nwhere maternity services are offered.\n3\t\nIn order to facilitate the effective implementation of AB PM-JAY, state governments shall set up the State Health Authority \n(SHA) or designate this function under any existing agency/trust designated for this purpose, such as the State Nodal Agency \nor a trust set up for the state insurance program.\n4 \nQualified doctors are a MBBS approved as per the Clinical Establishment Act/state government rules & regulations as \napplicable from time to time.\n5 \nQualified nurse per unit per shift shall be available as per requirement laid down by the Nursing Council/Clinical Establishment \nAct/State government rules & regulations as applicable from time to time. Norms vis a vis bed ratio may be spelt out.\nAnnexure 1",
+          "pre_rerank_rank": 3
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 16,
+          "score": 2.4370503425598145,
+          "chunk_id": "empanelment_dec2021_p0016_01",
+          "text": "found that hospital has applied for multiple specialties, but all do \nnot conform to minimum requirements under PM-JAY, the hospital will only be empaneled for \nspecialties that conform to PM-JAY norms.\nFigure 1: Options for Approval Process for Empanelment\nWithin 15 working days\nWithin 15 working days\nOption1: Physical and\nDesktop Veriﬁcation by\nDEC/TPEA\n \n \n \nDocument Scrutiny\nMatch\n \n \n \n \n \n \nAuto \nApproved\n \n \n \n \n \nApplication\nSubmitted\nOption 2: Fast Track Auto \nEmpanelment of \nQCI/State HCSP\nOption 3: Fast Track \nAuto Empanelment of \nnon QCI/HCSP\nDesktop veriﬁcation \nwith QCI Database\nDesktop veriﬁcation with \nthe checklist and \ngeotagged video\nPhysical Veriﬁcation\nDoes not \nMatch\nRecommend\nApproval\nReport Submission \nwith Recommendation\nDesktop veriﬁcation with\nthe checklist and\ngeotagged video\nSHA decision considering \nrecommendation from \nDEC/TPEA\nRecommend \nApproval\nRecommend\nRelaxation\nRecommend \nRejection\nRecommend\nApproval\nSeek\nClariﬁcation\nRecommend \nRejection\nPhysical Veriﬁcation \nwithin 3 Months of \nAuto-Empanelment\nSHA decision considering \nrecommendation from \nDEC/TPEA\nSHA decision considering \nrecommendation \nfromDEC/TPEA\nSeek\nClariﬁcation\nRecommend\nRejection",
+          "pre_rerank_rank": 25
+        },
+        {
+          "rank": 5,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 6,
+          "score": 2.3389225006103516,
+          "chunk_id": "empanelment_v2_0_p0006_00",
+          "text": "Page  6  of  64  \n3. The criteria established under the Clinical establishment Act2, was used as a \nguiding example to establish structural & human resource requirements for \nspecialties based on the intensity of care required. \n4. State consultations were held with practitioners of similar programs, inviting \nviews based on experience and sharing evidence. \n5. Specialty-wise sub-groups assigned to design packages reviewed the \ncorresponding minimum qualification criteria for such specialties. \n \ni. \n1 Structural and HR requirements \nii. \n2 The Clinical Establishments Act was passed by the GoI, to provide for registration and regulation of all clinical \nestablishments in the country with a view to prescribing the minimum standards of facilities and services which may be \nprovided by them so that mandate of article 47 of the constitution for improvement in public health may be achieved. \n \nEmpanelment of Health Care Providers \nThe health care services under AB PM-JAY would be provided to its beneficiaries \nthrough a network of public and private healthcare providers. In view of the above, the \nfollowing broad guidelines have been suggested towards empanelment of hospitals \nunder the program, with a view to improving quality processes and health care services \nin AB PM-JAY network hospitals. \n \ni. \nAll States/UTs will be permitted to empanel hospitals only in their own State/UT. \nii. \n In case State/ UT wants to empanel hospitals in another State/UT, they can only \ndo so till the time that State/ UT is not implementing AB-PMJAY. \niii. \n All public facilities with capability of providing inpatient services (Community Health \nCentre level and above) are deemed empanelled under AB-PMJAY. The State \nHealth Department shall ensure that the enabling infrastructure and guidelines are \nput in place to enable all public health facilities to provide services under AB-\nPMJAY. \niv. \nPublic Hospitals under other Ministries including Employee State Insurance \nCorporation (ESIC) hospitals will also be eligible for empanelment in AB-PMJAY, \nbased on the approvals.",
+          "pre_rerank_rank": 4
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 2343.432900001062,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2496,
+        "eval_ms": 0.0,
+        "eval_tokens": 68,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is primary identity document for family member under PM-JAY?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "Aadhaar will be primary identity document for a family member that has to be produced under the AB PM-JAY scheme [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 12,
+          "score": 7.305142879486084,
+          "chunk_id": "beneficiary_identification_p0012_00",
+          "text": "Page 11 of 15 \n \nBeneficiary Identification Guidelines \n \n4 \nIdentity Document for a Family Member \n \nAadhaar will be primary identity document for a family member that has to be produced under the AB PM-\nJAY scheme. When the beneficiary comes to a contact point, the QR code on the Aadhaar card is scanned \n(or an e-KYC is performed) to capture all the details of the Aadhaar. A demographic authentication is \nperformed with UIDAI to ensure the information captured is authentic. A live photograph of the member is \ntaken to be printed on the e-card.  \nIf the AB PM-JAY family member does not have an Aadhaar card and the contact point is a location where \nno treatment is provided, the operator will inform the beneficiary that he is eligible and can get treatment \nonly once without an Aadhaar or an Aadhaar enrolment slip. They may be requested to apply for an \nAadhaar as quickly as possible. A list of the closest Aadhaar enrolment centres is provided to the \nbeneficiary \nThe AB PM-JAY family member does not have an Aadhaar card and the contact point is a Hospital or place \nof treatment then: \nA. A signed declaration is taken from the Beneficiary that he does not possess an Aadhaar card and \nunderstands he will need to produce an Aadhaar or an Aadhaar enrolment slip prior to the next \ntreatment \nB. The beneficiary must produce an ID document from the list of approved ids by the State \nC. The operator captures the type of ID and the fields as printed on the ID including the Name, Father’s \nName (if available), Age, Gender and Address fields.  \nD. A scan of the ID produced is uploaded into the system for verification. \nE. A photo of the beneficiary is taken. \nF. The information from this alternate ID is used instead of Aadhaar for matching against the AB PM-JAY \nrecord.  \n \n5 \nSearching the AB PM-JAY Database \n \n",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 2,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 14,
+          "score": 5.388975143432617,
+          "chunk_id": "beneficiary_identification_p0014_00",
+          "text": "Page 13 of 15 \n \nBeneficiary Identification Guidelines \nThe operator is presented with the confidence score between the Beneficiary Identity document and the \nRSBY record.  \n \n7 \nLinking Family Identification document with the AB PM-JAY Family \n \nOne or more Family Identity Cards can be linked with each AB PM-JAY Family. While Ration cards will be \nthe primary family document, States can define additional family documents that can be used. SECC \nsurvey was conducted on the basis of households and there are possibilities where the household could \nhave multiple ration cards.  \nLinking a family identification document strengthens the beneficiary identification process as we can create \na confidence score based on the names in family identification document and AB PM-JAY record.  \n \nRation Card or Other Government Family ID     \nBeneficiary Identity Document \nAB PM-JAY Beneficiary Record \nNames of family \nmembers \nRAM, GEETHA, \nGOVIND, \nMEENAKUMARI \nNames of family \nmembers \nGEETHA, \nMEENAKUMARI, RAM \nFAMILY MATCH CONFIDENCE SCORE: 92% \n \nLinking the family identification document will be mandatory ONLY if the same document is also the ID \nused by the state to cover a larger base. Operators are encouraged to upload the family document if the \nname match confidence score is low, but they believe the 2 records are the same \nIntegration with an online family card database is recommended. In this scenario, the operator will enter \nthe Family ID No (from the IDs mentioned earlier) and will be able to fetch the names of the family members \nfrom the online database.  \nIf an integration is not possible, the operator will enter the names of the family members as written in the \nID card and upload a scan of the ID card for verification.  \n \n8 \nApproval by Insurance Company/Trust \n \nThe State can appoint either the Insurance Company or Trust to perform the verification of the data of \nidentified beneficiaries. The team needs to work with a strong Service Level Agreements (SLA) on \nturnaround time. Approvals are expected to be provided within 30 minutes back to the operator on a 24x7 \nbasis.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 3,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 15,
+          "score": 4.170815467834473,
+          "chunk_id": "beneficiary_identification_p0015_00",
+          "text": "Page 14 of 15 \n \nBeneficiary Identification Guidelines \nThe Approver is presented the Beneficiary Identity Document and the AB PM-JAY (or RSBY) record side \nby side for validation along with the confidence score. The lowest confidence score records are presented \nfirst.  \nIf the operator has uploaded the Family Identity document, it is also displayed along with the Confidence \nScore. \nThe Approver has only 2 choices for each case – Approve or Recommend for Rejection with Reason \nThe System maintains a track of which Operator is Approving / Recommending for rejection. The Insurance \nCompany/Trust can analyze the approval or rejection pattern of each of the operators.  \n \nA \nAcceptance of Rejection Request by State (applicable only in case of Insurance Company \nmode of implementation) \n \nThe State should setup a team that reviews all the cases recommended for Rejection. The team \nreviews the data provided and the reason it has been recommended for rejection. If the State agrees \nwith the Insurer, it can reject the case. \nIf the State disagrees with the Insurer, it can approve the case. The person in the state making the \ndecision is also tracked in the system. The State review role is also SLA based and a turnaround is \nexpected in 24 hours on working hour basis.  \n \nB \nAddition of Family Members \n \nThe AB PM-JAY scheme allows addition of new family members if they became part of the family \neither due to marriage or by birth. In order to add a family member, at least one of the existing family \nmembers needs to be verified and the identity document used for the verification must be Aadhaar.  \nTo add the additional member, the family must produce: \n• \nThe name of the additional member in a State approved family document like Ration Card OR \n• \nA birth certificate linking the member to the family OR \n• \nA marriage certificate linking the member to the family OR \n• \nAn Adoption certificate to identified family member is available. \n \nNote: Any family member can be added in existing SECC family in-spite of his/her date of birth is after \nor before 2011 and addition of members is not limited only to new born and newly married, any member \ncan be added to existing SECC family provided member can establish relation with a PMJAY verified \nbeneficiary and the identity document used for the verification must be Aadhaar.",
+          "pre_rerank_rank": 3
+        },
+        {
+          "rank": 4,
+          "source_file": "beneficiary_identification.pdf",
+          "page": 8,
+          "score": 3.185337781906128,
+          "chunk_id": "beneficiary_identification_p0008_00",
+          "text": "Page 7 of 15 \n \nBeneficiary Identification Guidelines \niii. AHL_HH_ID will be considered as Family ID for AB PM-JAY targeted families. \niv. Final data will be accessible in a secure manner to only authorised users who will be allowed to \naccess it online and use it for beneficiary verification. \n \n \n \n \nExample: \n \nA. State implementing RSBY –the scenario could be as follows: \n• \nNumber of eligible families in SECC Data =   \n             \n50 lakhs \n• \nNumber of families currently enrolled in RSBY =  \n \n \n52 lakhs \n• \nTotal Number of eligible families for AB PM-JAY =   \n \n52 lakhs  \n \nB. State/ UT not implementing RSBY - the scenario could be as follows: \n• \nNumber of eligible families in SECC data =   \n \n            50 lakhs \n• \nTotal number of eligible families for AB PM-JAY =   \n \n50 lakhs \n \nC. State implementing their own scheme – the scenario could be as follows: \n• \nNumber of eligible families in SECC Data =   \n \n            50 lakhs \n• \nNumber of families currently covered in State Scheme =  \n \n75 lakhs \n• \nTotal Number of eligible families for AB PM-JAY =   \n \n50 lakhs \n \nC. Informing Beneficiaries on what to bring for Identification \nResponsibility of – SHA \nTimeline – Ongoing \nThe process requires that Beneficiaries bring: \n• \nAadhaar \n• \nAny other valid government id(s) decided by the State if they do not have an Aadhaar \n• \nRation Card or any other family ID from the following: \no Government certified list of members \no RSBY Card: Document image (RSBY Card) to be uploaded \no PM Letter: Document image (PM Letter) to be uploaded  \no State Specific Requirement",
+          "pre_rerank_rank": 7
+        },
+        {
+          "rank": 5,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 44,
+          "score": 2.510274887084961,
+          "chunk_id": "field_investigation_manual_p0044_00",
+          "text": "40  Field Investigation and Medical Audit Manual \nAnnexure 6: BIS investigation form \n \nA. Patient Information   \n  \n1. PM-JAY FAMILY ID: ____________________  \n2. Name:   \n3. Father’s or Husband’s name:  \n4. Address:   \n \nDistrict:    \n  \n  \nState:  \n  \nPin Code:  \n5. Contact No.   \n6. Members registered:   \nS. No.  \nName  \nPM-JAY ID \nnumber  \nGender  \nAge  \nRelationship \n1.  \n  \n  \n  \n  \n  \n  \n2.  \n  \n  \n  \n  \n  \n  \n3.  \n  \n  \n  \n  \n  \n  \n4.  \n  \n  \n  \n  \n  \n  \n5.  \n  \n  \n  \n  \n  \n  \n6.  \n  \n  \n  \n  \n  \n  \n \nB. General Information   \n  \n1. Where was the E card made?   \n  \n2. If hospital, was the beneficiary charged any money for the E card? If yes, how much?   \n  \n3. Has s/he availed services under PM-JAY? If yes -proceed further   \n  \n4. In which hospital did s/he utilize the services?   \n  \n5. What symptoms were the patient exhibiting when he/she visited the hospital?  \n  \n  \n6. When did s/he get admitted?    \n  \n7. When did s/he get discharged?",
+          "pre_rerank_rank": 15
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 3824.6262000029674,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2577,
+        "eval_ms": 0.0,
+        "eval_tokens": 28,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "If any party to a grievance is not satisfied, then how many days it has to appeal that decision?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "If any party to a grievance is not satisfied with the decision of the relevant Grievance Redressal Committee, it may appeal against the decision within 30 days to the higher Grievance Redressal Committee or other authority having powers of appeal [5]. \n\nAdditionally, the provided sources specify the following regarding appeals:\n* If either party is not satisfied with a DGNO’s decision, they can appeal to the DGRC within 30 days of the DGNO order [2, 3, 4].\n* If either party is not satisfied with a DGRC decision, they can appeal to the SGRC within 30 days [1, 2, 3, 4].\n* If either party is not satisfied with an SGRC order, they shall approach the SAA within 30 days of the SGRC order [4]. \n\nIf an appeal is not filed within the 30-day period, the aggrieved party loses its right to appeal [5].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "grievance_redressal.pdf",
+          "page": 23,
+          "score": 7.352465629577637,
+          "chunk_id": "grievance_redressal_p0023_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n22 \n \n \n \n \ngrievance for \nDGRC \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to \nresolve the grievance. \n• SGRC decision shall be final and \nbinding \n5 \nBeneficiary \nDistrict \nauthorities \n• Grievance not addressed by the \nconcerned officer \nSGNO \n15 days of \nreceipt of \ngrievance for \nSGNO \n30 days of \nreceipt of \ngrievance for \nSGRC \n• If either party is not satisfied with \nDGRC order, they shall approach the \nSGRC \n• Decision of SGRC on such cases \nshall be final and binding.",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 2,
+          "source_file": "grievance_redressal.pdf",
+          "page": 24,
+          "score": 6.357892036437988,
+          "chunk_id": "grievance_redressal_p0024_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n23 \n \n \n6 \nHealth Care \nProvider \nBeneficiary \n• Misconduct or harassment by the \nbeneficiary \n• Any other \nDGNO \n15 days of \nreceipt of \ngrievance for \nDGNO \n30 days of \nreceipt of \ngrievance for \nDGRC \n• If grievance is not resolved by DGNO \nwithin 15 days, case shall be referred \nto DGRC. \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of \nthe DGNO order \n• DGRC shall have 30 days to resolve \nthe grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to resolve \n• the grievance",
+          "pre_rerank_rank": 3
+        },
+        {
+          "rank": 3,
+          "source_file": "grievance_redressal.pdf",
+          "page": 22,
+          "score": 5.306806564331055,
+          "chunk_id": "grievance_redressal_p0022_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n21 \n \n \n \n \n• Non-availability of Arogya Mitra \n• Non-Cooperation of Arogya \nMitra \n• Misconduct by Hospital Staff \n3 \nBeneficiary \nInsurance \ncompany / \nTPA \n• Demanding money for approval \nof pre-authorization \n• Misconduct by IC/ISA/TPA \nrepresentative \nDGNO / \nSGNO \n15 days of \nreceipt of \ngrievance for \nDGNO/SGNO \n \n30 days of \nreceipt of \ngrievance for \nDGRC \n• If grievance is not resolved by \nDGNO/SGNO within 15 days, case \nshall be referred to DGRC/SGRC. \n• If either party is not satisfied with \nDGNO’s/SGNO’s decision, then they \ncan appeal to DGRC/SGRC within 30 \ndays of the DGNO/SGNO order \n• DGRC/SGRC shall have 30 days to \nresolve the grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n• SGRC shall have 30 days to \nresolve the grievance. \n• SGRC decision shall be final and \nbinding \n4 \nBeneficiary \nCommon \nService \nCentre (CSC) \n• Demanding extra money (above the \napproved cost of Rs. 30) for issuing \nAyushman card \n• Card issued to another family \n• Card not provided to beneficiary \n• Poor Quality of Service \nDGNO \n15 days of \nreceipt of \ngrievance for \nDGNO \n30 days of \nreceipt of \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of the \nDGNO \n• DGRC shall have 30 days to \nresolve the grievance.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 4,
+          "source_file": "grievance_redressal.pdf",
+          "page": 25,
+          "score": 4.537807464599609,
+          "chunk_id": "grievance_redressal_p0025_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n24 \n \n \n \n \n• Decision of the SGRC shall be final \nand binding. \n7 \nHealth Care \nProvider \nInsurance \nCompany / \nISA / TPA \n/SHA \n• Claims rejected by Insurer/SHA in \nfull or partial claim amount not \npaid \n• Demanding Money for Claim \nSettlement \n• Misconduct by ISA/TPA/ SHA \nRepresentatives \n• Non-cooperation by Insurer/ISA/ \nSHA \n• Delay in claim payment \nDGNO \n/SGNO/ \nSAA \n \n15 days of \nreceipt of \ngrievance for \nDGNO/SGNO\n/SAA \n30 days of \nreceipt of \ngrievance for \nDGRC \n \n30 days of \nreceipt of \ngrievance for \nSAA \n \n• If either party is not satisfied with \nDGNO’s decision, then they can \nappeal to DGRC within 30 days of \nthe DGNO order \n• DGRC shall have 30 days to resolve \nthe grievance. \n• If either party is not satisfied with \nDGRC decision, then they can appeal \nto SGRC within 30 days \n•  SGRC shall have 30 days to resolve \nthe grievance \n• If either party is not satisfied with \nSGRC order, they shall approach \nthe SAA within 30 days of the \nSGRC order.  \n• The decision of SAA shall be final \nand binding. \n8 \nHealth Care \nProvider \nInsurer/ISA/ \nD istrict \nEmpanelment \n• Demanding money for \nempanelment \n• Not empaneled despite meeting all \nthe criteria \nSGRC \n30 days of \nreceipt of \ngrievance \n• SGRC shall have 30 days to resolve \nthe grievance \n• If either party is not satisfied with \n• SGRC order, they shall approach",
+          "pre_rerank_rank": 5
+        },
+        {
+          "rank": 5,
+          "source_file": "grievance_redressal.pdf",
+          "page": 16,
+          "score": 3.894913673400879,
+          "chunk_id": "grievance_redressal_p0016_00",
+          "text": "GRIEVANCE REDRESSAL SYSTEM \n15 \n  \n \n7.2 Process of Redressal through the Relevant Grievance Committee \nAll the cases which are appealed against the orders of grievance officer must be \nplaced before   the concerned grievance redressal committee. \n \na. The Convener of the relevant Grievance Redressal Committee shall place the \ngrievance before the Grievance Redressal Committee for its decision at its next \nmeeting \n \nb. Each grievance shall be addressed by the relevant Grievance Redressal \nCommittee within a period of 30 days of the receipt of the grievance. \nDepending on the urgency of the case, the Grievance Redressal Committee \nmay decide to meet earlier for a speedier resolution of the grievance \n \nc. The relevant Grievance Redressal Committee shall arrive at a logical decision \nwithin 30 days of receipt of the grievance. All such decisions shall be based on \nthe principles of natural justice (including giving the parties a reasonable \nopportunity to be heard) and be taken by majority vote of its members present \n \nd. If any party to a grievance is not satisfied with the decision of the relevant \nGrievance Redressal Committee, it may appeal against the decision within 30 \ndays to the higher Grievance Redressal Committee or other authority having \npowers of appeal \n \ne. If an appeal is not filed within 30-day period, the aggrieved party shall lose its \nright to appeal, and the decision of the original Grievance Redressal Committee \nshall be final and binding \n \nf. A Grievance Redressal Committee or any other authority having powers of \nappeal shall dispose of an appeal within 30 days of receipt of the appeal. Such \ndecision shall be given after following the principles of natural justice, \nincluding giving the parties a reasonable opportunity to be heard. The decision \nof the Grievance Redressal Committee or other authority having powers of \nappeal shall be final and binding",
+          "pre_rerank_rank": 4
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1677.2533999974257,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2167,
+        "eval_ms": 0.0,
+        "eval_tokens": 213,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What is per day price for bed if patient is admitted to ICU with ventilator support?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "The per day price for a bed in an Intensive care requiring ventilator support is ₹ 4,500 [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 18,
+          "score": 1.0765002965927124,
+          "chunk_id": "hbp_2_2_manual_p0018_00",
+          "text": "Page 17 of 64 \n \n \n2.2.2 Stratification \nStratification has been introduced to further drill down into procedures based on criteria such as type of \nanesthesia, bed category on admission, surgical technique etc. Stratification enables price differentiation \nof the procedure to better accommodate the nuances of the procedure performed and improve the \nassociated payment. \nFor example, the procedure of ‘Incision and Drainage of Abscess’ is split into two stratified packages with \na price differential of ₹ 5,000 between them. \ni. \nIncision and Drainage of Abscess under Local Anaesthesia \nii. \nIncision and Drainage of Abscess under General Anaesthesia \nSignificance for the user: While total price calculation would remain at the back end of the TMS, the \nend user may be required to feed in certain details of the procedure that would otherwise have been \nassumed. For example, following selection of the procedure to be performed, the TMS may ask for \ndetails such as the type of anesthesia anticipated. There may also be certain criteria that the TMS would \npick up automatically from patient details to distinguish between requirement of a pediatric / adult \nprocedure, but these back-end assumptions may be further vetoed by the treating physician based on his \nclinical judgment. However, such overridden assumptions may trigger a medical audit, and it is \nrecommended that a strong paper trail be maintained to justify such cases. \n2.2.3 Stratification in Medical Packages \nAll Medical packages in HBP 2.1 are featured as stratified packages based on the bed category of patient \nadmission. The bed category for admission and will need to be chosen at the time of selecting a \ndiagnosis. \nThe price of medical packages will continue to be calculated on the basis of the bed category, multiplied \nby the number of bed days for the patient.The per day price for bed categories will be as follows: \ni. \n₹ 1,800 for Routine Ward \nii. \n₹ 2,700 for High Dependency unit \niii. \n₹ 3,600 for Intensive care not requiring ventilator support \niv. \n₹ 4,500 for Intensive care requiring ventilator support \nSignificance for the user: There is no significant change at the user end on account of this feature of \nthe HBP 2.0, HBP 2.1 &HBP 2.2. The TMS will continue to calculate the final price of the medical \npackage at the back end based on patient bed category and number of days’ stay.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 28,
+          "score": -3.2272467613220215,
+          "chunk_id": "empanelment_dec2021_p0028_00",
+          "text": "22\nGuidelines on Hospital Empanelment and De-Empanelment\niii.\t Round-the-clock availability of specialists (or on-call) in the concerned specialties having \nenough experience where such services are offered (e.g., Orthopaedics, ENT, Ophthalmology, \nDental, general surgery (including endoscopy) etc.)\nd)\t Hospital should have adequate arrangements for round-the-clock support systems required for \nthe above services like pharmacy, blood bank, laboratory, dialysis unit, endoscopy investigation \nsupport, post-op icU care with ventilator support (mandatory for providing surgical packages), \nX-ray facility etc., either ‘in-house’ or with ‘outsourcing arrangements’ with appropriate \nagreements and in nearby vicinity.\ne)\t\nSeparate male and female wards with toilet and other basic amenities.\nf) \n24 hours emergency services managed by technically qualified staff wherever emergency services \nare offered or a minimum first aid/emergency medicine/oxygen availability:\ni. \nCasualty should be equipped with monitors, defibrillator, nebulizer with accessories, crash \ncart, resuscitation equipment, oxygen cylinders with flow meter/tubing/catheter/face mask/\nnasal prongs, suction apparatus etc. and with attached toilet facility. \nii.\t\nRound the clock ambulance services (own or tie-up).\ng)\t\nMandatory for hospitals wherever surgical procedures are offered:\ni. \nFully equipped Operation Theatre of its own with qualified nursing staff under its employment \nround the clock.\nii.\t\nPost-op ward with ventilator and other required facilities.\nh)\t Wherever intensive care services are offered it is mandatory to be equipped with an Intensive \nCare Unit (for medical/surgical ICU/HDU) with requisite staff:\ni.\t\nThe unit is to be situated in proximity of operation theatre, acute care medical and surgical \nward units.\nii.\t\nSuction, oxygen supply and compressed air should be provided for each bed.\niii.\t Further High Dependency Unit (HDU) - where such packages are mandated should have the \nfollowing equipment:\n1.\t\nPiped gases\n2.\t\nMulti-sign monitoring equipment\n3.\t\nInfusion of ionotropic support\n4.\t\nEquipment for maintenance of body temperature\n5.\t\nWeighing scale\n6.\t\nManpower for 24x7 monitoring\n7.\t\nEmergency cash cart\n8. \nDefibrillator\n9.\t\nEquipment for ventilation\n10.\t In case there is common Pediatric ICU then pediatric equipments, e.g.: pediatric \nventilator, pediatric probes, medicines, and equ",
+          "pre_rerank_rank": 8
+        },
+        {
+          "rank": 3,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 42,
+          "score": -3.34354829788208,
+          "chunk_id": "empanelment_v2_0_p0042_00",
+          "text": "Page  42  of  64  \nii. \nSuction, oxygen supply and compressed air should be provided for each bed. \niii. \nFurther High Dependency Unit (HDU) - where such packages are mandated \nshould have the following equipment: \n1. Piped gases \n2. Multi-sign Monitoring equipment \n3. Infusion of ionotropic support \n4. Equipment for maintenance of body temperature \n5. Weighing scale \n6. Manpower for 24x7 monitoring \n7. Emergency cash cart \n8. Defibrillator. \n9. Equipment for ventilation. \n10. In case there is common Paediatric ICU then Paediatric \nequipments, e.g.: paediatric ventilator, Paediatric probes, \nmedicines and equipment for resuscitation to be available. \niv. \nHDU (high dependency unit) should also be equipped with all the \nequipment and manpower as per HDU norms. \ni) Records Maintenance: Maintain complete records as required on day-to-day basis and is \nable to provide necessary records of hospital / patients to the Society/Insurer or his \nrepresentative as and when required. \ni. \nWherever automated systems are used it should comply with MoHFW/ \nNHA EHR guidelines (as and when they are enforced) \nii. \nAll AB PM-JAY cases must have complete records maintained \niii. \nShare data with designated authorities for information as mandated. \nj) Legal requirements as applicable by the local/state health authority. \nk) Adherence to Standard treatment guidelines/ Clinical Pathways for procedures as \nmandated by NHA from time to time. \nl) Registration with the Income Tax Department. \nm) NEFT enabled bank account \nn) Telephone/Fax \no) Safe drinking water facilities. \np) Uninterrupted (24 hour) supply of electricity and generator facility with required capacity \nsuitable to the bed strength of the hospital.",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 41,
+          "score": -3.462517261505127,
+          "chunk_id": "empanelment_v2_0_p0041_00",
+          "text": "Page  41  of  64  \n6 Qualified doctor is a MBBS approved as per the Clinical Establishment Act/ State government rules & regulations as applicable \nfrom time to time. \n7 Qualified nurse per unit per shift shall be available as per requirement laid down by the Nursing Council/Clinical Establishment Act/ \nState government rules & regulations as applicable from time to time. Norms vis a vis bed ratio may be spelt out. \n \niii. \nRound-the-clock availability of specialists (or on-call) in the concerned specialties \nhaving enough experience where such services are offered (e.g. Orthopaedics, \nENT, Ophthalmology, Dental, general surgery (including endoscopy) etc.) \n \nd) Hospital should have adequate arrangements for round-the-clock support systems \nrequired for the above services like Pharmacy, Blood Bank, Laboratory, Dialysis unit, \nEndoscopy investigation support, Post op ICU care with ventilator support (mandatory for \nproviding surgical packages), X-ray facility etc., either ‘In-House’ or with ‘Outsourcing \narrangements’ with appropriate agreements and in nearby vicinity. \ne) Round-the-clock Ambulance facilities (own or tie-up). \nf) 24 hours emergency services managed by technically qualified staff wherever emergency \nservices are offered  \ni. \nCasualty should be equipped with Monitors, Defibrillator, Nebulizer with \naccessories, Crash Cart, Resuscitation equipment, Oxygen cylinders with flow \nmeter/ tubing/catheter/face mask/nasal prongs, Suction apparatus etc. and with \nattached toilet facility.  \ng) Mandatory for hospitals wherever surgical procedures are offered: \ni. \nFully equipped Operation Theatre of its own with qualified nursing staff under its \nemployment round the clock. \nii. \nPost-op ward with ventilator and other required facilities. \nh) Wherever intensive care services are offered it is mandatory to be equipped with an \nIntensive Care Unit (For medical/surgical ICU/HDU) with requisite staff. \ni. \nThe unit is to be situated in close proximity of operation theatre, acute care \nmedical and surgical ward units.",
+          "pre_rerank_rank": 6
+        },
+        {
+          "rank": 5,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 10,
+          "score": -3.8247342109680176,
+          "chunk_id": "hbp_2_2_manual_p0010_00",
+          "text": "Page 9 of 64 \n \n \n1.4.1 Patient Leave / Discharge Against Medical Advice (LAMA/DAMA) \nLeave Against Medical Advice (LAMA), also called Discharge Against Medical Advice (DAMA), is an act \nwhereby a patient takes his/her discharge contrary to the recommendation or will of the attending \nphysician. This can happen due to various reasons related to the beneficiary or the hospital. After the \naudit, the payment to the hospital will be done as per the following: \nA. Surgical Cases – Patient has been admitted for a surgical package where a fixed package rate is to \nbe paid. \n• \nLAMA/DAMA before surgery –The claim amount would be calculated in line with the existing medical \npackages according to Length of Stay (LoS) and bed category of the patient. Payment for 100% of \nthe daily package rate for the full number of days when patient was admitted will be paid. Required \ndocumentation (clinical notes) for each full day will need to be submitted for payment to be \nconsidered. This will be applicable in all cases irrespective of the fact whether pre-operative \ninvestigations have been done or not. \n• \nLAMA/ DAMA after surgery –Payment for 75% of the package rate will be done to the hospital by the \nSHA/ Insurer in this case. Daily case sheets and OT notes will need to be submitted by the hospital \nfor auditing purposes to qualify for payment. \nB. Medical Cases –Payment for 100% of the daily package rate for the full number of days for which the \npatient was admitted will be paid as per the category of ward. Required documentation (clinical notes) \nfor each full day will need to be submitted for payment to be considered. \n1.4.2 Patient dies in the EHCP \nIf the patient dies in the EHCP during treatment before discharge, after the audit, payment to the EHCP \nwill be made as follows: \nA. \nSurgical Cases: \n• \nDeath before surgery – The claim amount would be calculated in line with the existing medical \npackages according to Length of Stay (LoS) and bed category of the patient. Payment for 100% of \nthe daily package rate for the full number of days when patient was admitted will be paid. Required \ndocumentation (clinical notes) for each full day will need to be submitted for payment to be \nconsidered. This will be applicable in all cases irrespective of the fact whether pre-operative \ninvestigations have been done or not.",
+          "pre_rerank_rank": 9
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 4742.950600004406,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2911,
+        "eval_ms": 0.0,
+        "eval_tokens": 25,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "By what timeline, mortality report section 5.1 and 5.2 has to be filled by the hospital and sent?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "Section 5.1 and 5.2 of the mortality report must be filled by the hospitals and sent \"within 48 hrs\" of the beneficiaries’ death [1].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 35,
+          "score": 6.643148422241211,
+          "chunk_id": "field_investigation_manual_p0035_00",
+          "text": "Field Investigation and Medical Audit Manual | 31 \nAnnexure 5.1: Mortality Report   \nSource: www.sast.gov.in  \nSection 5.1. and 5.2. is to be filled by the hospitals and sent at the time of beneficiaries’ death (within 48 \nhrs) and 5.3 to be submitted at claim submission by the hospital  \n5.1 Death Summary (A brief note)  \n• \nHospital Name \n• \nHospital ID \n• \nPatient ID (e-card number) \n• \nPatient Characteristics \n• \nName \n• \nAge \n• \nSex  \n• \nLength of Admission in days  \n• \nClinical Diagnosis (es) on Admission  \n• \nClinical diagnosis(es) on Death \n• \nEmergency or Elective \n• \nDate of Admission:  \n• \nDate of Death:  \n \n5.2 Progress of the patient during hospitalization  \n• \nAbnormal Investigations:  \n• \nHematology, Biochemistry, Radiology, Microbiology Others  \n• \nWhat was the treatment provided?  \n• \nWere there any clinical errors, omissions, process problems that hindered the process of giving good \nquality care?  \n• \nWere there identifiable clinical risks/incidents?  \n• \nWere there any of the clinical risks/incidents due to delay in Diagnosis, Delay in Treatment, Medical \nClinical Errors, Nursing Clinical Errors, Medication Errors, Process Errors  \n• \nPlease give further details below \n• \nWere all standard protocols followed? \n• \nWhat according to the treating doctor is the cause of death and contributing factors? \n• \nAny other remarks",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 2,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 36,
+          "score": -1.287691354751587,
+          "chunk_id": "field_investigation_manual_p0036_00",
+          "text": "32  Field Investigation and Medical Audit Manual \n5.3 The Hospital would prepare ‘MORTALITY REPORT ’ as mentioned below :  \nSection A: General Information:  \n• \nPatient details:  \n• \nName:  \n• \nAge:  \n• \nSex:  \n• \nDOA:  \n• \nDate of Surgery:  \n• \nDiagnosis:  \n• \nTreatment given:   \n• \nSurgery/Procedure/ Radiotherapy/ Chemotherapy/ Others (specify)  \n• \nHospital name:  \n• \nName of Treating Doctor  \nSection B -  Case summary:  \nPlease provide a summary of the Case in the form of narrative – including complaints at the time of \nadmission, chronology of events up to death of the patient -  \nSection C: Case Assessment  \n1. Were there any areas of CONCERN or ADVERSE EVENTS in the management of this patient?  - \nYes No  \n2. Was surgery performed? Yes/ No  \n3. Were there any areas of Concern, or Adverse Events in any of the following?  \nOperation/procedure was performed, or treatment provided?\n  \nYes  \nNo \nNA  \nPre-anesthetic checkup/fitness for surgery/treatment  \n \n \n \nDecision to operate  \n \n \n  \nChoice of operation  \n \n \n  \nTiming of operation (too late, too soon, wrong time of day)  \n \n \n   \nIntra-operative process  \nProblems in functioning of OT  \nGrade / experience of surgeon deciding  \nGrade / experience of surgeon operating  \nPost-operative period",
+          "pre_rerank_rank": 7
+        },
+        {
+          "rank": 3,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 17,
+          "score": -1.370932698249817,
+          "chunk_id": "field_investigation_manual_p0017_00",
+          "text": "Fraud Investigation and Medical Audit Manual | 13 \n2. Mortality Audit  \nAs per Guidelines, 100% of the mortality cases should be audited. The hospitals is required to provide \nall the relevant information as specified in Annexure 5.1 and the same would be reviewed and verified \nby State Mortality and Morbidity Committee (setup under SHA) . Based on the review gaps would be \nidentified and necessary actions would be taken to improve patient safety and quality of care.  (Annexure \n5.2).  \n \nPrimary objective of mortality audit is to  \n• \nEliminating preventable medical mistakes,    \n• \nGuarding against the impact of human error and    \n• \nEstablishing systems to safeguard beneficiary’s health and well‐being. \n \n2.1. Process flow for Mortality Audit  \n \nEvery death occurring in the Empanelled Health Care Provider (EHCP) should have a mortality \nreport prepared by the hospital. Each EHCP should submit a mortality report to SHA at the time of \nclaims submission within 7 days (Refer Annexure 5.1 for Mortality Report). State Mortality and \nMorbidity Committee to conduct desk/ field mortality audit of all mortality cases (Refer Annexure \n5.2 for Mortality Audit Report). \n.",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 4,
+          "source_file": "field_investigation_manual.pdf",
+          "page": 39,
+          "score": -2.5659070014953613,
+          "chunk_id": "field_investigation_manual_p0039_00",
+          "text": "Field Investigation and Medical Audit Manual | 35 \nAnnexure 5.2: Mortality Audit Report (By SHA) \n  \nSection A: General Information  \nPatient details:  \nName:  \n \nAge:    \n  \n  \nSex:    \n  \nPre-auth No.  \n \nDOA:   \n  \n  \nDOD:  \nDiagnosis:  \nReviewing Doctor:  \nPlease provide a summary of the Case in the form of narrative  \n  \n \n___________________________________________________________  \nSection B: Case Note Assessment   \nWere there any areas of CONSIDERATION, of CONCERN or ADVERSE \nEVENTS in the management of this patient?  \nYes   \nNo  \n   \n1 Describe the most significant event:  \n \nWas surgery performed?  Yes   \n  \nNo  \nWere there any Areas of Consideration, of Concern, or Adverse Events in \nany of the following areas if an operation was performed?   \n  \nDiscussion points    \n  \n  \n  \n  \n  \n    Yes  \n \n No   N/A  \nPre anaesthetic check up/fitness for surgery  \nDecision to operate",
+          "pre_rerank_rank": 4
+        },
+        {
+          "rank": 5,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 15,
+          "score": -2.8160510063171387,
+          "chunk_id": "empanelment_dec2021_p0015_00",
+          "text": "9\n5. Process of Empanelment \n5. Process of Empanelment \n5.1.\t\nApplication and Registration on the Portal\n5.1.1.\t\nHealthcare service providers will have to register themselves on a web-based platform called \n‘Hospital Empanelment Module’ (HEM) portal to get empaneled under the PM-JAY. The hospital \nmust apply through this portal using URL https://hospitals.pmjay.gov.in as a first step for \nempanelment. \n5.1.2.\t\nEach provider will have to fill in some basic information in the HEM portal and create an account \nwhich will provide an exclusive hospital reference number and password to the hospital on their \nregistered mobile number. Using the credentials, a detailed application form will have to be \nfilled for empanelment of the healthcare service provider.\n5.2.\t\nApproval Process of the Application \n5.2.1.\t\nApproval Flow and Process\n5.2.1.1. \n\u0007Once the healthcare provider has filled the application, the verification and approval process will \nbe undertaken by the SHA. Only those healthcare providers will be allowed to get empaneled \nunder the scheme who have been registered as an establishment under the relevant central \nor state acts (if applicable). The verification process may be undertaken through one or a \ncombination of the following suggested options (Figure 1). \n5.2.1.2.\t\nOption 1: Desktop and Physical Verification within 15 working days\n5.2.1.2.1.\tThe application should be scrutinized by the DEC and processed completely within 15 working \ndays of receipt of the application. A login account for a nodal officer from DEC will be created by \nSHA as a one-time process. This login ID will be used to download the application of healthcare \nproviders and upload the inspection report.\n5.2.1.2.2. As a first step, the documents uploaded by the hospital will be verified by DEC for completeness. \nIn case any documents are found wanting, the DEC may return the application to the hospital \nfor rectifying any errors in the documents.\n5.2.1.2.3. After desktop verification, DEC/district nodal officer will physically inspect the premises of \nthe hospital and verify the accuracy of the details entered in the empanelment application, \nincluding but not limited to equipment, human resources, service, and quality standards. Post \nthe physical verification, it will submit its report as per the format given in the HEM portal along \nwith supporting pictures/videos/document scans.",
+          "pre_rerank_rank": 5
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1421.4522000038414,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2164,
+        "eval_ms": 0.0,
+        "eval_tokens": 37,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "How much incentive will hospital receive with full NABH accreditation?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "A hospital with full NABH accreditation will receive a 15% incentive [1], [4].",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "hbp_2_2_manual.pdf",
+          "page": 51,
+          "score": 6.41286039352417,
+          "chunk_id": "hbp_2_2_manual_p0051_00",
+          "text": "Page 50 of 64 \n \n \nS. No. \nCriteria \nIncentive \n(Over and above base \nprocedure rate) \n1 \nEntry level NABH \n10% \n2 \nFull NABH accreditation \n15% \n3 \nSituated in Delhi or some other Metro \n10% \n4 \nAspirational district \n10% \n5 \nRunning PG / DNB course in the empanelled specialty \n10% \n \nThese percentage incentives are added by compounding rather than in simple way. Thus, for a \npackage costing Rs. 10,000 otherwise, the payment made for a hospital with full NABH accreditation \nin an aspirational district will be ₹10,000 x 1.15 x 1.10 = ₹12,650. It will not be calculated as ₹10,000 \nx 1.25 = ₹12,500 \n \n27. What are the Aspirational districts? \nA. 117 Aspirational districts have been identified by NITI Aayog based upon composite indicators \nfrom Health & Nutrition, Education, Agriculture & Water Resources, Financial Inclusion and Skill \nDevelopment and Basic Infrastructure which have an impact on Human Development Index. \n \n28. What are the Metros? \nA. The Metros include Delhi (UA) (including Faridabad, Ghaziabad, NOIDA and Gurugram), Greater \nMumbai (UA), Kolkata (UA), Chennai (UA), Bangalore / Bengaluru (UA), Ahmedabad (UA), \nHyderabad (UA) and Pune (UA). \n[Cities classified as “X” in Ministry of Finance’s OM No. 2/5/2014-E.II(B) dated 21.07.2015] \n \n29. What is an Add-on Procedure? \nA. Certain packages which can be booked with a primary package at a 100% reimbursement contrary \nto the existing principle of 50% reimbursement of the second package. These packages are defined \nas Add-on Packages. \n \n30. What are Stand-Alone Procedures? \nA. For Fraud prevention and control, some packages have been identified that cannot be booked in \ncombination with any other package / procedure. These are termed as stand-alone packages in the \nHBP 2.0",
+          "pre_rerank_rank": 1
+        },
+        {
+          "rank": 2,
+          "source_file": "operation_manual.pdf",
+          "page": 17,
+          "score": 1.2412924766540527,
+          "chunk_id": "operation_manual_p0017_00",
+          "text": "17 | P a g e \n \nNABH’s Full Accreditation/JCI accreditation can apply for AB PMJAY Gold quality certification \ndirectly. Hospitals which are not certified by any accreditation body need to apply for bronze \ncertificate in order to get the quality certification. After completion of six months from the date of \nreceiving the certificate, hospitals can also upgrade to Silver and later to Gold. Also, a Guideline \non the step-wise process for non-empanelled hospitals for AB PM-JAY Quality certificate is \ndeveloped by NHA to promote quality certification in hospitals. \n \n \n \nFor further details regarding the guidelines and process, please visit the website on the link, \nhttps://pmjay.gov.in/resources/documents and refer to the Hospital Empanelment & Quality \nAssurance section for AB PM-JAY Quality guidelines  \nAB PM-JAY Quality certification portal: https://pmjay.qcin.org/Index \n  \n \n6. Health Benefit Packages (HBP) \n \nHealth Benefit Packages in this social health insurance scheme, not only define the scope of \nservices but also determine the extent of financial risk protection to the beneficiaries. It is \nenvisaged that the HBP cover diseases with high incidence/prevalence rates and the diseases \nwhich contribute to the maximum Out of Pocket expenditure (OOPE). \n \nThe benefits within this Scheme under the basic risk covered are provided on a cashless basis \nto the beneficiaries up to the limit of Rs. 5,00,000/ and includes: \n Hospitalization expense \n Day-care treatment (as applicable) \n Follow-up care \n Pre and post hospitalization expenses \n New-born child/children \n \nKey specialities covered under the HBP master package are as follows: \n \nSpecialities covered in HBP packages \nBurns Management \nOphthalmology \nCardiology \nOral and Maxillofacial Surgery \nCardiothoracic & Vascular surgery \nOrthopaedics \nEmergency Room Package \nOrgan & Tissue Transplant \nGeneral Medicine \nOtorhinolaryngology \nGeneral Surgery \nPaediatric Medical management \nInfectious Diseases \nPaediatric surgery \nInterventional Neuroradiology \nPlastic & Reconstructive Surgery \nMedical Oncology \nPolytrauma",
+          "pre_rerank_rank": 3
+        },
+        {
+          "rank": 3,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 10,
+          "score": 0.5938456058502197,
+          "chunk_id": "empanelment_dec2021_p0010_00",
+          "text": "4\nGuidelines on Hospital Empanelment and De-Empanelment\n3.1.9.\t For the healthcare service providers which were empanelled based on Quality Certification/\naccreditation, healthcare service providers will undergo a renewal process, once every 3 years or \ntill the expiry of validity of PM-JAY Bronze/NABH certification whichever is earlier; to determine \ncompliance to minimum standards.\n3.1.10.\tNational Health Authority may revise the empanelment criteria from time to time during the \nscheme if required. States/UTs will have to undertake any required re-assessments for the same \nwithin a stipulated timeline. \n3.2.\t Criteria for Empanelment\n3.2.1.\t For empanelment under the scheme, healthcare providers should meet the basic minimum \neligibility requirements as detailed in Annexure 1. As these are minimum standards, no exceptions \ncan be provided on these. \n3.2.2.\t Additionally, specialty specific eligibility criteria have been defined for healthcare providers \noffering specific specialties, e.g., Oncology, Neurology etc. This is applicable over and above the \nbasic minimum criteria and is also detailed in Annexure 1. \n3.2.3.\t State Governments will have the flexibility to revise/relax the empanelment criteria (barring the \nminimum requirements as highlighted in Annexure 1), based on their local context, availability of \nproviders, and the need to balance quality and access, with prior approval from National Health \nAuthority. The same will have to be incorporated in the web-portal for online empanelment of \nhealthcare providers.\n3.3.\t Incentive Structure for Empanelment\n3.3.1.\t For all healthcare providers empaneled under the scheme, the additional incentives will be \nprovided on the base health benefits packages as per HBP user guidelines as published on AB PM-\nJAY website.",
+          "pre_rerank_rank": 5
+        },
+        {
+          "rank": 4,
+          "source_file": "operation_manual.pdf",
+          "page": 7,
+          "score": -0.5253734588623047,
+          "chunk_id": "operation_manual_p0007_00",
+          "text": "7 | P a g e \n \nIII. Benefits for EHCPs under AB PM-JAY \n \nBecause of the scale of coverage of the scheme, Ayushman Bharat (AB PM-JAY) is a unique \nprogramme owing to the numerous stakeholders involved. The scheme offers several \nadvantages to the key stakeholders of the scheme, i.e., beneficiaries, service providers, SHAs, \nTPA & insurance agencies. AB PM-JAY is one of the schemes that promotes participation of \nprivate hospitals in Government scheme similar to public hospitals. Some of the unique aspects \nof the scheme are mentioned below: \n \nIncentives for Hospitals: Hospitals will receive incentives over and above basic package rates. \nThe hospitals with better quality standards will be rewarded for the same based on the incentive \nmechanisms shown below. However, the given incentive structure is indicative and might vary \nacross states: \n \nS. No \nCriteria \nIncentive* \n1 \nAB PM-JAY Bronze Quality certification \n            5% \n2 \nNational Level NQAS Certified EHCPs” \n           15% \n3 \nEntry Level NABH \n10% \n4 \nFull NABH accreditation \n15% \n5 \nSituated in Metro City# \n10% \n6 \nAspirational District$ \n10% \n7 \nRunning PG/DNB course in the empanelled specialities \n10% \n*Incentive structure is indicative and may vary across States. \n#Metro cities include Delhi (Including Faridabad, Ghaziabad, Noida, Gurugram), Greater Mumbai, \nKolkata, Chennai, Bangalore, Ahmedabad, Hyderabad and Pune \n$ as per the listed districts by NITI Aayog \n“NQAS incentive will be applicable from 1st April, 2022 \n \nLarge Patient base: Ayushman Bharat PM-JAY is the largest health assurance scheme in the \nworld which aims at providing a health cover of Rs. 5 lakhs per family per year for secondary \nand tertiary care hospitalization across public and private empanelled hospitals in India to over \n10.74 crores poor and vulnerable families (approximately 50 crore beneficiaries) that form the \nbottom 40% of the Indian population. The scheme provides a large patient base to hospitals and \nhelps them to fill their unfilled/unoccupied beds. Hospitals may achieve higher revenue without \nspending additional fixed costs on the infrastructure.  \n \n",
+          "pre_rerank_rank": 2
+        },
+        {
+          "rank": 5,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 8,
+          "score": -2.2054107189178467,
+          "chunk_id": "empanelment_v2_0_p0008_00",
+          "text": "Page  8  of  64  \napproval from National Health Authority. The same will have to be incorporated in the \nweb-portal for online empanelment of hospitals. \nHospitals will undergo a renewal process for empanelment once every 3 years or till the \nexpiry of validity of AB PM-JAY Bronze/NABH certification (when empaneled \nbased on AB PM-JAY Bronze/NABH criteria) to determine compliance to minimum \nstandards. \nNational Health Authority may revise the empanelment criteria at any point during the \nprogramme, if required and the states/Uts will have to undertake any required re-\nassessments for the same. \n \nInstitutional Set-Up for Empanelment \nFor providing the benefits envisaged under the Scheme, the State Health Agency (SHA) \nthrough State Empanelment Committee (SEC) will empanel or cause to empanel private \nand public health care service providers and facilities in their respective State/UTs as per \nthese guidelines. \nThe states/UTs are free to decide the mode of verification of empanelment application, \nconducting the physical verification either through District Empanelment Committee (DEC) \nor using the selected insurance company (Insurance Model), under the broad mandate of \nthe instructions provided in these guidelines. \n \na) State Empanelment Committee (SEC) will constitute of following members: \n \ni. \nCEO, SHA - Chairperson \nii. \nMedical officer not less than the level Director, preferably Director In-Charge for \nImplementation of Clinical Establishment Regulation Act- Member \niii. \nTwo State Government officials nominated by the Department-Members",
+          "pre_rerank_rank": 16
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1486.0285000031581,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2684,
+        "eval_ms": 0.0,
+        "eval_tokens": 21,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    },
+    {
+      "question": "What should be minimum revenue of hospital to be eligible for empanelment application?",
+      "mode": "rerank",
+      "k": 5,
+      "answer": "I cannot answer this from the provided sources.",
+      "hits": [
+        {
+          "rank": 1,
+          "source_file": "empanelment_v2_0.pdf",
+          "page": 40,
+          "score": 4.078212738037109,
+          "chunk_id": "empanelment_v2_0_p0040_00",
+          "text": "Page  40  of  64  \nAnnex 1: Detailed Empanelment Criteria \n \nMinimum Criteria \n \nA Hospital would be empaneled as a network private hospital with the approval of the \nrespective State Health Authority5 if it adheres with the following minimum criteria: \na) Should have at least 10 inpatient beds with adequate spacing and supporting staff as per \nnorms. \ni. \nExemption may be given for single-speciality hospitals like Eye ,ENT and \nStandalone Dialysis Centres. \nii. \nGeneral ward - @80sq ft per bed, or more in a Room with Basic amenities- bed, \nmattress, linen, water, electricity, cleanliness, patient friendly common washroom \netc. Non AC but with fan/Cooler and heater in winter \nb) It should have adequate and qualified medical and nursing staff (doctors6 & nurses7), \nphysically in charge round the clock; (necessary certificates to be produced during \nempanelment). \nc) Fully equipped and engaged in providing Medical and Surgical services, commensurate to \nthe scope of service/ available specialties and number of beds. \ni. \nRound-the-clock availability (or on-call) of a Surgeon and Anesthetist where surgical \nservices/ day care treatments are offered. \nii. \nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and \nAnaesthetist where maternity services are offered. \n \n5 In order to facilitate the effective implementation of AB PM-JAY, State Governments shall set up the State Health Authority (SHA) \nor designate this function under any existing agency/ trust designated for this purpose, such as the state nodal agency or a trust \nset up for the state insurance program.",
+          "pre_rerank_rank": 15
+        },
+        {
+          "rank": 2,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 27,
+          "score": 3.2787880897521973,
+          "chunk_id": "empanelment_dec2021_p0027_00",
+          "text": "21\nAnnexure 1\nCriteria for Empanelment\nThis annexure contains the basic minimum criteria for empanelment for all the healthcare service \nproviders. It also covers the criteria in Aspirational Districts and additional criteria for empanelment of \nspecialties under the scheme. \n1. Minimum Criteria\n\t\nA hospital would be empanelled as a network private hospital with the approval of the respective \nState Health Agency3 if it adheres with the following minimum criteria:\na)\t\nShould have at least 10 inpatient beds with adequate spacing and supporting staff as per norms:\ni.\t\nExemption may be given for dental and day-care procedure hospitals like Eye, ENT, and \nStandalone Dialysis Centres.\nii.\t\nGeneral ward - @80sq ft per bed, or more in a room with basic amenities- bed, mattress, \nlinen, water, electricity, cleanliness, patient friendly common washroom etc. Non-AC but \nwith fan/cooler and heater in winter\nb) It should have adequate and qualified medical and nursing staff (doctors4 & nurses5), physically \nin charge round the clock; (necessary certificates to be produced during empanelment). The \nstate should have specific guidelines on the number of hospitals a doctor can work. \nc)\t\nFully equipped and engaged in providing medical and surgical services, commensurate to the \nscope of service/available specialties and number of beds:\ni.\t\nRound-the-clock availability (or on-call) of a Surgeon and Anaesthetist where surgical \nservices/day care treatments are offered.\nii.\t\nRound-the-clock availability (or on-call) of an Obstetrician, Paediatrician and Anaesthetist \nwhere maternity services are offered.\n3\t\nIn order to facilitate the effective implementation of AB PM-JAY, state governments shall set up the State Health Authority \n(SHA) or designate this function under any existing agency/trust designated for this purpose, such as the State Nodal Agency \nor a trust set up for the state insurance program.\n4 \nQualified doctors are a MBBS approved as per the Clinical Establishment Act/state government rules & regulations as \napplicable from time to time.\n5 \nQualified nurse per unit per shift shall be available as per requirement laid down by the Nursing Council/Clinical Establishment \nAct/State government rules & regulations as applicable from time to time. Norms vis a vis bed ratio may be spelt out.\nAnnexure 1",
+          "pre_rerank_rank": 6
+        },
+        {
+          "rank": 3,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 16,
+          "score": 2.3894147872924805,
+          "chunk_id": "empanelment_dec2021_p0016_00",
+          "text": "10\nGuidelines on Hospital Empanelment and De-Empanelment\nis found that hospital has not applied for one or more specialties, the hospital will be instructed \nto apply for the missing specialties within a stipulated a timeline (i.e., 15 working days from the \ninspection date). In this case, the hospital will modify the application form again on the web \nportal and submit for DEC verification. If the hospital does not apply for the other specialties in \nthe stipulated time, it may be liable for disqualification from the empanelment process.\n5.2.1.2.4.\tWhile partial specialty empanelment is not allowed, exception may be provided to the hospitals \nwho are willing to get empaneled for certain specific tertiary care specialties i.e, Pediatric cancer, \nPediatric surgery, Radiation oncology, Medical oncology, Surgical oncology, Neuro surgery, \nNeonatology, Burn management, Plastic reconstructive surgery, Cardiology, Interventional \nneuro radiology specialties. This should be allowed as an exception on case to case basis by the \nSHA to ensure availability of specialty services to beneficiaries not routinely available in public \nor currently empaneled private hospitals. Partial specialty empanelment will be allowed only in \ncities classified as X & Y (total 8 and 88) as per Ministry of Finance, O.M. No.2/5/2017 E.II (B) \ndated 7.7.2017 (Annexure 2).\n5.2.1.2.5.\tIn case during inspection, it is found that hospital has applied in the category of “Dialysis Single \nSpecialty Hospital” but is found to be multiple specialty hospital, the hospital’s application will \nbe rejected and a show cause notice shall be issued to them for willful submission of fraudulent \ndetail. In case during inspection, Except in case of the dialysis centre associated (outsourced/\nPPP model) with a hospital which is not empaneled under AB PM-JAY and the dialysis centre is \nrun by an organization who has a separate legal entity or separate parent company.\n5.2.1.2.6.\tIn case during inspection, it is found that hospital has applied for multiple specialties, but all do \nnot conform to minimum requirements under PM-JAY, the hospital will only be empaneled for \nspecialties that conform to PM-JAY norms.\nFigure 1: Options for Approval Process for Empanelment\nWithin 15 working days\nWithin 15 working days\nOption1: Physical and\nDesktop Veriﬁcation by\nDEC/TPEA\n \n \n \nDocument Scrutiny\nMatch\n \n \n \n \n \n \n",
+          "pre_rerank_rank": 7
+        },
+        {
+          "rank": 4,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 18,
+          "score": 2.3256969451904297,
+          "chunk_id": "empanelment_dec2021_p0018_00",
+          "text": "12\nGuidelines on Hospital Empanelment and De-Empanelment\n5.2.1.2.10. The final decision on empanelment under PM-JAY should be completed within 30 working days \nof receiving the application.\n5.2.1.3.\t\nOption 2: Fast Track Empanelment of QCI recommended/State empaneled hospital \nwithout physical verification\n5.2.1.3.1.\tTo fast-track empanelment process, states may choose to auto-approve already empaneled \nhospitals under a state scheme, if they meet the minimum eligibility criteria prescribed under \nPM-JAY. The healthcare provider will have to submit their RSBY ID or state empanelment ID \nduring the application process to facilitate auto empanelment. Any previous disciplinary action/\nde-empanelment under any other scheme must be reviewed before auto-empanelment. \n5.2.1.3.2. Additionally, healthcare providers which are PM-JAY Bronze Certified/NABH accredited/\nNABH certified/CGHS empaneled/ECHS empaneled will be auto-approved; provided they have \nsubmitted the application on web portal and meet the minimum criteria.\n5.2.1.3.3. A system-based auto verification process will be conducted to match the credentials provided \nagainst the QCI/NABH database within 5 working days. If the credentials match, the HCP will \nbe auto approved at DEC level and the case will be moved to SHA with a notification to DEC \napproval authority. \n5.2.1.3.4.\tIf the credentials do not match with the database, the DEC will conduct a desktop-based \nverification based on PM-JAY Bronze Certificate/NABH certificate/QCI recommended document \nfor CGHS/ECHS empanelment (as applicable) uploaded by the healthcare providers. Post the \ndesk verification, it may take a decision to recommend approval of the application or seek \nfurther clarification/additional documents from the provider or rejection of application within \n5 working days. The case will then be forwarded to SHA for final decision. \n5.2.1.4.\t\n\u0007Option 3: Fast track-empanelment for non QCI healthcare providers with physical \nverification within 3 months\n5.2.1.4.1.\tThis option may be undertaken during exceptional circumstance wherein relaxation for online-\nempanelment may be provided for those districts that have limited number of empanelled \nhospitals or for those specialties in the state that are not covered under the scheme like tertiary \ncare; or any other exceptional situation as the SHA may deem fit. The reason for availing this \noptio",
+          "pre_rerank_rank": 4
+        },
+        {
+          "rank": 5,
+          "source_file": "empanelment_dec2021.pdf",
+          "page": 10,
+          "score": 2.293605327606201,
+          "chunk_id": "empanelment_dec2021_p0010_00",
+          "text": "4\nGuidelines on Hospital Empanelment and De-Empanelment\n3.1.9.\t For the healthcare service providers which were empanelled based on Quality Certification/\naccreditation, healthcare service providers will undergo a renewal process, once every 3 years or \ntill the expiry of validity of PM-JAY Bronze/NABH certification whichever is earlier; to determine \ncompliance to minimum standards.\n3.1.10.\tNational Health Authority may revise the empanelment criteria from time to time during the \nscheme if required. States/UTs will have to undertake any required re-assessments for the same \nwithin a stipulated timeline. \n3.2.\t Criteria for Empanelment\n3.2.1.\t For empanelment under the scheme, healthcare providers should meet the basic minimum \neligibility requirements as detailed in Annexure 1. As these are minimum standards, no exceptions \ncan be provided on these. \n3.2.2.\t Additionally, specialty specific eligibility criteria have been defined for healthcare providers \noffering specific specialties, e.g., Oncology, Neurology etc. This is applicable over and above the \nbasic minimum criteria and is also detailed in Annexure 1. \n3.2.3.\t State Governments will have the flexibility to revise/relax the empanelment criteria (barring the \nminimum requirements as highlighted in Annexure 1), based on their local context, availability of \nproviders, and the need to balance quality and access, with prior approval from National Health \nAuthority. The same will have to be incorporated in the web-portal for online empanelment of \nhealthcare providers.\n3.3.\t Incentive Structure for Empanelment\n3.3.1.\t For all healthcare providers empaneled under the scheme, the additional incentives will be \nprovided on the base health benefits packages as per HBP user guidelines as published on AB PM-\nJAY website.",
+          "pre_rerank_rank": 10
+        }
+      ],
+      "stats": {
+        "served_by": "",
+        "total_ms": 1281.9209000008414,
+        "load_ms": 0.0,
+        "queue_ms": 0.0,
+        "prompt_eval_ms": 0.0,
+        "prompt_eval_tokens": 2836,
+        "eval_ms": 0.0,
+        "eval_tokens": 9,
+        "prompt_eval_tps": 0.0,
+        "eval_tps": 0.0
+      }
+    }
+  ]
+}
