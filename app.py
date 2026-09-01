@@ -104,15 +104,6 @@ st.caption(
     "Answers come only from the National Health Authority PM-JAY corpus, "
     "with the file and page behind every claim."
 )
-st.info(
-    "**Portfolio demo on free hosting.** Live questions run against a free "
-    "language-model tier with a shared daily budget, so they are capped. The "
-    "suggested questions are answered in advance and always available. "
-    "This reports what the source documents say — it is not medical or legal "
-    "advice, and two editions of the empanelment guidelines in the corpus "
-    "contradict each other on several rules.",
-    icon="ℹ️",
-)
 
 
 @st.cache_resource
@@ -285,6 +276,28 @@ with st.sidebar:
         st.caption(f"source: `{BASELINES[mode]['descriptor']}`")
     if LIVE_SHA:
         st.caption(f"question set `{LIVE_SHA}`")
+
+    # The caveats are important and a visitor needs them at most once, so they sit
+    # behind a click at the bottom of the sidebar rather than in a banner above the
+    # answer. A permanent notice in the main column is read on the first visit and
+    # ignored on every one after, while costing vertical space on every question --
+    # it stops being a disclosure and becomes furniture.
+    st.divider()
+    with st.popover("ℹ️ Demo version", use_container_width=True):
+        st.markdown(
+            "**Portfolio demo on free hosting.**\n\n"
+            "- Live questions run against a free language-model tier with a shared "
+            "daily budget, so they are capped per visitor and per day.\n"
+            "- The suggested questions are **answered in advance** and always "
+            "available — they cost no quota and no waiting.\n"
+            "- First load takes ~30 s while two models start up.\n\n"
+            "**This is not medical or legal advice.** It reports what the source "
+            "documents say. Two editions of the empanelment guidelines are in the "
+            "corpus and they contradict each other on several rules — where that "
+            "happens, check the cited pages rather than trusting the answer.\n\n"
+            "Source documents are Government of India publications from the "
+            "National Health Authority and state health agencies."
+        )
 
 # ---------------------------------------------------------------------------
 # Quota protection.
