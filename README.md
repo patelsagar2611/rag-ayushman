@@ -105,12 +105,58 @@ Python 3.12 (3.13 not used — some ML wheels still lag).
 ```powershell
 py -3.12 -m venv .venv
 .venv\Scripts\Activate.ps1
-
-# CPU-only torch FIRST, or pip pulls the ~2.5 GB CUDA build as a
-# sentence-transformers dependency
-pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
+
+**The two-step torch install is gone.** `requirements.txt` now pins
+`torch==2.13.0+cpu` behind `--extra-index-url`, so one file produces a CPU-only
+environment. It had to: Hugging Face Spaces builds from `requirements.txt` and
+nothing else, and a two-step install is not expressible there.
+
+`--extra-index-url` alone would not have been enough — it is a *hint*, so pip
+weighs both indexes and a newer torch on PyPI simply wins. The `+cpu`
+local-version suffix is what makes it binding, because that suffix exists only on
+the PyTorch index: resolution either finds the CPU wheel or fails loudly.
+
+Verified in a clean `python:3.12-slim` container rather than asserted — it
+resolves `torch-2.13.0+cpu-cp312-cp312-manylinux_2_28_x86_64.whl` with **zero
+`nvidia-*` packages in a 111-package closure**. The absence of those packages is
+the real acceptance test: `torch.cuda.is_available()` returns `False` on any
+machine without a GPU, *including one where the 2.5 GB CUDA build installed
+perfectly*, so it would have passed while the exact failure being guarded against
+had occurred. Note the wheel is `manylinux_2_28`, so the host needs **glibc ≥ 2.28**
+(Debian bookworm and Ubuntu 22.04 both clear it).
+
+`requirements-lock.txt` is the full 111-package closure captured inside that
+container. It is generated, never hand-edited, and never with `pip freeze` on
+Windows — that emits Windows-resolved versions and platform-only packages that
+break a Linux build.
+
+### Re-indexing
+
+**`chroma/` is committed, and hidden from git with `skip-worktree`.** Merely
+*opening* the collection rewrites the sqlite file and the HNSW segment, so without
+this every run of the app or the eval leaves a 15.7 MB binary looking modified —
+and one absent-minded `git add -A` puts it into history permanently.
+
+Set the flag once per clone (it is local to a working copy and not inherited by a
+fresh checkout):
+
+```powershell
+git ls-files -z chroma/ | xargs -0 git update-index --skip-worktree
+```
+
+The cost of that fix is that a **genuine** re-index is hidden too, so committing
+one is a deliberate act:
+
+```powershell
+git ls-files -z chroma/ | xargs -0 git update-index --no-skip-worktree
+git add chroma/ ; git commit -m "re-index"
+git ls-files -z chroma/ | xargs -0 git update-index --skip-worktree
+```
+
+`python -m src.index` prints those steps on completion, so the instruction appears
+in the output of the command that creates the situation rather than only here.
 
 Local LLM — install [Ollama](https://ollama.com/download), then in a **new** terminal
 (the installer's PATH change is not visible to already-open shells):
@@ -155,24 +201,57 @@ unmeasured bet.
 ### Choosing an LLM backend
 
 Generation runs against a local Ollama model by default, or any OpenAI-compatible endpoint.
-Copy `.env.example` to `.env` (gitignored) and fill it in:
+Copy `.env.example` to `.env` (gitignored) and fill it in.
 
-```powershell
-# local, the default and the baseline
-LLM_PROVIDER=ollama
-OLLAMA_MODEL=qwen2.5:7b
+Two variables select the backend, and they answer different questions:
 
-# or any OpenAI-compatible endpoint
+| variable | question | values |
+|---|---|---|
+| `LLM_PROVIDER` | which **API shape** | `ollama` (local) or `openai` (any OpenAI-compatible endpoint) |
+| `LLM_BACKEND` | which **endpoint** of that shape | any `<NAME>` for which `<NAME>_BASE_URL` etc. are defined |
+
+Every hosted setting is read from a `<BACKEND>_*` prefix, so the URL, key, model
+and upstream pin are selected **together** by one name:
+
+```dotenv
 LLM_PROVIDER=openai
-OPENAI_BASE_URL=https://api.groq.com/openai/v1
-OPENAI_MODEL=openai/gpt-oss-120b
-GROQ_API_KEY=...
+LLM_BACKEND=google          # the only line you change to switch endpoint
+
+GOOGLE_API_KEY=...
+GOOGLE_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
+GOOGLE_MODEL=models/gemini-3.1-flash-lite
+
+OPENROUTER_API_KEY=...
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=google/gemini-3.1-flash-lite-20260507
+OPENROUTER_PROVIDER=Google AI Studio
 ```
 
-Only the base URL and model name change between providers, so switching is configuration
-rather than code. **A hosted model is a different model** — never compare a hosted number
-against a local one and attribute the difference to retrieval. Every results file records
-`llm_provider` and `llm_model` so no run is ambiguous about what produced it.
+Adding a vendor is three lines of `.env` and **no code change**, which is the
+strongest available form of "provider is configuration, not a branch".
+
+**Two failure modes this exists to make unrepresentable**, both of which earlier
+designs allowed. A single `OPENAI_API_KEY` resolved without reference to the
+endpoint means that with two vendors configured and one slot to hold them,
+switching backends is an edit — and forgetting once sends a live credential for
+one vendor to another vendor as a bearer token. Matching the key to the endpoint
+by hostname fixes that but leaves the URL and the **model** as separate settings
+that must move together: Google wants `models/gemini-…` where OpenRouter wants
+`google/gemini-…-20260507`, so a half-finished switch produces a puzzling 404.
+Selecting everything by one prefix removes both, rather than detecting them.
+
+A typo in `LLM_BACKEND` fails immediately, naming the missing variables and
+listing the backends actually configured — discovered by scanning the environment
+for `*_BASE_URL`, so the error message cannot itself go stale.
+
+**A hosted model is a different model** — never compare a hosted number against a
+local one and attribute the difference to retrieval. Every results file records
+`llm_provider`, `llm_backend` and `llm_model`, so no run is ambiguous about what
+produced it. `llm_backend` was added because the endpoint was previously
+*unrecoverable*: `llm_model` names the model and `served_by` names the upstream
+deployment, but nothing recorded which endpoint was called. Google-direct and
+OpenRouter runs were distinguishable only because their model ids happen to differ
+in shape, which is luck rather than provenance.
 
 ## Evaluation
 
@@ -950,11 +1029,41 @@ A query therefore costs about **2¼ minutes end to end** locally, which is measu
 reproducible, and not demoable. That is a property of running a 7B model on CPU, not of the
 pipeline.
 
-**The hosted backend confirms it.** Against an OpenAI-compatible endpoint the same call takes
-**~0.5 s** — 0.1 s prefill plus 0.4 s decode, measured. Generation stops being the bottleneck
-entirely and the cross-encoder becomes the slowest component, which inverts every latency
-argument above. Set `LLM_PROVIDER=openai` to switch; Ollama stays the default and remains the
-only source of the prefill/decode split on identical hardware.
+**The hosted backend confirms it** — the direction, not the magnitude. Against an
+OpenAI-compatible endpoint generation stops being the bottleneck entirely and the cross-encoder
+becomes the slowest component, which inverts every latency argument above. Set
+`LLM_PROVIDER=openai` and `LLM_BACKEND=<name>` to switch; Ollama stays the default and remains
+the only source of the prefill/decode split on identical hardware.
+
+> **~~Against an OpenAI-compatible endpoint the same call takes ~0.5 s — 0.1 s prefill plus
+> 0.4 s decode, measured.~~ Corrected 2026-08-31: that figure is not supported by any results
+> file in this repo.** Generation p50 across every committed hosted run:
+>
+> | model | upstream | gen p50 | gen p95 |
+> |---|---|---|---|
+> | `gemini-3.1-flash-lite` via OpenRouter | Google AI Studio | 1,112 ms | 1,465 ms |
+> | `gemini-3.1-flash-lite` via OpenRouter | Google AI Studio | 1,231 ms | 1,778 ms |
+> | `gemini-3.1-flash-lite` via OpenRouter | unpinned | 1,448 ms | 2,637 ms |
+> | `gemini-3.1-flash-lite` **Google direct** | — | 2,185 ms | 5,048 ms |
+> | `gemini-3.1-flash-lite` **Google direct** | — | 3,978 ms | 7,251 ms |
+> | `qwen-2.5-7b-instruct` | Phala | 1,247 ms | 2,979 ms |
+>
+> **The fastest committed run is 1,112 ms and nothing is near 500 ms**, so treat hosted
+> generation as **~1–2 s**, not sub-second. The error was quoting a figure without re-deriving
+> it from the results files, and it survived because it pointed the right way — generation
+> really did stop being the bottleneck, so nobody checked the number that said so. It was
+> found only when it was used as the basis of a deployment projection and the arithmetic
+> mattered.
+>
+> **Two further things that table shows, neither of them good news for the demo.** The Google
+> *direct* endpoint — the one chosen as the deployment backend — is the slowest hosted path
+> here and by far the most variable, with a p95 of 5.0 and 7.3 s against OpenRouter-pinned's
+> 1.5–1.8 s, on the same underlying model. And a three-question spot check on 2026-08-31 did
+> **not** reproduce that gap (Google ~2.1 s, OpenRouter ~2.0 s), so the evidence conflicts and
+> three questions cannot settle a p95. Google direct was chosen because its *outputs* are
+> byte-identical to the pinned OpenRouter path; that was never a claim about latency, and it
+> should not have been allowed to stand in for one. **Backend choice may reopen at D-2 on
+> latency grounds.**
 
 Two things learned running it that are not in the provider documentation:
 
@@ -964,6 +1073,130 @@ Two things learned running it that are not in the provider documentation:
 - **Every retry is a billed request**, so retrying through a rate limit burns several times a
   run's question count and drives `retry-after` from ~15 s to *hundreds* of seconds. Pacing
   proactively against the reported budget is strictly better than retrying reactively.
+
+## Deployment measurements — what was verified before anything was hosted
+
+The target is a 2-vCPU Hugging Face Space. Everything below was measured locally in
+containers, *before* the Space existed, because each answer changes what gets built.
+None of it is the Space's own number: **D-2 measures that, and these are projections
+with a measurement behind them rather than projections with reasoning behind them.**
+
+### The environment that will run this reproduces every retrieval figure exactly
+
+`requirements.txt` pins 9 direct dependencies; the environment that actually runs is
+**111 packages**. The other 102 are chosen by pip at install time from whatever
+satisfies the declared ranges *that day* — and four of them had already moved away
+from the versions every published number was measured on:
+
+| package | measured on (Windows venv) | Linux resolves today |
+|---|---|---|
+| `transformers` | 5.15.0 | **5.16.1** |
+| `tokenizers` | 0.22.2 | **0.23.1** |
+| `huggingface-hub` | 1.27.0 | **1.29.0** |
+| `onnxruntime` | 1.28.0 | **1.29.0** |
+
+`tokenizers` turns a question into the integer ids `bge-small` embeds and the
+cross-encoder scores, and `transformers` owns the loading and pooling around it. So
+this is the hot path, and the failure mode is silent — the Space would serve slightly
+different retrieval from what this README describes, with nothing anywhere saying so.
+
+**Measured instead of pinned around.** All four retrievers were re-run inside the
+container against the live golden set and compared to the committed baselines:
+
+| retriever | hit@1 | hit@3 | hit@5 | MRR |
+|---|---|---|---|---|
+| `vector` | 0.5667 = | 0.7833 = | 0.9167 = | 0.6994 = |
+| `bm25` | 0.7000 = | 0.8333 = | 0.8667 = | 0.7658 = |
+| `hybrid` | 0.6167 = | 0.8833 = | 0.9167 = | 0.7528 = |
+| `rerank` | 0.8167 = | 0.9500 = | 0.9667 = | 0.8792 = |
+
+**16 metrics, largest absolute difference 0.000000.** The drift is immaterial to
+retrieval, and the lockfile therefore records an environment that was *proven
+equivalent* rather than pinned defensively against a risk never demonstrated.
+
+This also extends [design decision 17](#design-decisions--do-not-silently-reverse-these)
+further than it was written. "Retrieval is byte-reproducible" was established across
+days and process restarts on one machine; it now holds across **a different OS, a
+different CPU, and four different library versions in the hot path**. It says nothing
+about generation, and nothing about latency.
+
+### Thread count is a deployment parameter, worth ~48% of reranked latency
+
+`docker run --cpus=2` throttles CPU *quota* but does not change what the library sees:
+`os.cpu_count()` reads the host, so torch sized its pool from 8 cores and chose 4
+threads, which then contended for 2 cores' worth of time. That is not a 2-vCPU box, it
+is a **worse** one. Four arms under the same budget, 20 questions each:
+
+| mode | threads | retrieve p50 | p95 |
+|---|---|---|---|
+| `rerank` | torch default (4) | 7,615 ms | 8,120 ms |
+| `rerank` | **pinned to 2** | **3,974 ms** | 4,242 ms |
+| `vector` | torch default (4) | 109 ms | 182 ms |
+| `vector` | **pinned to 2** | **39 ms** | 54 ms |
+
+Pinning nearly halves reranked retrieval and cuts dense retrieval to a third. Same
+code, same models, same CPU budget — the only change is not asking for more
+parallelism than the container is allowed to deliver.
+
+**So the deployed app sets it, from `PMJAY_TORCH_THREADS` (default 2), in `app.py`
+only** — see design decision 32. Shipping without it would have cost ~3.6 s per query
+on a machine with no visible defect, and the natural suspect would have been the
+cross-encoder: the component *already known* to be slow, and therefore the one that
+would have absorbed the blame. A performance bug hiding behind a legitimately
+expensive component is close to undiscoverable by intuition.
+
+### The resulting projection, and what it does not settle
+
+```
+                    retrieval   generation      end to end
+rerank, 2 vCPU         4.0 s     1.2-2.2 s      5.2-6.2 s     ABOVE the ~5 s threshold
+vector, 2 vCPU        0.04 s     1.2-2.2 s      1.2-2.2 s
+```
+
+Generation is the measured **1.2–2.2 s** band from the committed runs, not the ~0.5 s this
+section originally claimed — see the correction above. An earlier version of this projection
+read `~4.5 s end to end` for `rerank`, which put it just *under* the threshold; on the
+corrected generation figure it lands *above*. **That is a real change of direction, and it came
+from a documentation error rather than from any new measurement of the system.**
+
+DEPLOYMENT.md projected "~20–30 s" for the reranker on free hosting, from reasoning alone. The
+measured projection is still far better than that, and **partly for a reason that is
+configuration rather than hardware** — see the thread-count finding above.
+
+**This does not settle whether the demo defaults to `rerank` — but it now leans against
+it.** Two of these cores under a cgroup quota are not two of a cloud provider's shared vCPUs;
+there is no cold start, no network I/O and no noisy neighbour in the container. So D-2 decides.
+What the corrected arithmetic changes is the direction of the prior: `rerank` is over the
+threshold rather than under it, and if Google direct's committed p95 of 5–7 s is real, a
+reranked p95 could approach 11 s, which is not a demo.
+
+int8 ONNX quantisation is therefore back on the table where it previously was not. It would
+cut the 4.0 s retrieval component, at the cost of a full re-baseline of all four retrievers —
+quantisation can shift scores and that must be measured rather than assumed. Do not reach for
+it before D-2 produces a real number.
+
+### Cold start is ~26 s, and the download is not the reason
+
+From a fully warm model cache under the 2-vCPU budget:
+
+| | |
+|---|---|
+| `bge-small` load | 8.7 s |
+| cross-encoder load | 9.9 s |
+| **both ready, including the torch/sentence-transformers imports** | **25.8 s** |
+
+The deployment plan's concern was the cross-encoder's ~90 MB download landing on one
+unlucky visitor. That is real and is now moved into startup — but the **load** costs
+more than the download, and no packaging choice removes it. It also weakens the case
+for switching to the Docker SDK purely to bake weights into an image: doing so saves
+the download and not the 26 s.
+
+### The Chroma index travels
+
+`chroma/` is written on Windows and read on Linux. Opened in a `python:3.12-slim`
+container: collection `pmjay`, **872 chunks**, and the HNSW segment answered a query.
+So the index does not need rebuilding on the host, which is what makes committing it
+worthwhile — see [Re-indexing](#re-indexing) for the `skip-worktree` consequence.
 
 ## Layout
 
@@ -976,9 +1209,14 @@ src/extract.py         PyMuPDF, one record per page
 src/chunk.py           ~600-token windows, ~100-token overlap
 src/index.py           BGE embeddings -> Chroma; model + query prefix live here
 src/retrieve.py        vector / bm25 / hybrid RRF / cross-encoder rerank
-src/generate.py        prompt assembly + Ollama call, with latency breakdown
+src/generate.py        prompt assembly + LLM call; backend selected by LLM_BACKEND
 config/prompts.yaml    versioned prompts
-app.py                 Streamlit UI
+app.py                 Streamlit UI; sets torch threads, reads baselines from results
+chroma/                committed index, hidden with skip-worktree (see Re-indexing)
+requirements.txt       9 direct pins, incl. torch==2.13.0+cpu
+requirements-lock.txt  the full 111-package closure, generated on Linux
+deploy_space.py        copies the runtime files into a Hugging Face Space checkout
+Docs/SPACE_README.md   the Space landing card -- becomes README.md on the Space only
 eval/golden_set.csv    hand-written questions, committed
 eval/known_gaps.csv    written but unscorable (answer lives in an image)
 eval/run_eval.py       scoring harness; --retrieval-only needs no LLM
@@ -987,7 +1225,7 @@ eval/diff_editions.py  where the two empanelment editions disagree
 eval/backfill_provenance.py  adds question-set hash + served_by to older results files
 eval/results/          one committed JSON per run
 Docs/HANDOFF.md        authoritative status: what is done, half-done, and next
-Docs/DEPLOYMENT.md     hosted-LLM and public-demo plan (not built yet)
+Docs/DEPLOYMENT.md     the original hosting plan; steps 1-5 are done
 Docs/PMJAY-RAG-PROJECT.md  the original brief
 Docs/empanelment-diff.md   where the two empanelment editions disagree
 ```
@@ -1164,6 +1402,32 @@ assertion.
     a long chunk is invisible to the reranker. Stated rather than worked around: re-chunking to
     fit would change the indexing the Phase 1 baseline was measured against.
 
+
+**Deployment**
+
+31. **`chroma/` is committed, and hidden from git with `skip-worktree`.** Chosen over
+    committing `chunks.jsonl` and rebuilding at startup, which would cost 30–60 s on
+    every wake of a sleeping Space. The cost is that *opening* the collection rewrites
+    the sqlite file and the HNSW segment, so without the flag every run leaves a
+    15.7 MB binary looking modified and one `git add -A` bloats history permanently.
+    The flag hides a genuine re-index too, which is why `src/index.py` prints the
+    un-hide steps on completion — the instruction lives in the output of the command
+    that creates the situation, not only in a document. See [Re-indexing](#re-indexing).
+32. **`torch.set_num_threads` is set in `app.py`, from an env var, and NOT in
+    `src/retrieve.py`.** Every committed evaluation number was measured under torch's
+    default threading; setting it inside the pipeline would silently re-baseline the
+    whole project. It is a property of the deployed product, not of the retriever.
+    An env var (`PMJAY_TORCH_THREADS`, default 2) rather than a hardcoded 2, because
+    the value that is right for a 2-vCPU host is wrong for an 8-core development
+    machine and hardcoding would quietly tax local use. `0` leaves torch alone.
+33. **The hosted backend is selected by one name, `LLM_BACKEND`, with every setting
+    read from a `<BACKEND>_*` prefix.** Chosen over a single `OPENAI_*` group with the
+    key resolved by hostname. Both alternatives were built and discarded: a
+    non-endpoint-aware key can be sent to the wrong vendor, and endpoint-matched keys
+    still leave the URL and model as separate settings that must move together. One
+    prefix makes both mismatches unrepresentable, and keeps the vendor list in `.env`
+    rather than in code — adding a provider is configuration with no code change.
+
 ## Gotchas — each of these cost hours
 
 **Corpus and environment**
@@ -1325,7 +1589,19 @@ Phase 1 complete. Phase 2 retrieval complete and measured. Phase 2 generation me
   retrieval and citation figure re-measured against the corrected set, from saved data, at no
   cost. See [the completeness review](#the-golden-set-was-incomplete-and-correcting-it-moved-every-number).
 
+**Deployment: D-1 (pre-flight) complete, nothing hosted yet.** Verified in a clean
+Linux container rather than asserted — CPU-only torch resolvable from
+`requirements.txt` alone, the Chroma index travelling Windows to Linux intact, and
+the dependency drift measured immaterial to all four retrievers. Two findings the
+plan did not anticipate: thread count is worth ~48% of reranked latency on a 2-vCPU
+budget, and cold start is ~26 s of model loading regardless of packaging. See
+[Deployment measurements](#deployment-measurements--what-was-verified-before-anything-was-hosted).
+
 **Not yet built**
+- The Space itself. **D-2 measures it, and two decisions are deliberately open until
+  it does**: whether the demo defaults to `vector` or `rerank`, and whether int8 ONNX
+  quantisation is needed. The local projection is ~4.5 s end to end for `rerank`
+  against a ~5 s threshold — close enough that only the real hardware settles it.
 - Prompt v2, targeting the false-abstention weakness, A/B'd against v1 with nothing else changed
 - Handling of the empanelment version conflict, which reranking makes worse rather than better
 - Faithfulness measurement — see the note under [Why these metrics](#why-these-metrics);

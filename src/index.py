@@ -74,6 +74,28 @@ def load_chunks():
         return [json.loads(line) for line in f]
 
 
+# Printed after every successful re-index. The committed index is hidden from git
+# with skip-worktree, because merely OPENING the collection rewrites the sqlite
+# file and the HNSW segment -- so without it, every run of the app or the eval
+# leaves a 16 MB binary looking modified, and one absent-minded `git add -A` puts
+# it into history permanently.
+#
+# The cost of that fix is exactly this: a REAL re-index is hidden too. So the
+# instruction lives here, printed by the tool that creates the situation, rather
+# than only in a document someone has to remember to consult. The same steps are
+# in the README under "Re-indexing".
+REINDEX_REMINDER = """
+NOTE: the index is hidden from git (skip-worktree), so this re-index is INVISIBLE
+to `git status`. To commit it:
+
+    git ls-files -z chroma/ | xargs -0 git update-index --no-skip-worktree
+    git add chroma/ && git commit -m "re-index"
+    git ls-files -z chroma/ | xargs -0 git update-index --skip-worktree
+
+Re-hide it afterwards, or every later run will show the index as modified again.
+"""
+
+
 def main():
     chunks = load_chunks()
     collection = get_collection()
@@ -106,6 +128,7 @@ def main():
         print(f"added {min(i + ADD_BATCH, len(pending))}/{len(pending)}")
 
     print(f"\ncollection '{COLLECTION}' now holds {collection.count()} chunks in {CHROMA_DIR}/")
+    print(REINDEX_REMINDER)
 
 
 if __name__ == "__main__":

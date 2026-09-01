@@ -43,10 +43,11 @@ import requests  # noqa: E402
 import streamlit as st  # noqa: E402
 
 from src.generate import (  # noqa: E402
+    BACKEND_BASE_URL,
+    LLM_BACKEND,
     LLM_MODEL,
     LLM_PROVIDER,
     OLLAMA_MODEL,
-    OPENAI_BASE_URL,
     answer,
 )
 from src.index import COLLECTION, EMBED_MODEL, get_collection  # noqa: E402
@@ -250,7 +251,7 @@ if question:
             )
         else:
             st.error(
-                f"Could not reach the `{LLM_PROVIDER}` endpoint at `{OPENAI_BASE_URL}`. "
+                f"Could not reach the `{LLM_BACKEND}` endpoint at `{BACKEND_BASE_URL}`. "
                 "The provider may be down, or the API key may be missing from this "
                 "deployment's secrets."
             )
@@ -274,13 +275,29 @@ if question:
     st.write(text)
 
     if stats:
-        st.caption(
-            f"{stats['total_ms'] / 1000:.1f}s total — "
-            f"prompt {stats['prompt_eval_ms'] / 1000:.1f}s "
-            f"({stats['prompt_eval_tokens']} tok), "
-            f"generation {stats['eval_ms'] / 1000:.1f}s "
-            f"({stats['eval_tokens']} tok)"
-        )
+        # Only Ollama reports a prefill/decode split. An OpenAI-compatible endpoint
+        # returns token counts with no phase timings, so those fields come back 0 --
+        # and rendering them unconditionally printed "prompt 0.0s, generation 0.0s"
+        # under a query that visibly took 1.8s. Correct data, and it reads as broken
+        # instrumentation. The deployed backend is hosted, so this was the case
+        # EVERY visitor would have seen; it stayed invisible locally because the
+        # local backend is the one provider that does report the split.
+        split_reported = (stats.get("prompt_eval_ms") or 0) > 0
+        line = f"{stats['total_ms'] / 1000:.1f}s total"
+        if split_reported:
+            line += (
+                f" — prompt {stats['prompt_eval_ms'] / 1000:.1f}s "
+                f"({stats['prompt_eval_tokens']} tok), "
+                f"generation {stats['eval_ms'] / 1000:.1f}s "
+                f"({stats['eval_tokens']} tok)"
+            )
+        elif stats.get("prompt_eval_tokens"):
+            line += (
+                f" — {stats['prompt_eval_tokens']} prompt tok, "
+                f"{stats['eval_tokens']} generated "
+                f"(this provider reports no prefill/decode split)"
+            )
+        st.caption(line)
 
     # The score is labelled with what it actually is. In hybrid it is an RRF score
     # (~0.03) and in rerank a cross-encoder logit that is often negative -- neither

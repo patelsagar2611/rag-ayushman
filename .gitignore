@@ -29,6 +29,11 @@ data/processed/
 # Local config
 .env
 
+# Hugging Face Space checkout, populated by deploy_space.py. A second git repo
+# with its own history and its own README; it must never be nested inside this
+# repo's index.
+.space/
+
 # Editors / OS
 .vscode/
 .idea/

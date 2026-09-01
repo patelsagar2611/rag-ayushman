@@ -724,9 +724,10 @@ def main():
     llm_provider = None
     llm_model = None
     llm_upstream_pin = None
+    llm_backend = None
     if not args.retrieval_only:
         from src.generate import (
-            LLM_MODEL, LLM_PROVIDER, OPENAI_PROVIDER, PROMPT_VERSION,
+            LLM_BACKEND, LLM_MODEL, LLM_PROVIDER, BACKEND_PROVIDER, PROMPT_VERSION,
         )
 
         prompt_version = PROMPT_VERSION
@@ -734,22 +735,28 @@ def main():
         # LLM_MODEL, not OLLAMA_MODEL -- the latter would mislabel every hosted run
         # with the name of a model that never saw the prompt.
         llm_model = LLM_MODEL
+        # WHICH ENDPOINT was called. Previously unrecoverable from a results
+        # file: `llm_model` names the model and `served_by` names the upstream
+        # deployment, but nothing recorded the endpoint itself. Google-direct
+        # and OpenRouter runs were distinguishable only because their model ids
+        # happen to differ in shape, which is luck rather than provenance.
+        llm_backend = LLM_BACKEND or None
         # Which UPSTREAM was pinned, which is a different question from
         # llm_provider (the adapter: "ollama" or "openai"). An aggregator resolves
         # one model id to several real deployments and picks PER REQUEST, so an
         # unpinned run is a blend and its composition changes on re-run. Empty
         # string means "deliberately not pinned"; None means the question did not
         # apply, i.e. a retrieval-only or local run.
-        llm_upstream_pin = OPENAI_PROVIDER if LLM_PROVIDER == "openai" else None
+        llm_upstream_pin = BACKEND_PROVIDER if LLM_PROVIDER == "openai" else None
 
         # Said before the run rather than discovered in the results file. This is
         # the variable that was silently uncontrolled in every hosted run before
         # 2026-08-26: gemini-3.1-flash-lite arrived as a ~55/45 blend of two
         # different Google endpoints WITHIN a single 69-question run.
-        if LLM_PROVIDER == "openai" and not OPENAI_PROVIDER:
+        if LLM_PROVIDER == "openai" and not BACKEND_PROVIDER:
             print("NOTE: upstream provider is NOT pinned. The aggregator may route\n"
                   "      different questions to different deployments, and the blend\n"
-                  "      will differ on re-run. Set OPENAI_PROVIDER to pin it.\n")
+                  "      will differ on re-run. Set <BACKEND>_PROVIDER to pin it.\n")
 
     golden = Path(args.golden)
     cases = load_golden(golden)
@@ -821,6 +828,7 @@ def main():
             "retriever": args.retriever,
             "prompt_version": prompt_version,
             "llm_provider": llm_provider,
+            "llm_backend": llm_backend,
             "llm_model": llm_model,
             "llm_upstream_pin": llm_upstream_pin,
             # Present and null on a full run, so a reader never has to

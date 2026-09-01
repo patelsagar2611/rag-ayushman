@@ -37,27 +37,106 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
 PROVIDERS = ("ollama", "openai")
 
-# OpenAI-compatible settings. Base URL is a variable so the same adapter reaches
-# Groq, OpenRouter, Together or a local vLLM without a code change.
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.groq.com/openai/v1")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "openai/gpt-oss-120b")
-OPENAI_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
+# WHICH endpoint answers, when LLM_PROVIDER=openai.
+#
+# Every hosted setting is read from <BACKEND>_* in the environment, so the URL,
+# the key, the model and the upstream pin are selected TOGETHER by one name.
+#
+# This replaced two earlier designs, both of which were one forgotten edit away
+# from a real failure. The first was a single BACKEND_API_KEY resolved by a
+# first-non-empty chain that never looked at the endpoint: with two vendors
+# configured and one slot to hold them, switching backends meant editing a value,
+# and forgetting once sends a live credential for one vendor to another vendor as
+# a bearer token. The second matched the key to the endpoint by hostname, which
+# fixed that but left the URL and the MODEL as separate settings that must change
+# together -- Google wants "models/gemini-...", OpenRouter wants
+# "google/gemini-...-20260507" -- so a half-finished switch produced a puzzling
+# 404 instead.
+#
+# Selecting everything by one prefix makes both mismatches UNREPRESENTABLE rather
+# than merely detected, and it keeps the vendor list out of this file: adding a
+# provider is three lines of .env and no code, which is the strongest form of
+# "provider is configuration, not a branch".
+LLM_BACKEND = os.getenv("LLM_BACKEND", "").strip().lower()
+
+
+def configured_backends():
+    """Backend names discoverable from the environment.
+
+    Derived by scanning for <NAME>_BASE_URL rather than hardcoding a list, so the
+    error message for a typo cannot itself go out of date.
+    """
+    return sorted(
+        key[: -len("_BASE_URL")].lower()
+        for key, value in os.environ.items()
+        if key.endswith("_BASE_URL") and value
+    )
+
+
+def backend_setting(name, default=None):
+    """One <BACKEND>_<NAME> setting, or `default` when unset."""
+    if not LLM_BACKEND:
+        return default
+    return os.getenv(f"{LLM_BACKEND.upper()}_{name}", default)
+
+
+# Trailing slash stripped because the request path is appended as
+# "/chat/completions". Google's OpenAI-compatible base URL ends in a slash and
+# would otherwise produce a double slash in the path.
+BACKEND_BASE_URL = (backend_setting("BASE_URL") or "").rstrip("/")
+BACKEND_MODEL = backend_setting("MODEL")
+BACKEND_API_KEY = backend_setting("API_KEY")
 
 # Aggregators route ONE model id across SEVERAL upstream providers, which can
 # differ in quantisation, context handling and output shape. That makes the
 # served provider a variable of the experiment, not an implementation detail:
 # two runs naming the same model can be two different deployments.
 #
-# Set to pin routing to one upstream (e.g. "Anthropic", "Google AI Studio").
-# Unset means the aggregator picks, which is fine as long as the run RECORDS
-# what answered -- see served_by in parse_openai_stats. Recording is mandatory;
-# pinning is optional, because a provider that is down should fail the run
-# rather than silently swap deployments mid-benchmark.
-OPENAI_PROVIDER = os.getenv("OPENAI_PROVIDER", "")
+# Set <BACKEND>_PROVIDER to pin routing to one upstream (e.g. "Google AI
+# Studio"). Unset means the aggregator picks, which is fine as long as the run
+# RECORDS what answered -- see served_by in parse_openai_stats. Recording is
+# mandatory; pinning is optional, because a provider that is down should fail the
+# run rather than silently swap deployments mid-benchmark. Meaningless on a
+# direct endpoint, which is its own provider.
+BACKEND_PROVIDER = backend_setting("PROVIDER", "") or ""
+
+
+def require_backend():
+    """Fail with a usable message BEFORE a request is attempted.
+
+    Checked at call time, not import time: app.py and the eval import this module
+    even when they are pointed at the local model, and a hosted misconfiguration
+    must not stop a local run from starting.
+    """
+    known = configured_backends()
+    listed = ", ".join(known) if known else "none found in the environment"
+    if not LLM_BACKEND:
+        raise SystemExit(
+            "LLM_BACKEND is not set, so no hosted endpoint is selected. Set it to "
+            f"one of: {listed}. Each backend needs <NAME>_BASE_URL, <NAME>_API_KEY "
+            "and <NAME>_MODEL in .env -- see .env.example."
+        )
+    prefix = LLM_BACKEND.upper()
+    missing = [
+        f"{prefix}_{n}"
+        for n, v in (
+            ("BASE_URL", BACKEND_BASE_URL),
+            ("API_KEY", BACKEND_API_KEY),
+            ("MODEL", BACKEND_MODEL),
+        )
+        if not v
+    ]
+    if missing:
+        raise SystemExit(
+            f"LLM_BACKEND={LLM_BACKEND!r} but {', '.join(missing)} "
+            f"{'is' if len(missing) == 1 else 'are'} not set. "
+            f"Backends configured here: {listed}. See .env.example."
+        )
+
 
 # The model actually in play, for the results `config` block. Reading OLLAMA_MODEL
 # there would mislabel every hosted run.
-LLM_MODEL = OLLAMA_MODEL if LLM_PROVIDER == "ollama" else OPENAI_MODEL
+LLM_MODEL = OLLAMA_MODEL if LLM_PROVIDER == "ollama" else BACKEND_MODEL
 
 def load_prompts(path=PROMPTS_PATH):
     """Read the prompt config, failing loudly if it is missing or unversioned.
@@ -385,14 +464,10 @@ def call_openai_compatible(prompt):
     against the ~2.4k these prompts actually use, so gotcha 7's silent front-
     truncation cannot happen.
     """
-    if not OPENAI_API_KEY:
-        raise SystemExit(
-            "No API key. Put GROQ_API_KEY=... in .env (gitignored) or set it in "
-            "the environment. See .env.example."
-        )
+    require_backend()
 
     body = {
-        "model": OPENAI_MODEL,
+        "model": BACKEND_MODEL,
         "messages": [{"role": "user", "content": prompt}],
         # Matches the Ollama call so the two differ only by model.
         "temperature": 0,
@@ -409,9 +484,9 @@ def call_openai_compatible(prompt):
     # Only sent when pinned. An empty routing block is not the same as no
     # routing block on every aggregator, and a provider that ignores the key
     # is preferable to one that reads a half-specified one.
-    if OPENAI_PROVIDER:
+    if BACKEND_PROVIDER:
         body["provider"] = {
-            "order": [OPENAI_PROVIDER],
+            "order": [BACKEND_PROVIDER],
             # Falling back silently is the failure this exists to prevent.
             "allow_fallbacks": False,
         }
@@ -422,8 +497,8 @@ def call_openai_compatible(prompt):
         started = time.perf_counter()
         try:
             response = requests.post(
-                f"{OPENAI_BASE_URL}/chat/completions",
-                headers={"Authorization": f"Bearer {OPENAI_API_KEY}"},
+                f"{BACKEND_BASE_URL}/chat/completions",
+                headers={"Authorization": f"Bearer {BACKEND_API_KEY}"},
                 json=body,
                 timeout=180,
             )
@@ -453,10 +528,11 @@ def call_openai_compatible(prompt):
         # see it coming. Fail immediately and say what to do.
         if response.status_code == 429 and _PER_DAY_RE.search(response.text or ""):
             raise SystemExit(
-                f"Daily quota exhausted on {OPENAI_MODEL}. Retrying will not help: "
+                f"Daily quota exhausted on {BACKEND_MODEL}. Retrying will not help: "
                 "every retry is itself a billed request and the reset is hours away. "
-                "Wait for the reset, point OPENAI_BASE_URL and OPENAI_MODEL at another "
-                f"provider, or upgrade the tier. Provider said: {response.text[:240]}"
+                "Wait for the reset, set LLM_BACKEND to another configured "
+                "backend, or upgrade the tier.\n"
+                f"Provider said: {response.text[:240]}"
             )
 
         if response.status_code in RETRY_STATUSES and attempt < MAX_RETRIES - 1:
@@ -489,7 +565,7 @@ def call_openai_compatible(prompt):
     # regressions. Raise, so the eval records it as an error instead.
     if not text:
         raise RuntimeError(
-            f"{OPENAI_MODEL} returned empty content "
+            f"{BACKEND_MODEL} returned empty content "
             f"({payload.get('usage', {}).get('completion_tokens', 0)} completion tokens, "
             f"max_tokens={1536}) -- the token budget was consumed before any answer."
         )
@@ -502,7 +578,7 @@ def call_openai_compatible(prompt):
     # closest relative of the local qwen2.5:7b baseline.
     if "<think>" in text:
         raise SystemExit(
-            f"{OPENAI_MODEL} emitted an inline <think> block. This model is not "
+            f"{BACKEND_MODEL} emitted an inline <think> block. This model is not "
             "usable with this harness unmodified -- its reasoning would be scored "
             "as the answer. Pick a model that keeps content clean."
         )

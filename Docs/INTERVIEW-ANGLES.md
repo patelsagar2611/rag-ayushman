@@ -1568,6 +1568,85 @@ before the infrastructure exists"*, or anything about containers and resource li
 
 ---
 
+# 33. Two UI surfaces that were correct when written and wrong by the time anyone looked
+
+**The scenario.** Preparing the Streamlit app for deployment turned up two defects in it. Neither
+is a coding error; both would pass any test that was written for them; and both had been sitting
+in the app for weeks looking perfectly reasonable.
+
+1. **The retrieval-mode help text quoted MRRs of 0.624, 0.677 and 0.795.** The live figures are
+   0.699, 0.766 and 0.879. The numbers had been copied into the source by hand, and the golden set
+   was revised three times afterwards.
+2. **The latency caption rendered `prompt 0.0s, generation 0.0s` under a query that took 1.8 s.**
+
+**How we got to the answer.** The two look unrelated and share a root: *a surface that was accurate
+when it was written, on a path nobody re-checked when the deployment target changed.*
+
+The first is the ordinary version. The stale numbers were not a slip — the comment sitting directly
+above them **predicted the failure**: *"these are copied here rather than computed. That makes them
+a thing that can go stale."* The prediction was correct and the warning changed nothing, which is
+the useful part. A comment saying "remember to update this" is not a mitigation; it is a record of
+knowing better. So the fix was not to correct the numbers but to remove the possibility: the help
+text is now prose written in the source and figures read from the committed results files at
+startup, under a deliberately strict rule — retrieval-only runs, scored by the question set that is
+live *right now* (matched on content hash, not filename), full runs only, and `k` equal to the
+app's default.
+
+The strictness immediately earned itself. Two of the six retrieval modes have no results file
+matching the live question set, because their current figures were re-scored from saved candidate
+lists rather than re-run. The UI now says *"no current measurement"* for those two instead of
+displaying the superseded numbers it used to display. **The rule did not just refresh the numbers,
+it discovered that two of them should never have been shown at all.**
+
+The second defect is subtler and was found by accident, in the output of a one-question smoke test
+against the hosted endpoint. The timing fields really were zero: only the local backend reports a
+prefill/decode split, and an OpenAI-compatible endpoint returns token counts with no phase timings.
+The generation module is documented as tolerating exactly that. The UI then rendered those fields
+unconditionally — **correct data, displayed without asking whether the data existed.**
+
+What makes it worth an entry is *when* it would have surfaced. Every local test used Ollama, the one
+backend that does report the split, so the bug was invisible for the entire project. The deployed
+app is hosted. So the first person ever to see it would have been a visitor to the public demo, and
+they would have seen it on **100% of queries** — a stat line reading 0.0 s for both phases of a
+query that visibly took two seconds, on a project whose entire pitch is that its numbers are
+trustworthy. The fix shows the split only when the provider reports one, and otherwise says so.
+
+**The shared lesson.** Both surfaces were validated against the environment they were written in and
+never re-validated when the target moved. Tests would not have caught either: the numbers were
+"correct" as literals, and the timing fields were correctly read from a real response. What catches
+this class is asking, of every surface that displays something, *under which backend and which data
+version is this still true?*
+
+**Defensive argument.** "Two display bugs came out of getting the app ready to deploy, and neither
+was a coding error. The mode help text quoted retrieval scores that were three golden-set revisions
+stale — and the comment above them had explicitly warned they would go stale, which tells you a
+comment is not a mitigation. So I made them derived instead: read from the committed results files
+at startup, filtered to runs scored by the question set that's live right now, matched on a content
+hash. That immediately showed two of my six modes have no current measurement at all, so the UI now
+says so rather than showing an old number. The second was a latency caption printing 0.0 s for
+prefill and decode. The data was right — only the local backend reports that split, hosted endpoints
+don't — but I rendered it without checking it existed. Since the deployment is hosted, every visitor
+would have seen it and I never would have, because I only ever tested locally. Both are the same
+mistake: a surface that was true in the environment it was written in and never re-checked when the
+target changed."
+
+**Show-off argument.** Openings: *"what do you do before shipping something"*, *"tell me about a bug
+tests wouldn't catch"*, or anything about documentation and code drifting apart.
+> "The bug I think about most from this project is one that would only ever have been visible to
+> other people. My app showed a latency breakdown — prefill time, decode time — and against my local
+> model it was accurate. The deployed version calls a hosted API, which returns token counts but no
+> phase timings, so those fields come back zero. The UI printed them anyway: '0.0 seconds prompt,
+> 0.0 seconds generation' under a query that took nearly two seconds. Correct data, rendered without
+> asking whether the data existed. And the asymmetry is what makes it interesting — it was invisible
+> to me for the whole project because I only tested against the one backend that reports the split,
+> and it would have been visible to every single visitor on every single query, on a project whose
+> whole claim is that its measurements are careful. I found it in a one-question smoke test I almost
+> didn't bother running. It pairs with a second one I found the same day — help text quoting scores
+> that were three revisions out of date, under a comment that had predicted they'd go stale. Same
+> root: things that were true when written, on paths nobody re-checked after the target moved."
+
+---
+
 *Every entry from the project's earlier phases has now been backfilled. New findings get an entry
 in the session that produces them — see the process rule in the
 [README](../README.md#important--the-engineering-journal-is-a-required-deliverable).*
