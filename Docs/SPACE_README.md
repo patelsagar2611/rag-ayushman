@@ -3,14 +3,17 @@ title: PM-JAY Document Assistant
 emoji: 📄
 colorFrom: indigo
 colorTo: blue
-sdk: streamlit
-sdk_version: 1.61.1
-app_file: app.py
-python_version: "3.12"
+sdk: docker
+app_port: 8501
 pinned: false
 license: mit
 short_description: Cited answers over India's PM-JAY health scheme documents, with the retrieval measured rather than asserted.
 ---
+
+<!-- The Hugging Face Space landing card. NOT the active deployment: the app runs
+     on Streamlit Community Cloud, deployed straight from the GitHub repo. Kept
+     because a Docker Space needs a PRO subscription, so this is the paid
+     fallback rather than the current path. -->
 
 # PM-JAY document assistant
 

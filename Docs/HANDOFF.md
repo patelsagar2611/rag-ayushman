@@ -1,7 +1,7 @@
 # Handoff — for the next session only
 
 **Read [README.md](../README.md) first.** It is the permanent record: results, design
-decisions (33), gotchas (25), anti-goals, corpus provenance, both eval sets. This file holds
+decisions (36), gotchas (25), anti-goals, corpus provenance, both eval sets. This file holds
 *only* what the next session needs that is not already there.
 
 **When this session's work is stable, promote its findings to the README and rewrite this file

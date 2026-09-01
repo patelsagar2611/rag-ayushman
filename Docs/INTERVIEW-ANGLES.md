@@ -1421,66 +1421,112 @@ tooling misled you"*, or anything about defensive programming.
 > matched the letter. The file had zero CR bytes. You can't diagnose a mangling problem with a tool
 > that's subject to the mangling."
 
+**Coda, same session.** This recurred twice more, in the same family: *the code was right and the
+assumption about the environment was wrong.* Two scratchpad scripts failed with
+`ModuleNotFoundError: No module named 'src'`, because Python seeds `sys.path` from the SCRIPT's
+directory, not the working directory — and the scripts lived outside the repo. The second failure
+came twelve minutes after fixing the first, because the fix was treated as specific to that file
+rather than as a property of running scripts from a scratchpad.
+
+The sharp part is the diagnostic. This project's own gotcha list says
+`ModuleNotFoundError: chromadb` **always** means the wrong interpreter. It is right often enough
+to be worth writing down, and following it here would have sent the search to the virtualenv,
+which was fine. **A heuristic that is usually right is most dangerous on the occasion it is not**,
+because it is trusted without re-derivation. The gotcha is still correct as written; what it
+needed was a stated exception — a script run from outside the project tree fails the same way for
+a different reason.
+
 ---
 
-# 31. The plan assumed a build step the platform does not have
+# 31. Three sources disagreed about a platform, and the cheapest one was wrong
 
-**The scenario.** The deployment plan, written a day earlier, contained a task: *fetch both models at
-build time and warm them at startup, so no visitor ever pays for a download* — and argued that doing
-so made an open question moot, namely whether a Space wake is a restart (model cache survives) or a
-rebuild (it does not). The app loads two models, `bge-small` at 133 MB and a cross-encoder at 90 MB,
-and today the cross-encoder downloads lazily on the first reranked query.
+**The scenario.** The deployment plan named Hugging Face Spaces, Streamlit SDK, free CPU tier.
+It contained a task — *fetch both models at build time so no visitor pays for the download* —
+and drew a conclusion from it: that doing so made a separate open question moot, namely whether
+a Space wake is a restart (model cache survives) or a rebuild (it does not). Every one of those
+premises turned out to be false, and they failed one at a time, each after work had been built
+on top of the last.
 
-**How we got to the answer.** Reading the platform's actual extension points before designing around
-them. A Streamlit-SDK Space has exactly two hooks: `requirements.txt`, which pip consumes, and
-`packages.txt`, which apt consumes. **Neither can execute project code**, and downloading a model
-means running `SentenceTransformer(...)`. Only the Docker SDK provides a `Dockerfile` with a `RUN`
-line that can bake weights into an image layer.
+**How we got to the answer.** Three rounds, in order.
 
-So on the chosen SDK, "build time" and "startup" are the same moment, and the plan's claim that
-baking it in made the restart-vs-rebuild question moot **does not hold** — the question stays open
-and has to be measured.
+**Round 1 — the plan assumed a build step the SDK did not have.** A Streamlit-SDK Space exposes
+exactly two hooks: `requirements.txt`, consumed by pip, and `packages.txt`, consumed by apt.
+Neither executes code, and fetching a model means executing code. So "build time" and "startup"
+were the same moment, and the plan's conclusion — that baking the models in closed the
+restart-vs-rebuild question — silently collapsed with the step it depended on. **One unchecked
+assumption had closed a question that was still open.** The workaround was to warm both models
+at import so the download lands in container start rather than mid-session.
 
-The choice was put to the owner rather than taken, because it is a real trade:
+**Round 2 — the SDK did not exist.** The owner, looking at the actual Hugging Face UI, said he
+could not find a Streamlit option and thought it sat under Docker, behind PRO. That was correct.
+It was dismissed on the strength of `huggingface.co/docs/hub/spaces-sdks-streamlit`, a live
+documentation page that still describes selecting Streamlit as an SDK. The Hub API then rejected
+it outright:
 
-- **Streamlit SDK, warm at import** — load both models inside a `@st.cache_resource` at module scope,
-  so the download happens during container start rather than lazily mid-session. Keeps the SDK the
-  plan assumed. The cost is that whether a cold-start visitor still watches the download depends on
-  whether Spaces marks the app ready before or after the first script run — unverified, and a
-  measurement rather than something to reason out.
-- **Docker SDK, prefetch in a RUN layer** — weights genuinely baked into the image, and explicit
-  control of the base image's Python version. Costs a Dockerfile as a new artifact to maintain.
+```
+Invalid option: expected one of "gradio"|"docker"|"static" at sdk
+```
 
-Streamlit SDK was chosen, on the grounds that it reaches the deployment's *measurement* phase sooner,
-and that measurement is what settles two other open decisions. Switching to Docker stays available if
-the startup number shows visitors actually paying the download.
+**Round 3 — the remaining option was not free.** Pivoting to the Docker SDK meant writing a
+Dockerfile, which was done and verified locally. Creating the Space then returned:
 
-**The transferable finding is not about Spaces.** A task list written in prose can encode a platform
-capability that nobody checked, and it reads as authoritative afterwards precisely because it is
-written down. This one would have been discovered while implementing it, at the point where it is
-most expensive to change course.
+```
+402 Payment Required
+Static Spaces are free for everyone, but hosting Gradio and Docker Spaces
+on free cpu-basic requires a PRO subscription.
+```
 
-**Defensive argument.** "My deployment plan said to fetch the models at build time so no visitor pays
-for the download. When I went to implement it I checked what the platform actually offers, and a
-Streamlit-SDK Space has two hooks — a pip file and an apt file. Neither runs code, and downloading a
-model means running code. Only the Docker SDK has a build step that can. So on my SDK, build time and
-startup are the same moment, and the plan's claim that this made the restart-versus-rebuild question
-moot was wrong — that question is still open. I chose to warm both models at import so the download
-lands in container start rather than mid-session, and I kept the Docker route available, but I wrote
-down that whether a cold-start visitor still waits is unverified rather than pretending it's solved."
+Also exactly what the owner had said in round 2.
 
-**Show-off argument.** Openings: *"tell me about a plan that didn't survive contact"*, *"how do you
-handle a spec that turns out to be wrong"*, or anything on deployment platforms.
-> "I'd written a deployment plan with a step that said 'bake the models into the image at build time
-> so no user pays for the download', and it read as settled because it was written down. When I got
-> to it, I checked what the platform actually exposes rather than assuming, and the SDK I'd chosen has
-> exactly two extension points — a requirements file and an apt file. Neither executes code. Fetching
-> a model is executing code. So the step was impossible as written; only the Docker SDK has a real
-> build stage. What I find interesting is the failure mode of my own plan — I'd also written that
-> baking the models in made a separate open question moot, and that conclusion silently depended on
-> the impossible step. One wrong assumption had closed a question that was still open. I picked the
-> lighter option, warming at import so the download moves into container start, and I explicitly
-> re-opened the question I'd prematurely closed rather than carrying the plan's conclusion forward."
+**What this is really about.** Four sources of evidence were available, and they are not equal:
+
+| source | what it is worth |
+|---|---|
+| memory of how a platform worked | worthless, and confidently so |
+| a live documentation page | describes some past version; no error when stale |
+| **a person reporting what the screen shows** | describes the product *now* |
+| **the API's response** | authoritative, and free to obtain |
+
+The two cheapest-to-obtain sources were the two that were right. A `create_repo` call costs one
+command and would have settled rounds 2 and 3 before either a Dockerfile or an SDK-specific
+design existed. Instead documentation was treated as authoritative because it was *written down*
+and *specific*, which is precisely how stale documentation earns unearned trust.
+
+The compounding is the expensive part. Round 1's finding was recorded as a permanent limitation
+of a platform choice that, one round later, was not available at all — so the analysis was
+correct and worthless simultaneously.
+
+**What survived, and what it cost.** Not nothing. The forced move to Docker delivered what round
+1 said was impossible: models baked into a `RUN` layer, an explicitly pinned base image, and a
+locally reproducible build of the exact deployed environment — which is what made the memory and
+thread measurements possible at all (entries 32 and 34). The final hosting answer was Streamlit
+Community Cloud, free, running the full app. But that was reached after two pivots that a single
+API call would have avoided.
+
+**Defensive argument.** "My deployment plan named a platform, a tier and an SDK, and all three
+were wrong — they failed one at a time, each after I'd built on the last. First the SDK had no
+build step, which quietly invalidated a conclusion I'd drawn from it. Then the SDK didn't exist:
+the API accepts gradio, docker or static, and rejects streamlit, while the Streamlit SDK
+documentation page is still live and still describes it. Then Docker turned out to need a paid
+subscription. What I take from it isn't about Hugging Face — it's that I had four sources of
+evidence and ranked them backwards. My collaborator told me what the UI actually showed and I
+overrode him with a docs page. The API would have answered it in one command, for free, before
+any of the work. Now I check the platform's live behaviour before designing around it, and I
+treat a person's report of the current screen as stronger evidence than documentation."
+
+**Show-off argument.** Openings: *"tell me about a plan that didn't survive contact"*, *"a time
+you were wrong"*, or anything about third-party platforms and vendor risk.
+> "I have a clean example of ranking evidence badly. I was deploying to a platform and my plan
+> named the tier and the SDK. The person I was working with looked at the actual signup screen
+> and said 'I don't think that SDK is there, and I think it's behind the paid plan.' I checked
+> the vendor's documentation, found a live page describing exactly that SDK, and talked him out
+> of it. Two pivots later the API told me the SDK doesn't exist any more, and then that the
+> alternative needs a subscription — both things he'd said at the start. The lesson isn't 'read
+> the docs more carefully', it's that docs are a *description* of some past version and they
+> don't error when they go stale, whereas an API call is the product answering for itself and
+> costs one command. I'd built a whole Dockerfile on an assumption I could have falsified in
+> thirty seconds. Now when a plan depends on a platform's capabilities or pricing, verifying
+> that is the first task, not a detail inside a later one."
 
 ---
 
@@ -1644,6 +1690,100 @@ tests wouldn't catch"*, or anything about documentation and code drifting apart.
 > didn't bother running. It pairs with a second one I found the same day — help text quoting scores
 > that were three revisions out of date, under a comment that had predicted they'd go stale. Same
 > root: things that were true when written, on paths nobody re-checked after the target moved."
+
+---
+
+# 34. The memory ceiling was one parameter, and it cost nothing to move
+
+**The scenario.** Free hosting has a memory limit. This app is not a thin API client — it loads
+PyTorch, a 133 MB embedding model and a 90 MB cross-encoder into the same process, which is
+exactly why it hits ceilings that a RAG demo calling an embeddings API never sees. The question
+that decided whether the project could be deployed for free was: *how much memory does it
+actually need, and what is spending it?*
+
+**How we got to the answer.** Nobody had ever measured it. The deployment plan asserted that a
+1 GB host "will likely OOM" — an assumption, and the same class of unverified platform claim that
+had already cost two pivots (entry 31). With a working Dockerfile in hand, it was measurable
+rather than arguable: run the container under `--memory` caps with swap disabled and watch the
+exit code.
+
+Peak RSS through a realistic sequence, 2 vCPU:
+
+```
+baseline (interpreter only)               11 MB
+after startup (Chroma + both models)     587 MB
+after a vector query                     672 MB
+after a bm25 query (builds the index)    696 MB
+after a rerank query                   1,169 MB   <- +473 MB
+```
+
+**Reranking is the memory cost — not the models sitting in memory.** Both models loaded is
+587 MB. Dense retrieval and BM25 together add ~110 MB. The single cross-encoder pass adds
+**473 MB**, four times what the entire lexical index costs.
+
+Under hard caps, the app was OOM-killed (exit 137) at both 768 MB and 512 MB, and both died at
+the *same step*: the first rerank query. Everything up to and including BM25 survived even
+512 MB, because those pages are largely file-backed and the kernel can evict them; reranking
+allocates anonymous memory that cannot be evicted.
+
+The mechanism was already in the project's notes wearing a different label. A recorded gotcha
+said reranking *latency* varies with chunk length, because `CrossEncoder.predict` pads every
+batch to the longest sequence in it. That is a statement about how much padding is materialised
+at once — which is a memory claim as much as a timing one. Nobody had followed it across.
+
+So batch size became the obvious lever, and the important question was not whether it saves
+memory but whether it is **free**:
+
+```
+batch    peak RSS   rerank    scores
+32 (def)  1,186 MB   4,709 ms  +5.1277 +3.2527 +2.7193 +2.2807 +1.1764
+16          991 MB   5,195 ms  +5.1277 +3.2527 +2.7193 +2.2807 +1.1764
+ 8          876 MB   5,286 ms  +5.1277 +3.2527 +2.7193 +2.2807 +1.1764
+ 4          828 MB   6,590 ms  +5.1277 +3.2527 +2.7193 +2.2807 +1.1764
+```
+
+**Bit-identical scores at every batch size, and the same five pages in the same order.** Padding
+changes what is held in memory, not what the model computes. That is what makes this a pure
+memory/latency trade and *not* a quality parameter — so setting it is not tuning against the
+evaluation set, and the project's disclosure rule about hyperparameters does not apply to it.
+Printing the scores was the point of the experiment; without them this would have been an
+unverified performance tweak on the component the whole of Phase 2 rests on.
+
+At `batch=8` the app survives a 768 MB cap with margin, against being killed at 32. **That single
+environment variable is the difference between reranking being available on free hosting and not
+being available at all**, and it costs 12% latency and zero ranking quality. `batch=4` buys only
+48 MB more for another 1.3 s — a clear knee.
+
+The default is left **unset**, so the evaluation harness still runs at the library's 32 and
+reproduces every committed number exactly; the 8 is applied in the application layer, alongside
+the thread-count setting and for the same reason (entry 32).
+
+**Defensive argument.** "My app carries torch and two local models, so memory is a real
+constraint rather than a footnote — that is the cost of a zero-dependency stack, and a RAG demo
+calling an embeddings API never meets it. I measured instead of estimating: peak RSS is 587 MB
+with both models loaded, and a single cross-encoder pass adds 473 MB on top, which is four times
+what my whole lexical index costs. Under a hard 768 MB cap it was OOM-killed, and always on the
+same step. The fix was the cross-encoder's batch size, because it pads each batch to the longest
+sequence in it — something I'd already written down as a *latency* effect without noticing it was
+a memory effect too. Dropping 32 to 8 cuts peak memory 26% for 12% more latency. The part I
+checked before adopting it is that the scores are bit-identical at every batch size — so it's a
+pure resource trade, not a quality knob, and it isn't tuning against my eval set. I left the
+library default in the pipeline so my published numbers still reproduce, and set the 8 in the
+app."
+
+**Show-off argument.** Openings: *"tell me about optimising something"*, *"how do you decide
+what's safe to tune"*, or anything about deploying ML on constrained hardware.
+> "The one I like is where the fix cost nothing. My retrieval app kept getting OOM-killed on free
+> hosting, and the interesting part was where the memory went: loading both models is 587 MB, but
+> one cross-encoder pass adds another 473 MB. The reranker's batch pads every sequence to the
+> longest one in it, so a batch of 30 chunks materialises 30 padded sequences at once. I'd
+> already documented that as a *latency* property months earlier and never connected it to
+> memory. Dropping the batch from 32 to 8 cut peak memory by 26% for 12% more latency, and turned
+> an app that got killed at 768 MB into one that runs with margin. But the thing I'd want to be
+> asked about is the check I ran before adopting it — I printed the actual scores at 32, 16, 8
+> and 4, and they're identical to four decimals with the same pages in the same order. That's
+> what makes it a resource trade rather than a quality knob. If they'd drifted, this would have
+> been a hyperparameter I'd tuned on my own test set and would have had to disclose as such."
 
 ---
 

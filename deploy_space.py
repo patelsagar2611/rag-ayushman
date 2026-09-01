@@ -1,5 +1,13 @@
 """Copy the runtime files into a Hugging Face Space checkout and (optionally) push.
 
+NOT THE ACTIVE DEPLOYMENT PATH. The app deploys to Streamlit Community Cloud,
+straight from the GitHub repo, with no second repository and no sync step. This
+script and Docs/SPACE_README.md are kept as the Hugging Face fallback, which
+needs a PRO subscription: as of 2026-09-01 the Hub API accepts only "gradio",
+"docker" and "static" as Space SDKs, and hosting a Docker or Gradio Space on the
+free cpu-basic tier requires PRO. Only Static Spaces are free, and a static page
+cannot run this pipeline.
+
 WHY THIS EXISTS. A Space reads its configuration -- SDK, app file, python version --
 from YAML front matter in README.md at its repo root, and there is no way to configure
 one without it. This repo's README.md is the project's permanent record: 1,500+ lines
@@ -42,7 +50,7 @@ DEFAULT_TARGET = REPO / ".space"
 # eval.run_eval, and reads eval/results/*.json to show each retrieval mode's measured
 # figures -- so the harness and the committed results ship with the app.
 DIRS = ["src", "eval", "config", "chroma"]
-FILES = ["app.py"]
+FILES = ["app.py", "Dockerfile", ".dockerignore"]
 
 IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", ".pytest_cache")
 

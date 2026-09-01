@@ -1076,10 +1076,77 @@ Two things learned running it that are not in the provider documentation:
 
 ## Deployment measurements — what was verified before anything was hosted
 
-The target is a 2-vCPU Hugging Face Space. Everything below was measured locally in
-containers, *before* the Space existed, because each answer changes what gets built.
-None of it is the Space's own number: **D-2 measures that, and these are projections
-with a measurement behind them rather than projections with reasoning behind them.**
+The target is **Streamlit Community Cloud**, free tier. Everything below was measured
+locally in containers, *before* anything was hosted, because each answer changes what
+gets built. None of it is the host's own number: these are projections with a
+measurement behind them rather than projections with reasoning behind them.
+
+### Where it is hosted, and why not the obvious place
+
+The plan named Hugging Face Spaces on the free CPU tier. That is no longer possible:
+
+```
+create_repo(space_sdk="streamlit")  ->  Invalid option: expected one of
+                                        "gradio"|"docker"|"static" at sdk
+create_repo(space_sdk="docker")     ->  402 Payment Required
+                                        Static Spaces are free for everyone, but hosting
+                                        Gradio and Docker Spaces on free cpu-basic
+                                        requires a PRO subscription.
+```
+
+**The Streamlit SDK has been removed, and the remaining runnable SDKs need a paid plan.**
+The Streamlit-SDK documentation page is still live and still describes selecting it, which
+is how the wrong belief survived two rounds of work — see journal entry 31, which is about
+ranking evidence rather than about Hugging Face.
+
+Streamlit Community Cloud runs the full app, free, deployed straight from the GitHub
+repository — no second repo, no sync step, no Git LFS. `Dockerfile` and `deploy_space.py`
+are kept as the paid Hugging Face fallback, and the Dockerfile earns its place anyway: it
+is what made every measurement in this section possible.
+
+**Worth stating plainly, because it explains a constraint most RAG demos never meet.** This
+app loads PyTorch, a 133 MB embedding model and a 90 MB cross-encoder into its own process.
+A demo that calls an embeddings API and a hosted vector database is a ~100 MB Python process
+and fits anywhere. The memory ceiling below is the price of the brief's zero-cost,
+no-vendor-lock-in stack, not an accident.
+
+### The memory ceiling, and the one parameter that moves it
+
+Peak RSS through a realistic sequence, 2 vCPU, swap disabled:
+
+| stage | peak RSS |
+|---|---|
+| baseline (interpreter only) | 11 MB |
+| after startup — Chroma plus both models | 587 MB |
+| after a `vector` query | 672 MB |
+| after a `bm25` query (builds the lexical index) | 696 MB |
+| after a `rerank` query | **1,169 MB** |
+
+**Reranking is the memory cost, not the models sitting in memory.** One cross-encoder pass
+adds 473 MB — over four times what the entire BM25 index costs. Under hard caps the app is
+OOM-killed (exit 137) at both 768 MB and 512 MB, and both die at the *same step*, the first
+rerank query. Everything up to and including BM25 survives even 512 MB, because those pages
+are largely file-backed and evictable; reranking allocates anonymous memory that is not.
+
+`CrossEncoder.predict` pads every batch to the longest sequence in it — recorded in gotcha 24
+as a *latency* property, and it drives peak memory the same way. So batch size is the lever:
+
+| batch | peak RSS | rerank | scores |
+|---|---|---|---|
+| 32 (library default) | 1,186 MB | 4,709 ms | `+5.1277 +3.2527 +2.7193 +2.2807 +1.1764` |
+| 16 | 991 MB | 5,195 ms | identical |
+| **8** | **876 MB** | **5,286 ms** | identical |
+| 4 | 828 MB | 6,590 ms | identical |
+
+**The scores are bit-identical at every batch size**, returning the same five pages in the
+same order. Padding changes what is held in memory, not what the model computes — which is
+what makes this a pure memory/latency trade and **not** a quality parameter, so setting it is
+not tuning against the golden set. At the default the app is killed under a 768 MB cap; at 8
+it survives with margin. That one variable is the difference between reranking being
+available on free hosting and not being available at all.
+
+`PMJAY_RERANK_BATCH` is **unset by default**, so the eval harness runs at the library's 32 and
+reproduces every committed number exactly. The 8 is applied in `app.py`, the product layer.
 
 ### The environment that will run this reproduces every retrieval figure exactly
 
@@ -1215,7 +1282,9 @@ app.py                 Streamlit UI; sets torch threads, reads baselines from re
 chroma/                committed index, hidden with skip-worktree (see Re-indexing)
 requirements.txt       9 direct pins, incl. torch==2.13.0+cpu
 requirements-lock.txt  the full 111-package closure, generated on Linux
-deploy_space.py        copies the runtime files into a Hugging Face Space checkout
+Dockerfile             the deployed environment, reproducible locally; HF/container fallback
+.dockerignore          keeps .venv, .git and .env OUT of the build context
+deploy_space.py        Hugging Face fallback only -- not the active deployment path
 Docs/SPACE_README.md   the Space landing card -- becomes README.md on the Space only
 eval/golden_set.csv    hand-written questions, committed
 eval/known_gaps.csv    written but unscorable (answer lives in an image)
@@ -1428,6 +1497,23 @@ assertion.
     prefix makes both mismatches unrepresentable, and keeps the vendor list in `.env`
     rather than in code — adding a provider is configuration with no code change.
 
+34. **`PMJAY_RERANK_BATCH` defaults to UNSET, and the deployment sets 8.** The library
+    default of 32 is what every committed evaluation number was measured under, and leaving
+    it untouched in the pipeline is what keeps those numbers reproducible. The product needs
+    8 to survive a 1 GB host. Adopting it required first proving it is not a quality
+    parameter: scores are bit-identical at 32, 16, 8 and 4. **If a future model makes scores
+    move with batch size, this stops being free and must be re-measured and disclosed.**
+35. **Hosting is Streamlit Community Cloud, chosen after Hugging Face Spaces became
+    unavailable on a free tier**, not on preference. Kept over the alternatives (paying for
+    HF PRO, Google Cloud Run, a static precomputed page) because it runs the *same* stack
+    from the same `requirements.txt`, so every published number still describes what is
+    deployed — the same reason the anti-goals rule out AnythingLLM and Open WebUI.
+36. **`app.py`'s boot order is load-bearing and documented as such.** Secrets are bridged from
+    `st.secrets` into `os.environ`, then thread and batch defaults are set, and only then are
+    `src` modules imported — because they read their settings at import time and one of them
+    pulls torch. Moving an import above that block disables the settings silently, with no
+    error and no signal beyond the app being slower or dying under memory pressure.
+
 ## Gotchas — each of these cost hours
 
 **Corpus and environment**
@@ -1449,7 +1535,13 @@ assertion.
    text-native because it measures *average characters per page*, which cannot see an image
    table on a text-heavy page. **Document-level triage is not content-level coverage.**
 7. **Use `.venv\Scripts\python.exe` explicitly.** System `python` is 3.13 and has none of the
-   dependencies. `ModuleNotFoundError: chromadb` always means the wrong interpreter.
+   dependencies. `ModuleNotFoundError: chromadb` almost always means the wrong interpreter.
+   **The exception, which cost time twice in one session:** a script run from *outside* the
+   project tree fails identically for a different reason — Python seeds `sys.path` from the
+   script's directory, not the working directory, so `import src...` fails even under the
+   right interpreter. Fix with `sys.path.insert(0, os.getcwd())`. A heuristic that is usually
+   right is most dangerous on the occasion it is not, because it gets trusted without
+   re-deriving it.
 8. **Windows console is cp1252** and crashes on non-encodable characters; entry points
    reconfigure stdout with `errors="replace"`.
 9. **CSV values containing commas must be quoted** (`"4,500"`). One unquoted value shifted a
@@ -1598,10 +1690,14 @@ budget, and cold start is ~26 s of model loading regardless of packaging. See
 [Deployment measurements](#deployment-measurements--what-was-verified-before-anything-was-hosted).
 
 **Not yet built**
-- The Space itself. **D-2 measures it, and two decisions are deliberately open until
-  it does**: whether the demo defaults to `vector` or `rerank`, and whether int8 ONNX
-  quantisation is needed. The local projection is ~4.5 s end to end for `rerank`
-  against a ~5 s threshold — close enough that only the real hardware settles it.
+- The public deployment itself, on Streamlit Community Cloud. One decision stays open
+  until it is measured on the real host: whether the demo defaults to `vector` or
+  `rerank`. Three independent lines of evidence currently favour `vector` — reranking
+  costs ~6.3–7.8 s end to end against a ~5 s threshold, needs ~470 MB more memory, and
+  showed no citation-precision gain on any model tested. `rerank` stays selectable.
+- int8 ONNX quantisation, which would cut the retrieval half of that latency at the cost
+  of re-baselining all four retrievers. Not needed unless the deployed number is worse
+  than the projection.
 - Prompt v2, targeting the false-abstention weakness, A/B'd against v1 with nothing else changed
 - Handling of the empanelment version conflict, which reranking makes worse rather than better
 - Faithfulness measurement — see the note under [Why these metrics](#why-these-metrics);

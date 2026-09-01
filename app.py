@@ -5,10 +5,38 @@ Run with:  streamlit run app.py
 
 import os
 
+import streamlit as st
+
 # ---------------------------------------------------------------------------
-# Intra-op thread count. This MUST run before any import that pulls torch --
-# src.index imports sentence_transformers at module scope, which imports torch,
-# and torch reads these variables once at initialisation.
+# BOOT ORDER IS LOAD-BEARING. Everything below runs before any `src` import, and
+# it has to, because src/index.py imports sentence_transformers at module scope
+# (which imports torch) and src/generate.py and src/retrieve.py read their
+# settings from os.environ at import time. Move an import above this block and
+# the settings silently stop applying -- no error, just a slower app reading the
+# wrong config.
+#
+# streamlit is imported first deliberately: it does NOT pull torch, so it is safe
+# here, and st.secrets is needed to build the environment.
+# ---------------------------------------------------------------------------
+
+# 1. Secrets -> environment.
+#
+# Streamlit Community Cloud supplies configuration as st.secrets, not as
+# environment variables, while every module in src/ reads os.environ. Some
+# Streamlit versions also export secrets to the environment; the documentation
+# does not commit to it, so this bridges explicitly rather than depending on
+# behaviour that may or may not be there. setdefault, so a real environment
+# variable always wins over a secret of the same name -- which is what makes the
+# local .env and the Docker image's ENV keep working unchanged.
+try:
+    for _key, _value in dict(st.secrets).items():
+        if isinstance(_value, str):
+            os.environ.setdefault(_key, _value)
+except Exception:
+    # No secrets file at all is the normal local case, not an error.
+    pass
+
+# 2. Intra-op thread count.
 #
 # Measured 2026-08-30 in a Linux container capped at 2 CPUs, 20 questions,
 # cross-encoder reranking:
@@ -16,31 +44,38 @@ import os
 #     torch default (4 threads)   retrieve p50 = 7,615 ms
 #     pinned to 2 threads         retrieve p50 = 3,974 ms   (-47.8%)
 #
-# The deployment target is a 2-vCPU Space. torch sizes its thread pool from the
-# HOST's core count, which inside a container is not the number of cores the
-# cgroup actually grants -- so it oversubscribes, and the threads contend for a
-# quota smaller than the pool. Dense-only retrieval shows the same effect
-# (109 ms -> 39 ms). Left unset, the Space would have been ~2x slower for a
-# reason nothing in the app would have pointed at.
+# torch sizes its thread pool from the HOST's core count, which inside a
+# container is not what the cgroup grants -- so it oversubscribes and the threads
+# contend for a quota smaller than the pool. Dense-only retrieval shows the same
+# effect (109 ms -> 39 ms).
 #
-# Deliberately an env var rather than a hardcoded 2: this default is right for
-# the deployment and wrong for an 8-core development machine, and hardcoding it
-# would quietly tax local use. Set PMJAY_TORCH_THREADS=0 to leave torch alone.
-#
-# Deliberately set HERE and not in src/retrieve.py: every committed eval number
-# was measured under torch's default threading, and changing that inside the
-# pipeline would silently re-baseline the whole project. This is a property of
-# the deployed product, not of the retriever.
-# ---------------------------------------------------------------------------
+# An env var defaulting to 2 rather than a hardcoded 2: right for the deployment,
+# wrong for an 8-core development machine. PMJAY_TORCH_THREADS=0 leaves torch
+# alone. Set HERE and not in src/retrieve.py, because every committed eval number
+# was measured under torch's default threading and changing that inside the
+# pipeline would silently re-baseline the project.
 TORCH_THREADS = os.getenv("PMJAY_TORCH_THREADS", "2")
 if TORCH_THREADS != "0":
     for _var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
         os.environ.setdefault(_var, TORCH_THREADS)
 
+# 3. Cross-encoder batch size.
+#
+# THIS ONE DECIDES WHETHER THE APP RUNS AT ALL ON FREE HOSTING. Measured peak RSS
+# over 5 reranked queries in a 2-vCPU container:
+#
+#     batch 32 (library default)   1,186 MB   -- OOM-KILLED under a 768 MB cap
+#     batch 8                        868 MB   -- survives 768 MB with margin
+#
+# Scores are bit-identical at every batch size, so this costs nothing in ranking
+# quality (see the table in src/retrieve.py). The default is set here rather than
+# in src/retrieve.py for the same reason as the thread count: the eval must keep
+# reproducing its committed numbers under the untouched library default.
+os.environ.setdefault("PMJAY_RERANK_BATCH", "8")
+
 import json  # noqa: E402
 
 import requests  # noqa: E402
-import streamlit as st  # noqa: E402
 
 from src.generate import (  # noqa: E402
     BACKEND_BASE_URL,
@@ -87,10 +122,16 @@ def warm_models():
     imports themselves. That ~26 s is the floor on a cold start even when
     nothing downloads -- larger than the download this function exists to move.
     """
-    from sentence_transformers import CrossEncoder, SentenceTransformer
+    # Call the modules' OWN loaders, not SentenceTransformer(...) directly. Both
+    # modules keep a process-wide singleton; constructing separate instances here
+    # would populate the HuggingFace cache and then throw the loaded models away,
+    # leaving the singletons to load them a SECOND time on first use. Measured at
+    # ~23 s of load on a 2-vCPU box, so doing it twice is not a rounding error.
+    from src.index import load_embedder
+    from src.retrieve import load_reranker
 
-    SentenceTransformer(EMBED_MODEL)
-    CrossEncoder(RERANK_MODEL)
+    load_embedder()
+    load_reranker()
     return True
 
 
@@ -210,6 +251,10 @@ def mode_caption(mode, k):
 with st.sidebar:
     st.metric("Indexed chunks", f"{count:,}")
     st.caption(f"LLM: `{LLM_PROVIDER}` / `{LLM_MODEL}`")
+    # Named rather than implied. Every retrieval figure in this UI was produced by
+    # these two specific models, and a reader who cannot see which ones cannot
+    # check the claim.
+    st.caption(f"embeddings: `{EMBED_MODEL}`")
     k = st.slider("Chunks retrieved (k)", 1, 15, DEFAULT_K)
     # Default is DEFAULT_MODE, not the best-scoring mode. Reranking wins clearly
     # on RETRIEVAL, but the generation runs showed no citation-precision benefit
@@ -222,6 +267,8 @@ with st.sidebar:
         help="How candidate chunks are found before the model reads them.",
     )
     st.caption(mode_caption(mode, k))
+    if mode.startswith("rerank"):
+        st.caption(f"reranker: `{RERANK_MODEL}`")
     if BASELINES.get(mode):
         st.caption(f"source: `{BASELINES[mode]['descriptor']}`")
     if LIVE_SHA:

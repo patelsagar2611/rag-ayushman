@@ -18,6 +18,7 @@ its ceiling. See rerank_search for why that is an open question rather than a
 settled choice.
 """
 
+import os
 import re
 import sys
 
@@ -59,6 +60,35 @@ RRF_K = 60
 # shortlist that cheaper retrieval has already narrowed.
 RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_DEPTH = FUSION_DEPTH
+
+# Cross-encoder batch size. UNSET BY DEFAULT, which leaves the library default of
+# 32 -- so every committed evaluation number was produced under, and is still
+# reproduced by, the untouched default.
+#
+# This exists because the batch is where reranking's MEMORY goes, not just its
+# time. CrossEncoder.predict pads every batch to the longest sequence in it
+# (gotcha 24 recorded that as a latency effect; it drives peak RSS the same way).
+# Measured in a 2-vCPU container, 5 reranked queries, peak RSS:
+#
+#     batch 32 (default)   1186 MB   4709 ms
+#     batch 16              991 MB   5195 ms
+#     batch  8              876 MB   5286 ms
+#     batch  4              828 MB   6590 ms
+#
+# At the default the app is OOM-KILLED under a 768 MB cap; at 8 it survives with
+# margin. That is the difference between reranking being available on a 1 GB free
+# host and not being available at all.
+#
+# THE REASON THIS IS SAFE TO TUNE: the scores are bit-identical at every batch
+# size -- +5.1277 +3.2527 +2.7193 +2.2807 +1.1764 at 32, 16, 8 and 4, returning
+# the same five pages in the same order. Padding changes what is held in memory,
+# not what the model computes. So this is a pure memory/latency trade and NOT a
+# quality parameter: setting it is not tuning against the golden set, and the
+# project's rule about disclosing hyperparameter tuning does not apply. If a
+# future model makes the scores move with batch size, this stops being free and
+# the finding above has to be re-measured.
+_RERANK_BATCH = os.getenv("PMJAY_RERANK_BATCH", "").strip()
+RERANK_BATCH = int(_RERANK_BATCH) if _RERANK_BATCH else None
 
 _reranker = None
 
@@ -247,7 +277,10 @@ def rerank(query, hits, k=DEFAULT_K):
         return []
 
     model = load_reranker()
-    scores = model.predict([(query, hit["text"]) for hit in hits])
+    # batch_size is passed only when set, so an unconfigured process gets the
+    # library default and reproduces every committed number exactly.
+    batching = {"batch_size": RERANK_BATCH} if RERANK_BATCH else {}
+    scores = model.predict([(query, hit["text"]) for hit in hits], **batching)
 
     # Ties broken on chunk_id so the output is deterministic run to run.
     order = sorted(range(len(hits)), key=lambda i: (-scores[i], hits[i]["chunk_id"]))

@@ -1,0 +1,36 @@
+# Build context exclusions.
+#
+# The Space builds from a directory populated by deploy_space.py, which already
+# contains only the deploy set. This file matters for LOCAL builds from the source
+# tree, where the context would otherwise include the virtualenv, the git history
+# and -- the one that actually matters -- .env with live API keys, which would be
+# baked into an image layer and survive any later deletion.
+
+# Secrets. Keys belong in the Space's Settings -> Secrets, never in a layer.
+.env
+.env.*
+!.env.example
+
+# Virtualenv and VCS: gigabytes of context, none of it used.
+.venv/
+.git/
+.gitignore
+.gitattributes
+
+# The Space checkout itself -- a second git repo.
+.space/
+
+# Corpus: downloadable, and not needed at runtime. The index in chroma/ is what
+# the app reads; pages.jsonl and chunks.jsonl are build-time artifacts.
+data/
+
+# Documentation, tooling and caches.
+Docs/
+deploy_space.py
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
