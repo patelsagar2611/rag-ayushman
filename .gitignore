@@ -29,6 +29,13 @@ data/processed/
 # Local config
 .env
 
+# Streamlit secrets -- SAME CLASS AS .env, and easy to miss because it lives in a
+# dotted directory. Streamlit Community Cloud takes secrets through its own
+# settings UI; a local .streamlit/secrets.toml exists only for testing that path
+# and must never be committed. Added before the repo went public, when it was not
+# yet covered.
+.streamlit/secrets.toml
+
 # Hugging Face Space checkout, populated by deploy_space.py. A second git repo
 # with its own history and its own README; it must never be nested inside this
 # repo's index.

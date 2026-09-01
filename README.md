@@ -1736,7 +1736,13 @@ And note what the generation runs did to that number's significance: **the +0.18
 translate into better answers at all.** A retrieval gain is not a system gain, and this README
 would have claimed one if the generation runs had never been done.
 
-## Acknowledgment
+## Licence and acknowledgment
 
-Source documents are Government of India publications from the National Health Authority
-and state health agencies, used here for a non-commercial portfolio project.
+The code in this repository is MIT licensed — see [LICENSE](LICENSE).
+
+**That licence covers the code only.** Source documents are Government of India
+publications from the National Health Authority and state health agencies, used here for a
+non-commercial portfolio project and **not redistributed**: `data/raw/` is gitignored and
+the PDFs are fetched from their original sources by `python -m src.download`. What is
+committed is the derived index in `chroma/`, which contains extracted passages of those
+documents for retrieval.

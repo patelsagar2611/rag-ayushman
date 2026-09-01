@@ -10,6 +10,7 @@
 .env
 .env.*
 !.env.example
+.streamlit/secrets.toml
 
 # Virtualenv and VCS: gigabytes of context, none of it used.
 .venv/
