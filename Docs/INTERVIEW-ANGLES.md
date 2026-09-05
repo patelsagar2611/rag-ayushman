@@ -2135,6 +2135,119 @@ misleading test"*, or anything about caching or test quality.
 
 ---
 
+# 38. The dashboard whose most useful panel refuses to show a number
+
+**The scenario.** A "How this was measured" tab for the public demo: a slider across project
+milestones showing what each change to the retrieval system bought. The obvious build — sort the
+committed results files by date, put them on a slider, show hit@k, MRR and latency at each position
+— produces something that looks rigorous and tells two lies.
+
+**How we got to the answer.**
+
+**The first lie is what the file dates make the DEFAULT behaviour.** This project's published
+figures moved twice for reasons that had nothing to do with the retriever: a completeness review
+found 18 of 60 answerable rows were missing target pages, and two listed a page that does not
+contain the answer at all. So the results files split like this:
+
+```
+24 August runs   vector / bm25 / hybrid / rerank   scored by goldenv1
+28 August runs   vector / bm25 / hybrid / rerank   scored by goldenv3
+```
+
+A date-sorted slider walks from `vector` on 24 August (MRR 0.624) to `rerank` on 28 August (0.879)
+and displays **+0.255**. The true system gain, holding the scorer fixed, is **+0.180**. A quarter of
+the headline would be a corrected evaluation set, presented to visitors as the work of the
+cross-encoder — and nothing in the naive build flags it, because sorting by date is the natural
+thing to do and the files offer no resistance.
+
+The fix is structural rather than a warning label. **The slider holds one variable.** Every position
+on it is scored by the question set that is live right now, so a measurement change cannot appear as
+a step — there is nothing for it to be a step *between*. The eval corrections get a separate panel
+where the retriever is held fixed and only the scorer moves. Two panels, one variable each. A badge
+saying "this one is a measurement change" was the alternative and it was rejected: a badge relies on
+being read, and the whole failure mode here is a visitor reading a slider quickly.
+
+That second panel turned out to carry the better argument anyway. Every retriever gained ~0.08 MRR
+from the correction, but the thing the project actually claims — the *gap* between baseline and
+reranker — moved from **+0.1706 to +0.1797**. Correcting the evaluation made the headline gain
+slightly *larger*, which is not the direction anyone hoped for when they went looking, and is
+exactly why it is worth showing.
+
+**The second lie is subtler: the latency column.** Retrieval quality and retrieval latency come out
+of the same JSON file and look like the same kind of data. They are not. Quality is byte-
+reproducible — all four retrievers reproduce to `0.000000` across a different OS, a different CPU
+and four different library versions. Latency reproduces across nothing at all.
+
+The evidence was already in the repository and had been for weeks. Two `rerank` runs, **same day**,
+same question set, same code:
+
+```
+20260824T185017Z   MRR 0.7947   hit@1 71.7%   retrieve p50  2,012 ms
+20260824T073542Z   MRR 0.7947   hit@1 71.7%   retrieve p50  3,269 ms
+```
+
+Identical rankings to four decimal places. Latency **1.63x apart**. Controlled measurement later put
+the spread at ~1.7x for reranking and ~1.9x for dense retrieval on one machine in one session,
+driven mostly by CPU boost state — a two-second idle gap between queries makes retrieval ~32%
+*faster* because the power budget recovers (entry 36).
+
+So the decision: **latency is not a metric on this page, it is the subject of a section.** The panel
+shows those two runs, states the spread, and says why no single p50 appears. The alternative —
+showing a caveated number — was rejected on the grounds that a number on a dashboard is read as a
+measurement no matter what the footnote says, and this one moves 60% between identical runs.
+
+What replaces it is honest and better: the per-answer timing on the Ask tab, measured live on the
+host that is actually serving the visitor. It says what *this* request cost and makes no claim about
+the next one.
+
+**Two implementation choices that follow from the same principle.** Nothing is hardcoded, including
+*which* eval versions to compare: "current" is whichever question-set hash is live, "earlier" is
+whichever appeared first in the results files. A hardcoded hash is a number that goes stale, which
+is the failure this tab exists to explain. And the duplicate-run pair in the latency panel is found
+by searching for runs with matching quality and differing latency rather than being named — so if a
+worse example ever lands in `eval/results/`, the tab finds it.
+
+**A structural detail worth recording.** `st.tabs` renders every tab in one pass, and the question
+flow calls `st.stop()` in five places — quota caps, an unreachable backend, an empty index.
+`st.stop()` halts the whole script, not the tab it was called from. So the two static tabs are
+rendered *before* the interactive one, and a visitor who trips the daily quota still gets a complete
+site rather than a page that is blank below the warning.
+
+**Defensive argument.** "The measurement tab on my demo had two traps and one of them was what the
+data made the default. My results files are timestamped, and my published numbers moved twice
+because I corrected the evaluation set — so sorting the files by date and putting them on a slider
+walks from 0.624 to 0.879 and shows a gain of 0.255, when the real system gain holding the scorer
+fixed is 0.180. A quarter of my headline would have been a corrected eval set presented as the work
+of the reranker. I fixed it structurally rather than with a warning: the slider holds one variable,
+every position scored by the question set that's live now, so a measurement change can't be a step
+on it. The eval corrections get their own panel with the retriever held fixed. The second trap was
+latency. Quality and latency come out of the same file and look like the same kind of number, but
+quality is byte-reproducible across operating systems and library versions and latency isn't
+reproducible across an idle gap. I had two runs of the same retriever from the same day with
+identical rankings and p50s 1.63x apart. So latency isn't a metric on the page, it's the subject of
+a section that shows those two runs and explains why there's no number. What visitors get instead is
+the real per-request timing on the Ask tab, measured on the host that actually served them."
+
+**Show-off argument.** Openings: *"how do you present results"*, *"tell me about a dashboard you
+built"*, or anything about honest reporting and metrics.
+> "The panel I'm proudest of on that project is the one that refuses to show a number. I built a
+> measurement tab for a public demo, and the natural build — sort my results files by date, put them
+> on a slider — would have lied twice. My published figures had moved because I corrected my
+> evaluation set, not because the system improved, so a date-sorted slider showed a gain of 0.255
+> where the real one was 0.180. A quarter of my headline would have been me fixing my own test set,
+> presented to visitors as the achievement of the reranker. The fix was structural: the slider holds
+> exactly one variable, every position scored by the same question set, so a measurement change
+> can't appear as a step on it. Corrections get their own panel with the retriever held fixed. And
+> the second one — I dropped latency entirely. Quality and speed come out of the same JSON file and
+> look like the same kind of data, but I had two runs of the same retriever from the same morning
+> with rankings identical to four decimal places and p50s 1.63x apart. So instead of a caveated
+> number I show those two runs and say why there isn't one, because a number on a dashboard gets
+> read as a measurement no matter what the footnote says. Visitors get the real timing of their own
+> request instead, measured on the host serving them. It's the most useful thing on the page and it
+> is an absence."
+
+---
+
 *Every entry from the project's earlier phases has now been backfilled. New findings get an entry
 in the session that produces them — see the process rule in the
 [README](../README.md#important--the-engineering-journal-is-a-required-deliverable).*
