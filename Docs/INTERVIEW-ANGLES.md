@@ -1787,6 +1787,354 @@ what's safe to tune"*, or anything about deploying ML on constrained hardware.
 
 ---
 
+# 35. The latency breakdown was built so it could never show an anomaly
+
+**The scenario.** A question asked on the deployed app in `vector` mode reported this under the
+answer:
+
+```
+12.2s total — retrieval 10.1s (vector), generation 2.1s
+```
+
+Dense retrieval measures **36 ms** in the evaluation harness. A `rerank` question in the same
+session reported retrieval of **3.2 s**. So the display was claiming the cheap retriever took three
+times longer than the expensive one.
+
+**How we got to the answer.** The first move was not to look at the code. It was to notice the claim
+is *arithmetically impossible*, from the architecture alone:
+
+```
+vector = dense
+rerank = dense + BM25 + fusion + cross-encoder
+```
+
+`rerank` **contains an entire `vector` query inside it**. If dense retrieval genuinely cost 10.1 s,
+the reranked query could not have finished retrieval in 3.2 s — it would be 10.1 s plus everything
+else. So the 10.1 s was not retrieval, and no measurement was needed to establish that. A structural
+argument beat an observation: the number was real, the label was not.
+
+Then the code. The app took **one** stopwatch around the whole call and derived the rest:
+
+```python
+wall_ms     = (time.perf_counter() - started) * 1000   # 12.2 s  measured
+gen_ms      = stats["total_ms"]                        #  2.1 s  reported by the provider
+retrieve_ms = max(wall_ms - gen_ms, 0.0)               # 10.1 s  SUBTRACTED, never measured
+```
+
+`retrieve_ms` never meant *retrieval*. It meant **"everything that was not the LLM call"**, printed
+under the word `retrieval`.
+
+The deeper defect is not the wrong label, it is the shape of the arithmetic. **One of the three
+displayed numbers was defined as the other two subtracted, so the parts were guaranteed to sum to
+the whole.** A breakdown that can never fail to reconcile can never surface an anomaly — it can only
+*relocate* one into whichever bucket is the leftover. Here that bucket was called `retrieval`, so
+the retriever silently absorbed the blame for anything that went wrong anywhere else in the request.
+The display was not merely wrong on this question; it was **incapable of ever being right about an
+unexpected cost**, and it looked correct for weeks because until then nothing unexpected had
+happened.
+
+What makes this worth an entry is that it is the *second* bug in the same three lines. The original
+version used the model's self-reported time as "total", which hid retrieval completely and made
+reranking look 20x faster than dense retrieval. The fix for that introduced this one. **Both were
+attempts to display a breakdown without measuring one of its parts**, and the second was harder to
+see precisely because it produced numbers that always added up.
+
+The fix is two stopwatches instead of one, which costs nothing because `answer()` is literally
+`search()` + `answer_from_hits()` — the two halves already existed and the evaluation harness had
+been calling them separately all along. The leftover is now computed, shown when it exceeds 250 ms,
+and **deliberately allowed not to reconcile**. That gap is the diagnostic.
+
+**And the actual cause turned out to be a second confusion, in the warm-up.** With retrieval timed
+directly, the 10.1 s would still have appeared — because it was genuinely *inside* `search()`. The
+app's `warm_models()` called `load_embedder()` and `load_reranker()` at startup, and both only
+**construct** the objects. torch still pays kernel setup on the first real forward pass, and Chroma
+loads its HNSW vector segment on the first **query** — the startup path called `.count()`, which
+reads metadata and never touches the index. So the first genuine question paid both.
+
+**Constructing a model is not warming it**, and the two had been conflated inside a function named
+`warm_models`. The evaluation harness had issued a throwaway query before timing anything since the
+beginning (gotcha 11); the application never adopted it. That is why every *published* latency
+figure in this project is a warm number and the *deployed* one was not.
+
+The warm-up added is `vector` only, deliberately. Warming `rerank` would run a cross-encoder pass
+during boot, and one pass adds ~473 MB of peak RSS on a host with roughly 1 GB (entry 34). Trading a
+slow first reranked query for a crash-loop at startup is a bad trade — especially once the first
+reranked query is labelled honestly instead of being blamed on the retriever.
+
+**Defensive argument.** "My deployed app told me dense retrieval took 10 seconds when I had measured
+it at 36 milliseconds. I did not start by profiling — I noticed the claim was impossible. My
+reranked mode does dense retrieval *plus* BM25 *plus* a cross-encoder, and it reported 3.2 seconds,
+so the retriever doing strictly less work could not be three times slower. Something else was in
+that number. It turned out retrieval was not measured at all: I had one stopwatch around the whole
+request and I subtracted the model's self-reported time, so 'retrieval' actually meant 'everything
+that was not the LLM call'. The real lesson is the shape of that: one of my three numbers was
+defined as the other two subtracted, so they always summed correctly — which sounds like a good
+property and is exactly why the display could never show me an anomaly. It just moved the anomaly
+into the bucket labelled retrieval. I fixed it with two stopwatches and a leftover term that is
+*allowed* not to reconcile. And the leftover then pointed at the real cause, which was a separate
+mistake: my warm-up function loaded both models at startup but never ran one, and loading is not
+warming. torch pays kernel setup on the first forward pass and Chroma loads its vector index on the
+first query, so my first real visitor paid both. My eval harness had done a throwaway warm-up query
+from day one — the app just never adopted it, which is why all my published latency numbers were
+warm and the deployed one was not."
+
+**Show-off argument.** Openings: *"tell me about a bug that was not a crash"*, *"how do you debug
+something in production"*, or anything about instrumentation, dashboards or observability.
+> "The one I would pick is a bug in a number rather than in behaviour. My app displayed a latency
+> breakdown — total, retrieval, generation — and one day it told me dense retrieval took 10 seconds
+> when I had measured it at 36 milliseconds. What I like about it is that I did not need to profile
+> anything to know it was wrong: my reranking mode does dense retrieval plus BM25 plus a
+> cross-encoder, and it was reporting 3.2 seconds. The retriever doing less work cannot be slower
+> than the one doing more, so the number had to contain something that was not retrieval. And it did
+> — I had never measured retrieval. I had one stopwatch around the whole request and subtracted the
+> LLM's self-reported time, so that field really meant 'everything that was not the model call'. The
+> part I would want to be asked about is why that survived: because it always added up. Total minus
+> generation equals retrieval, perfectly, every time, by construction. A breakdown that cannot fail
+> to reconcile cannot ever show you an anomaly — it just silently reassigns it to whichever number
+> is the leftover, and mine was labelled 'retrieval', so my retriever took the blame for everything.
+> Now the parts are measured independently and there is a leftover term allowed to be non-zero,
+> which is what pointed at the real cause: my 'warm models' function constructed both models at
+> startup and never ran one. Loading a model is not warming it — torch does kernel setup on the
+> first forward pass. My evaluation harness had always fired a throwaway query before timing
+> anything. The app never did, which is why every number I had published was warm and the one my
+> users saw was not."
+
+---
+
+# 36. Four mechanisms asserted, four refuted: a latency number with no environment
+
+**The scenario.** `config/showcase.json` was regenerated so it records retrieval time, measured the
+way `eval/run_eval.py` measures it — a stopwatch directly around `search()`, after a warm-up. A
+prediction was registered before the run: the numbers would land near the committed evaluation
+figures, because it is the same machine, the same code and the same library defaults.
+
+They missed, in **both directions at once**:
+
+| | showcase (8 questions) | eval (69 questions) | |
+|---|---|---|---|
+| `vector` | **66 ms** | 36 ms | 1.8x **slower** |
+| `rerank` | **2,255 ms** | 3,486 ms | 1.5x **faster** |
+
+**How we got to the answer — via four wrong explanations, each plausible, each cheap to have
+tested first.**
+
+1. **"A busy machine."** Rejected correctly: load slows everything, so it cannot move two numbers
+   in opposite directions. But this was then over-extended into *"no single cause can do this"*,
+   which is false and had to be withdrawn.
+2. **"Run shape."** The eval runs `--retrieval-only`, 69 retrievals back to back; the showcase waits
+   ~2 s on a hosted LLM between questions. The claim was that idling lets the CPU drop out of boost,
+   so each short query starts slow. This was **registered as a prediction** before testing.
+3. **"Thermal drift."** The first experiment showed reranking rising monotonically — 1,765 → 1,733
+   → 2,327 → 3,108 ms — across arms run in sequence, which looked like a chip heating up.
+4. **"CPU cache eviction."** A real LLM call does memory-heavy work between queries that `sleep`
+   does not, so perhaps the embedding model was being evicted from cache.
+
+**The first experiment was itself confounded, in exactly the way the entry is about.** Its arms ran
+one after another and its control ran last. Re-running the *identical* condition five minutes later
+— same 8 questions, same threads, same shape — moved reranked retrieval **+32%**, larger than any
+effect being measured. So the environment changed *during* the experiment, and the experiment did
+not record that either.
+
+The corrected design: five conditions, three repetitions, **order rotated each repetition** so
+elapsed time falls on every condition equally, with a fixed reference measured first and last to
+quantify drift rather than suffer it. Medians across repetitions:
+
+| condition | what changes | rerank | vs ref | vector | vs ref |
+|---|---|---|---|---|---|
+| `ref` | nothing | 2,628 ms | — | 44.7 ms | — |
+| `golden8` | 8 golden questions instead | 2,715 ms | +3.3% | 48.1 ms | +7.5% |
+| `gap` | 2 s idle between questions | **1,779 ms** | **−32.3%** | 33.6 ms | **−25.0%** |
+| `evict` | 64 MB buffer walk between queries | 2,560 ms | −2.6% | 42.4 ms | −5.3% |
+| `threads2` | 2 threads | 2,963 ms | **+12.8%** | 31.8 ms | **−28.9%** |
+
+**All four explanations fell.** Question mix: +3.3%, never the cause. Cache eviction: −2.6%, null —
+and `evict` was designed to touch memory *without* adding heat or elapsed time, so it isolates the
+mechanism cleanly. Thermal drift: the probe ran the same condition at t+0 s and t+478 s and came
+back **faster** (2,941 → 2,658 ms), so the tidy monotonic rise in the first experiment was position
+luck. And run shape was **backwards**: idle gaps make retrieval *32% faster*, not slower.
+
+The `gap` result is the strongest signal in the suite and the most reproducible — spread of 43 ms
+across three repetitions against `ref`'s 331 ms. That stability is the tell: with a gap, every query
+starts from the same recovered CPU power state, while back-to-back depends on whatever accumulated
+before it. It also reconciles the first experiment, whose fast opening arm had looked contradictory:
+
+```
+cold + back to back              1,765 ms
+warm + 2 s gaps                  1,779 ms   <- boost budget recovers in each gap
+warm + back to back              2,628 ms   <- boost budget exhausted
+warm + back to back + 2 threads  2,963 ms
+```
+
+**And the "impossible" opposite-direction signature turns out to be ordinary.** Thread count does
+it: 2 threads makes `rerank` 12.8% *slower* and `vector` 28.9% *faster*. Fewer threads means less
+parallelism for a big batched cross-encoder pass and less synchronisation overhead for a single
+short embedding. One variable, both directions — the thing that had been declared impossible, sitting
+in the same table as the refutation.
+
+**The finding.**
+
+```
+identical work, one machine, one session:
+  rerank   1,777 - 3,003 ms   (1.69x)
+  vector      31.6 - 59.3 ms  (1.88x)
+```
+
+**Every published `retrieve p50` in this project is a point sample from a range that wide, and
+nothing in any results file records where in the range it fell.** `eval/results/` is meticulous
+about *inputs* — k, embedding model, chunk parameters, a content hash of the question set — and
+silent about the *machine*. That is not incidental here: thread count was measured at ~48% of
+reranked latency (entry 32) and batch size at 26% of peak memory (entry 34), and both are set in
+`app.py` and recorded in no results file.
+
+**The generalisable form: the format protects the metric that did not need protecting.** Retrieval
+*quality* is byte-reproducible — verified identical to `0.000000` across a different OS, a different
+CPU and four different library versions in the hot path. Retrieval *latency* is not reproducible
+across an idle gap on the same laptop. All the provenance went to the metric that never varies.
+
+The original discrepancy is now explained on the `rerank` side: the showcase run waits on a hosted
+model between questions, which *is* the `gap` condition, and `gap` is 32% faster — 2,255 ms against
+the eval's back-to-back 3,486 ms. **The `vector` side remains unexplained**: 66 ms sits above every
+condition measured, and the one the showcase most resembles is the *fastest* at 33.6 ms. A residual
+of ~20 ms on a 36 ms base — real, small in absolute terms, and left stated rather than given a fifth
+hypothesis.
+
+**Defensive argument.** "I regenerated a data file to record retrieval latency the way my eval
+harness does, and predicted the numbers would match — same machine, same code, same defaults. They
+missed in both directions: dense retrieval 1.8x slower, reranking 1.5x faster. I then proposed four
+mechanisms and measured all four wrong. Question mix: three percent. Cache eviction: null. Thermal
+drift: my probe came back faster at the end than the start. And run shape, which I'd formally
+registered as a prediction, was backwards — inserting a two-second idle gap between queries makes
+retrieval thirty-two percent *faster*, because the CPU's boost budget recovers. What I should have
+noticed is that my first experiment ran its arms in sequence with the control last, and re-running
+an identical condition five minutes later moved the number thirty-two percent — so the environment
+was changing inside the experiment, which is the same defect I was investigating. The fix was a
+rotated repeated design so elapsed time hits every condition equally. The real finding is the range:
+identical work on one machine in one session spans 1.7x on reranking and 1.9x on dense retrieval. My
+results files record k, the embedding model, the chunk parameters and a hash of the question set,
+and nothing about the machine — even though I'd already measured that thread count alone is worth
+about half of reranking latency. So my provenance format protects retrieval quality, which is
+byte-reproducible across operating systems, and records nothing for latency, which isn't reproducible
+across an idle gap on the same laptop."
+
+**Show-off argument.** Openings: *"tell me about a measurement you did not trust"*, *"what goes into
+a benchmark"*, *"a time you were wrong"*, or anything about reproducibility and performance testing.
+> "The most useful thing I did on that project was be wrong four times in a row in about an hour. Two
+> latency numbers from the same machine disagreed in opposite directions — dense retrieval slower,
+> reranking faster — and I proposed four mechanisms: machine load, question mix, thermal drift, CPU
+> cache eviction. I measured every one of them and all four were wrong. The actual answer was the
+> opposite of my registered prediction: putting a two-second idle gap between queries makes retrieval
+> thirty-two percent *faster*, because the processor's boost budget recovers between bursts, and the
+> gap condition was the most reproducible thing in the suite — forty-three milliseconds of spread
+> against three hundred for back-to-back. But the part I'd want to be asked about is that my first
+> experiment was confounded in exactly the way I was investigating. I ran the conditions in sequence
+> with the control last, and when I re-ran an identical condition five minutes later it had moved
+> thirty-two percent. So I redesigned it to rotate the order across repetitions, which spreads drift
+> evenly instead of dumping it on whatever ran last. And the conclusion is one I'd defend anywhere:
+> identical work on one machine in one session spanned 1.7x, and none of my results files recorded
+> the machine. I'd been rigorous about provenance for retrieval quality — which reproduces to six
+> decimal places across a different OS and different library versions — and recorded nothing for
+> latency, which is the number that actually moves. I protected the metric that didn't need it."
+
+---
+
+# 37. The test passed through a cache and proved nothing
+
+**The scenario.** The Streamlit app had never been tested. Every claim about it was "it compiles"
+or "I looked at it once" — including, this session, three changes to the code that decides what
+latency number a visitor sees. The app is also where two deployment-critical settings live (thread
+count, cross-encoder batch size) and where the boot order is documented as load-bearing, so
+"unverified" was carrying a lot of weight.
+
+`streamlit.testing.v1.AppTest` runs the real `app.py` headlessly and exposes its rendered elements,
+so the app can be driven — set the mode, set `k`, pick a question, run — and asserted on. Seventeen
+cases were written: boot, precomputed answers in both modes, live answers in all six retrieval
+modes, a non-default `k`, live and precomputed abstention, the per-session quota cap, and backward
+compatibility with the old `showcase.json` format.
+
+**How we got to the answer.** The suite found three bugs before it found anything about the app, and
+all three were in the suite.
+
+1. **`AppTest.from_file` resolves a relative path against the calling file's directory**, not the
+   working directory. 15 of 17 cases failed identically with `FileNotFoundError`. Cost: nothing —
+   it failed in 0 s and spent no quota.
+2. **`at.selectbox[-1]` was assumed to be the question picker.** It is the retrieval-mode picker;
+   the element-tree order is not the source order. Fixed by selecting the box that actually *offers*
+   the value rather than by index — which is the general form of the fix, since an index encodes an
+   assumption and a lookup does not.
+3. **The backward-compatibility test passed through a cache and tested nothing.** This is the one
+   worth the entry.
+
+`showcase()` is decorated `@st.cache_data`. The test overwrote `config/showcase.json` on disk with
+an old-format copy, re-ran the app, and asserted the retrieval figure was absent. The app served the
+**memoized** copy — the new file, still carrying `retrieve_ms` — so the caption still showed
+`66 ms of retrieval` and the case was reported as a failure.
+
+**It failed for the right reason by luck.** The assertion happened to be "the retrieval figure is
+absent", so a stale cache produced a red result. Had the assertion been written the other way round
+— "the app does not crash" — it would have **passed**, while executing none of the code it existed
+to check, and the old-format path would have shipped untested with a green tick beside it. A test
+that cannot distinguish the two states it is comparing is not a weak test; it is not a test.
+
+The fix was to clear the cache between runs **and add a control**: run the same case against the
+*current* file and require the retrieval figure to be **present**, then against the old file and
+require it to be **absent**. Two assertions in opposite directions, so the test proves it can tell
+the states apart before it is trusted about either.
+
+```
+new file (has retrieve_ms)  ->  "...1.3s of generation and 66 ms of retrieval (`vector`)"
+old file (stripped)         ->  "...1.3s of generation"
+```
+
+That also surfaced a real property of the deployed app, independent of the test: **a regenerated
+`showcase.json` is not picked up until the process restarts.** On Community Cloud a `git push`
+restarts the app, so it does not bite in practice — but it would bite anyone editing that file on a
+running instance, and nothing anywhere said so.
+
+**What the suite then verified**, which is the point of having built it: all six retrieval modes
+render with sensible, correctly formatted per-mode timings (3 ms for BM25 through 3.2 s for the
+union pool); the precomputed path reports the cost the answer had *when generated* rather than the
+zero it costs to read from disk; a non-default `k` correctly misses the precomputed cache instead of
+serving a `k=5` answer as if it were `k=3`; abstention works live and precomputed; and the session
+cap blocks a live question before spending quota while still serving precomputed ones.
+
+**And the change this session was verified by its absence.** The new `other` term — everything
+outside the two measured phases — appears on none of the six live modes. The warm-up fix means there
+is no unaccounted initialisation left to leak into a question and be mislabelled as retrieval. The
+term is armed and has nothing to report, which is the correct outcome and is only observable because
+it was given somewhere to appear.
+
+**Defensive argument.** "I'd never tested my Streamlit app — everything about it was 'it compiles'.
+I wrote seventeen headless cases against the real app using Streamlit's AppTest, and the suite found
+three bugs in itself before it found anything about the app. The one worth talking about: my
+backward-compatibility test overwrote a data file on disk, re-ran the app and asserted the new field
+was absent. It failed — but not because the app was wrong. The loader is decorated with
+`@st.cache_data`, so the app served the memoized copy and my test never touched the file it had
+written. It failed for the right reason purely by luck: my assertion was 'the field is absent', so a
+stale cache showed red. If I'd written the more natural assertion — 'it doesn't crash' — it would
+have passed while executing none of the code it existed to test. So I added a control: run the same
+case against the current file and require the field to be *present*, then against the old file and
+require it *absent*. Two assertions in opposite directions, so the test demonstrates it can tell the
+states apart before I trust it about either. That also taught me something real about the deployment
+— a regenerated data file isn't picked up until the process restarts."
+
+**Show-off argument.** Openings: *"how do you test something hard to test"*, *"tell me about a
+misleading test"*, or anything about caching or test quality.
+> "My favourite bug from that project was in a test rather than in code. I was checking that my app
+> still worked with an older data file format, so the test overwrote the file on disk, re-ran the
+> app, and asserted the new field was gone. It failed — and I nearly filed it as an app bug. The
+> loader was decorated with Streamlit's cache_data, so the app served the memoized copy and my test
+> never read the file it had just written. What I find genuinely instructive is that it failed for
+> the right reason by accident. My assertion was 'the field is absent', so a stale cache showed red.
+> If I'd written the assertion everyone writes first — 'it doesn't crash' — it would have gone green
+> while executing literally none of the code path it existed to cover, and I'd have shipped
+> untested code with a passing test next to it. The fix wasn't just clearing the cache, it was
+> adding a control: assert the field is *present* with the new file and *absent* with the old one.
+> If a test can't distinguish the two states it's comparing, it isn't a weak test, it's not a test.
+> And it found me a real deployment fact for free — that file isn't reloaded until the process
+> restarts."
+
+---
+
 *Every entry from the project's earlier phases has now been backfilled. New findings get an entry
 in the session that produces them — see the process rule in the
 [README](../README.md#important--the-engineering-journal-is-a-required-deliverable).*

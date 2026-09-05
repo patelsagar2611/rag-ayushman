@@ -86,7 +86,7 @@ from src.generate import (  # noqa: E402
     LLM_MODEL,
     LLM_PROVIDER,
     OLLAMA_MODEL,
-    answer,
+    answer_from_hits,
 )
 from src.index import COLLECTION, EMBED_MODEL, get_collection  # noqa: E402
 from src.retrieve import (  # noqa: E402
@@ -95,6 +95,7 @@ from src.retrieve import (  # noqa: E402
     MODES,
     RERANK_MODEL,
     SCORE_LABELS,
+    search,
 )
 
 st.set_page_config(page_title="PM-JAY RAG", page_icon="📄", layout="centered")
@@ -135,6 +136,38 @@ def warm_models():
 
     load_embedder()
     load_reranker()
+
+    # CONSTRUCTING a model is not WARMING it, and the two were conflated here.
+    # The loaders above only build the objects: torch still pays kernel setup on
+    # the first real forward pass, and Chroma still loads its HNSW vector segment
+    # off disk on the first QUERY -- chunk_count() calls .count(), which reads
+    # metadata and never touches the index. So without the line below, the first
+    # genuine question pays both, and the app reports it as retrieval time,
+    # because that is honestly where it happens.
+    #
+    # Observed on the deployed app 2026-09-01: a `vector` question took 12.2 s
+    # total, 10.1 s of it inside search(), against 36 ms in the eval. The same
+    # session's `rerank` question, asked afterwards on the now-warm process,
+    # retrieved in 3.2 s. A retriever doing strictly LESS work cannot be 3x
+    # slower than one doing more -- rerank's pool is dense retrieval PLUS BM25
+    # PLUS a cross-encoder -- so the gap was entirely first-call initialisation.
+    #
+    # eval/run_eval.py has always issued a throwaway query before timing anything
+    # (gotcha 11). The app never adopted it, which is why every published latency
+    # figure is warm and the deployed one was not.
+    #
+    # `vector` ONLY, deliberately. Warming `rerank` would run a cross-encoder pass
+    # during boot, and one pass adds ~473 MB of peak RSS on a host with roughly
+    # 1 GB. Trading a slow first reranked query for a crash-loop at startup is a
+    # bad trade -- especially now that the first reranked query is labelled
+    # honestly as retrieval rather than blamed on something else.
+    try:
+        search("warmup", k=1, mode="vector")
+    except Exception:
+        # A warmup failure must never take the app down. The same call is about to
+        # be made by the first real question, which has error handling and a
+        # message for the user; this one has neither and needs neither.
+        pass
     return True
 
 
@@ -234,6 +267,16 @@ def mode_baselines():
 
 
 BASELINES, LIVE_SHA = mode_baselines()
+
+
+def fmt_ms(ms):
+    """Milliseconds below a second, seconds above it.
+
+    Dense retrieval is ~36 ms. At one decimal place in seconds that prints as
+    `0.0s`, which reads as "not measured" rather than "very fast" -- and the whole
+    point of measuring retrieval directly was to stop the number being ignorable.
+    """
+    return f"{ms:.0f} ms" if ms < 1000 else f"{ms / 1000:.1f}s"
 
 
 def mode_caption(mode, k):
@@ -408,14 +451,27 @@ if question:
             "Reranking, then generating…" if mode.startswith("rerank")
             else "Retrieving and generating…"
         )
-        # Wall clock around the WHOLE call. stats["total_ms"] covers only the LLM
-        # request, so using it as "total" hid retrieval entirely -- and retrieval
-        # is where the modes actually differ. On the deployed app that made
-        # reranking look 20x FASTER than dense retrieval: rerank showed 1.1 s
-        # (a warm LLM call, its ~3.5 s of cross-encoder work invisible) against
-        # vector's 22.2 s (a cold first LLM call, its 36 ms of retrieval
-        # invisible). Both numbers were correct and the comparison they invited
-        # was backwards.
+        # TWO stopwatches, not one, and retrieval is MEASURED rather than inferred.
+        #
+        # The first version of this caption used stats["total_ms"] -- the LLM
+        # request alone -- as "total", which hid retrieval entirely and made
+        # reranking look 20x FASTER than dense retrieval.
+        #
+        # The fix for that introduced a subtler bug: one stopwatch around the whole
+        # call, with retrieval derived as `wall_ms - gen_ms`. That number was never
+        # a measurement of retrieval. It was "everything that was not the LLM call",
+        # printed under the word `retrieval`, so any cost anywhere else in the
+        # request was silently attributed to the retriever.
+        #
+        # Worse, it was built so the parts ALWAYS summed to the whole -- one of the
+        # three numbers was defined as the other two subtracted. A breakdown that
+        # can never fail to reconcile can never show you an anomaly; it just moves
+        # the anomaly into whichever bucket is the leftover. Here that bucket was
+        # labelled `retrieval`, so the retriever took the blame for everything.
+        #
+        # answer() is exactly search() + answer_from_hits(), so calling the two
+        # halves directly costs nothing and buys an honest split. `other_ms` below
+        # is now allowed to be non-zero, and that is the point of it.
         if precomputed is not None:
             # Served from disk: no LLM call, and no retrieval either, because the
             # chunks were stored with the answer. Labelled below, because an
@@ -425,10 +481,13 @@ if question:
             hits = precomputed["hits"]
             stats = precomputed.get("stats") or {}
             wall_ms = None
+            retrieve_ms = precomputed.get("retrieve_ms")
         else:
             started = time.perf_counter()
             with st.spinner(spinner):
-                text, hits, stats = answer(question, k=k, mode=mode)
+                hits = search(question, k=k, mode=mode)
+                retrieve_ms = (time.perf_counter() - started) * 1000
+                text, stats = answer_from_hits(question, hits)
             wall_ms = (time.perf_counter() - started) * 1000
             st.session_state["live_calls"] = used_session + 1
             counter["count"] += 1
@@ -484,15 +543,24 @@ if question:
             # the zero it costs to read from disk.
             line = (
                 f"**Precomputed answer** — served from disk, no model call. "
-                f"When generated it took {gen_ms / 1000:.1f}s of generation"
+                f"When generated it took {fmt_ms(gen_ms)} of generation"
             )
+            if retrieve_ms:
+                line += f" and {fmt_ms(retrieve_ms)} of retrieval (`{mode}`)"
         else:
-            retrieve_ms = max(wall_ms - gen_ms, 0.0)
             line = (
-                f"**{wall_ms / 1000:.1f}s total** — "
-                f"retrieval {retrieve_ms / 1000:.1f}s (`{mode}`), "
-                f"generation {gen_ms / 1000:.1f}s"
+                f"**{fmt_ms(wall_ms)} total** — "
+                f"retrieval {fmt_ms(retrieve_ms)} (`{mode}`), "
+                f"generation {fmt_ms(gen_ms)}"
             )
+            # Deliberately allowed not to reconcile. Everything outside the two
+            # measured phases lands here instead of being folded into retrieval,
+            # so a first-call cost or an unexpected stall is VISIBLE rather than
+            # misattributed. Normally a few milliseconds, so it is hidden below
+            # the threshold rather than adding noise to every answer.
+            other_ms = wall_ms - retrieve_ms - gen_ms
+            if other_ms >= 250:
+                line += f", other {fmt_ms(other_ms)}"
         split_reported = (stats.get("prompt_eval_ms") or 0) > 0
         if split_reported:
             line += (

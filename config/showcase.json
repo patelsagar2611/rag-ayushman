@@ -1,15 +1,23 @@
 {
-  "generated_utc": "2026-09-01T11:11:29Z",
+  "generated_utc": "2026-09-01T19:04:41Z",
+  "complete": true,
   "prompt_version": 1,
   "llm_provider": "openai",
   "llm_backend": "google",
   "llm_model": "models/gemini-3.1-flash-lite",
+  "timing_env": {
+    "machine": "Windows",
+    "torch_threads": 10,
+    "rerank_batch": null,
+    "note": "development machine, library defaults -- not the deployed host"
+  },
   "entries": [
     {
       "question": "What is cover amount under PM JAY for family floater basis?",
       "mode": "vector",
       "k": 5,
       "answer": "PM-JAY covers secondary and tertiary care costs of up to Rs. 5,00,000 annually for each entitled family [1].",
+      "retrieve_ms": 66.08599999162834,
       "hits": [
         {
           "rank": 1,
@@ -59,7 +67,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1397.3038000040106,
+        "total_ms": 1257.2246999916388,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -75,6 +83,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "The minimum number of inpatient beds required for a hospital to be empanelled under PM-JAY is at least 10 [1], [4]. However, for hospitals located in Aspirational Districts, the requirement is 5 inpatient beds [2]. \n\nExemptions to the minimum bed requirement may be granted for specific types of hospitals:\n*   In general criteria, exemptions may be given for \"single-speciality hospitals like Eye ,ENT and Standalone Dialysis Centres\" [1] or \"dental and day-care procedure hospitals like Eye, ENT, and Standalone Dialysis Centres\" [4].\n*   In Aspirational Districts, the 5-bed requirement applies \"unless providing day-care packages covered under PM-JAY\" [2].",
+      "retrieve_ms": 116.62349999824073,
       "hits": [
         {
           "rank": 1,
@@ -124,7 +133,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1865.9217999957036,
+        "total_ms": 2428.9919000002556,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -140,6 +149,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "Aadhaar will be primary identity document for a family member that has to be produced under the AB PM-JAY scheme [2].",
+      "retrieve_ms": 57.64669999189209,
       "hits": [
         {
           "rank": 1,
@@ -189,7 +199,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1439.6276999978,
+        "total_ms": 1450.2555999933975,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -205,6 +215,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "If any party to a grievance is not satisfied with the decision of a grievance redressal committee, it may appeal against the decision within \"30 days\" [2]. \n\nRegarding specific appeal paths:\n*   If a party is not satisfied with a DGNO’s or SGNO’s decision, they can appeal to the DGRC or SGRC \"within 30 days of the DGNO/SGNO order\" [3].\n*   If a party is not satisfied with a DGRC decision, they can appeal to the SGRC \"within 30 days\" [1], [3], [4], [5].\n*   If a party is not satisfied with an SGRC order, they shall approach the SAA \"within 30 days of the SGRC order\" [4].\n*   If a party is not satisfied with a DGNO’s decision, they can appeal to the DGRC \"within 30 days of the DGNO\" [3] or \"within 30 days of the DGNO order\" [4], [5].\n\nIf an appeal is not filed within the \"30-day period\", the aggrieved party loses its right to appeal [2].",
+      "retrieve_ms": 65.73659999412484,
       "hits": [
         {
           "rank": 1,
@@ -254,7 +265,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 2470.679800004291,
+        "total_ms": 2548.8029999978608,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -270,6 +281,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "The per day price for a bed in an Intensive care requiring ventilator support is ₹ 4,500 [5].",
+      "retrieve_ms": 72.83499999903142,
       "hits": [
         {
           "rank": 1,
@@ -319,7 +331,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1853.4925999992993,
+        "total_ms": 2202.101999995648,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -335,6 +347,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "Section 5.1 and 5.2 are to be filled by the hospitals and sent at the time of beneficiaries’ death (within 48 hrs) [1].",
+      "retrieve_ms": 70.7265999953961,
       "hits": [
         {
           "rank": 1,
@@ -384,7 +397,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 2180.4320000010193,
+        "total_ms": 1410.8168999955524,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -400,6 +413,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "Hospitals with full NABH accreditation receive a 15% incentive [1], [3].",
+      "retrieve_ms": 62.50240000372287,
       "hits": [
         {
           "rank": 1,
@@ -449,7 +463,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 3216.29060000123,
+        "total_ms": 4048.0263000063132,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -465,6 +479,7 @@
       "mode": "vector",
       "k": 5,
       "answer": "I cannot answer this from the provided sources.",
+      "retrieve_ms": 61.46630000148434,
       "hits": [
         {
           "rank": 1,
@@ -514,7 +529,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 2930.470500003139,
+        "total_ms": 3966.450399995665,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -530,6 +545,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "The benefit cover under the scheme is INR 5,00,000 on a family floater basis [1].",
+      "retrieve_ms": 2287.368499994045,
       "hits": [
         {
           "rank": 1,
@@ -579,7 +595,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1335.329500005173,
+        "total_ms": 1200.1877000002423,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -595,6 +611,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "For a hospital to be empanelled under PM-JAY, the minimum requirement is at least 10 inpatient beds [1, 3]. However, for hospitals located in Aspirational Districts, the minimum requirement is 5 inpatient beds, unless the hospital is providing day-care packages covered under PM-JAY [2].",
+      "retrieve_ms": 2184.5046000089496,
       "hits": [
         {
           "rank": 1,
@@ -644,7 +661,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 2343.432900001062,
+        "total_ms": 1312.2420999861788,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -660,6 +677,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "Aadhaar will be primary identity document for a family member that has to be produced under the AB PM-JAY scheme [1].",
+      "retrieve_ms": 2250.0437999988208,
       "hits": [
         {
           "rank": 1,
@@ -709,7 +727,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 3824.6262000029674,
+        "total_ms": 3726.1846999899717,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -725,6 +743,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "If any party to a grievance is not satisfied with the decision of the relevant Grievance Redressal Committee, it may appeal against the decision within 30 days to the higher Grievance Redressal Committee or other authority having powers of appeal [5]. \n\nAdditionally, the provided sources specify the following regarding appeals:\n* If either party is not satisfied with a DGNO’s decision, they can appeal to the DGRC within 30 days of the DGNO order [2, 3, 4].\n* If either party is not satisfied with a DGRC decision, they can appeal to the SGRC within 30 days [1, 2, 3, 4].\n* If either party is not satisfied with an SGRC order, they shall approach the SAA within 30 days of the SGRC order [4]. \n\nIf an appeal is not filed within the 30-day period, the aggrieved party loses its right to appeal [5].",
+      "retrieve_ms": 2211.338399996748,
       "hits": [
         {
           "rank": 1,
@@ -774,7 +793,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1677.2533999974257,
+        "total_ms": 3046.284999989439,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -790,6 +809,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "The per day price for a bed in an Intensive care requiring ventilator support is ₹ 4,500 [1].",
+      "retrieve_ms": 2276.885900006164,
       "hits": [
         {
           "rank": 1,
@@ -839,7 +859,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 4742.950600004406,
+        "total_ms": 1214.1536999988602,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -855,6 +875,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "Section 5.1 and 5.2 of the mortality report must be filled by the hospitals and sent \"within 48 hrs\" of the beneficiaries’ death [1].",
+      "retrieve_ms": 2196.7997000028845,
       "hits": [
         {
           "rank": 1,
@@ -904,7 +925,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1421.4522000038414,
+        "total_ms": 1832.5936000037473,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -920,6 +941,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "A hospital with full NABH accreditation will receive a 15% incentive [1], [4].",
+      "retrieve_ms": 2347.238100002869,
       "hits": [
         {
           "rank": 1,
@@ -969,7 +991,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1486.0285000031581,
+        "total_ms": 2342.069899998023,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
@@ -985,6 +1007,7 @@
       "mode": "rerank",
       "k": 5,
       "answer": "I cannot answer this from the provided sources.",
+      "retrieve_ms": 2260.3872000036063,
       "hits": [
         {
           "rank": 1,
@@ -1034,7 +1057,7 @@
       ],
       "stats": {
         "served_by": "",
-        "total_ms": 1281.9209000008414,
+        "total_ms": 1252.0717999868793,
         "load_ms": 0.0,
         "queue_ms": 0.0,
         "prompt_eval_ms": 0.0,
