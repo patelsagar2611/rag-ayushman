@@ -1361,14 +1361,32 @@ The **genuine** conflict is between two different editions:
 | Date on cover | December 2021 | not printed |
 | Source | NITI for States | Kerala SHA |
 
-Version 2.0 states its own version, which is stronger evidence than a date inferred from a
-filename — but **which edition is currently in force is still unconfirmed**, and the whole
-point of these test cases is knowing which rule is current. Settle it against NHA's own
-circulars before writing the version-conflict questions; do not infer it from filenames,
-which is precisely the mistake that produced the false pair above.
+**Settled 2026-09-06, by checking NHA's live site rather than by reasoning about the files.**
+Of the two editions in the corpus, **`empanelment_dec2021.pdf` is the later one and is treated
+as in force.** Note that this is the *opposite* of what the filenames suggest: "Version – 2.0"
+reads like the newer document and is not, which is exactly why the standing rule is to check the
+source rather than infer from a version string or a date. An earlier version of this section
+argued that a self-declared version number is stronger evidence than a filename date; that
+reasoning was sound and the conclusion it pointed at was wrong.
+
+> **The more important finding, and it is a limitation of the whole corpus.** NHA's live site
+> now publishes an empanelment edition **newer than either file here**, and it is not in the
+> corpus. So the version conflict between our two files is no longer the interesting problem:
+> **every empanelment answer this system gives is drawn from superseded guidance**, however
+> correctly it cites. That is a property of a fixed 2026-08 corpus snapshot and not a bug, but
+> it has to be said out loud wherever the system is used, because a correct citation to an
+> outdated rule is more convincing than a wrong answer and no easier to catch.
+>
+> Fetching the new edition is not a small change: it would alter retrieval, invalidate the
+> empanelment rows of the golden set, and force a re-baseline of every published figure. It is
+> the right thing to do and it is a phase of work, not an errand.
 
 Retrieval does surface both editions: "minimum bed requirements for empanelment" returns
-`empanelment_v2_0.pdf` p.40 and `empanelment_dec2021.pdf` p.30 at ranks 1 and 2.
+`empanelment_v2_0.pdf` p.40 and `empanelment_dec2021.pdf` p.30 at ranks 1 and 2. Since neither
+is current, **the honest product behaviour is to surface the disagreement rather than to pick a
+winner** — naming the edition beside each citation and stating both values when they differ.
+Telling the model to prefer one edition would produce a confident, well-cited, outdated figure
+on a health-scheme entitlement, which is the worst available outcome.
 
 ### Corpus triage
 
@@ -1443,8 +1461,20 @@ assertion.
 21. **Results from a superseded golden set move to `eval/results/archive-<n>q/`, never
     deleted.** The JSON `label` does not record question count, so the folder does it, with a
     README naming what changed.
-22. **`DEFAULT_MODE` stays `vector`** until generation evidence justifies changing it.
-    Switching the product's default for unmeasured reasons is what this rules out.
+22. **`DEFAULT_MODE` stays `vector`. SETTLED 2026-09-05, after the deployment, and it is a
+    decision rather than a deferral.** The original form of this rule was "until generation
+    evidence justifies changing it"; that evidence now exists and does not justify it.
+    Reranking is a large *retrieval* win (MRR 0.699 → 0.879) that bought **no citation-precision
+    gain on any of the three models tested** and actively harmed it on two, its only answer-side
+    benefit being fewer false refusals. Against that it costs ~470 MB more peak RSS on a ~1 GB
+    host — the single parameter that decides whether the app survives at all (decision 34) — and
+    seconds of retrieval per query.
+    **What did NOT decide it, having been checked:** latency. On the deployed host, *generation*
+    was observed swinging **1.9 s to 10.4 s** across six back-to-back calls to the same endpoint,
+    which is larger than the whole retrieval difference between the modes, so a latency argument
+    in either direction is not supportable at that noise level (gotcha 26).
+    `rerank` remains one selection away in the sidebar, with its measured figures shown beside
+    it, so the default is a starting point rather than a restriction.
 23. **The rerank candidate pool is a parameter, and `hybrid` was chosen on LATENCY, not
     quality.** The union pool measures strictly better on coverage (98.3% vs 95.0% hit@5).
     Anyone reversing this should reverse it on latency evidence, not because they think hybrid
