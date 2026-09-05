@@ -860,8 +860,65 @@ def render_about():
 # emitted would be missing from the page. Rendering the two static tabs FIRST
 # means a stopped question still leaves a complete site behind it.
 # ---------------------------------------------------------------------------
+# Streamlit's default tabs are plain text with a thin underline on the active
+# one. Reported from the live site: a visitor who does not already know there are
+# tabs does not see them -- the labels read as a subheading, so the two tabs that
+# are not "Ask" may as well not exist. Since the measurement tab is the point of
+# this project rather than a footnote, that is a real loss and not a cosmetic one.
+#
+# So: draw each tab as a BOX, and give the selected one a filled background and a
+# coloured border. The states now differ in three ways at once (fill, border,
+# weight) rather than in one thin line.
+#
+# Colours are rgba overlays on top of whatever the visitor's theme provides,
+# rather than fixed hex values, so this works on both the light and dark themes
+# without knowing which is active. #FF4B4B is Streamlit's own accent, so the
+# selected tab looks native rather than bolted on.
+#
+# This targets `data-baseweb` attributes, which are Streamlit internals and may be
+# renamed by a future version. It degrades safely: if the selectors stop matching,
+# the tabs render in the default style and still work. Nothing here is
+# load-bearing for behaviour.
+st.markdown(
+    """
+    <style>
+    div[data-testid="stTabs"] div[data-baseweb="tab-list"] {
+        gap: 8px;
+        padding: 6px;
+        border-radius: 10px;
+        background: rgba(128, 128, 128, 0.10);
+        flex-wrap: wrap;                 /* narrow screens wrap instead of clipping */
+    }
+    div[data-testid="stTabs"] button[data-baseweb="tab"] {
+        border-radius: 8px;
+        padding: 10px 18px;
+        background: rgba(128, 128, 128, 0.06);
+        border: 1px solid rgba(128, 128, 128, 0.30);
+        font-weight: 600;
+    }
+    div[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+        background: rgba(128, 128, 128, 0.16);
+    }
+    div[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+        background: rgba(255, 75, 75, 0.16);
+        border-color: rgba(255, 75, 75, 0.80);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    }
+    /* The default underline now duplicates state the box already carries. */
+    div[data-testid="stTabs"] div[data-baseweb="tab-highlight"],
+    div[data-testid="stTabs"] div[data-baseweb="tab-border"] {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Icons carry the same signal as the boxes for anyone scanning rather than
+# reading, and they survive even if the CSS above stops matching a future
+# Streamlit -- which is the reason they are in the labels and not in the style.
 TAB_ASK, TAB_MEASURED, TAB_ABOUT = st.tabs(
-    ["Ask", "How this was measured", "About"]
+    ["💬  Ask", "📊  How this was measured", "ℹ️  About"]
 )
 
 with TAB_MEASURED:

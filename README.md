@@ -7,9 +7,11 @@ system declines to answer when the retrieved evidence does not support one.
 Zero-cost stack: PyMuPDF, BGE embeddings, Chroma, Streamlit, and either a local Ollama model
 or any OpenAI-compatible hosted endpoint.
 
-**Status:** Phase 1 complete. Phase 2 retrieval complete and measured; Phase 2 generation
-measured on a local model. 11 documents, 629 pages, 872 chunks, 69 hand-written evaluation
-questions.
+**Status:** Live on Streamlit Community Cloud. Phase 1 complete; Phase 2 retrieval complete and
+measured; Phase 2 generation measured on three models across both retrieval arms. 11 documents,
+629 pages, 872 chunks, 69 hand-written evaluation questions. The deployed app carries a
+**"How this was measured"** tab that derives every figure from a committed results file — including
+the two results that went the wrong way, and a section explaining why it shows no speed number.
 
 **The headline result: a large retrieval gain bought almost no answer gain.** Reranking
 improved retrieval by 26% in MRR (0.699 → 0.879). It reduced false refusals on every model tested — and
@@ -439,6 +441,14 @@ reproducible in minutes with `--retrieval-only`.
 | `hybrid` — RRF of the two | 61.7% | 88.3% | 91.7% | **0.753** | 41 ms |
 | `rerank` — hybrid top-30, cross-encoder | **81.7%** | **95.0%** | **96.7%** | **0.879** | 3,486 ms |
 | **change vs baseline** | **+25.0 pts** | **+16.7 pts** | **+5.0 pts** | **+0.180** | ×97 slower |
+
+> **The `retrieve p50` column is a point sample, not a measurement — read it with gotcha 26.**
+> The quality columns are byte-reproducible and were verified identical to `0.000000` across a
+> different OS, a different CPU and four different library versions. Latency has none of that
+> property: two `rerank` runs *from the same day* with **identical rankings** report 2,012 ms and
+> 3,269 ms, and controlled measurement puts the spread at ~1.7×, driven mostly by CPU boost
+> state. The ×97 ratio between dense retrieval and reranking is real and far larger than that
+> spread; the individual millisecond figures are not stable enough to compare across runs.
 
 > **These figures are goldenv3, 2026-08-28.** Eighteen rows gained target pages after a
 > completeness review found the golden set was missing pages that genuinely answer the
@@ -1278,7 +1288,8 @@ src/index.py           BGE embeddings -> Chroma; model + query prefix live here
 src/retrieve.py        vector / bm25 / hybrid RRF / cross-encoder rerank
 src/generate.py        prompt assembly + LLM call; backend selected by LLM_BACKEND
 config/prompts.yaml    versioned prompts
-app.py                 Streamlit UI; sets torch threads, reads baselines from results
+app.py                 Streamlit UI, 3 tabs; sets torch threads, derives every figure
+                       shown from eval/results/ rather than hardcoding it
 chroma/                committed index, hidden with skip-worktree (see Re-indexing)
 requirements.txt       9 direct pins, incl. torch==2.13.0+cpu
 requirements-lock.txt  the full 111-package closure, generated on Linux
@@ -1513,6 +1524,31 @@ assertion.
     `src` modules imported — because they read their settings at import time and one of them
     pulls torch. Moving an import above that block disables the settings silently, with no
     error and no signal beyond the app being slower or dying under memory pressure.
+37. **Retrieval is timed with its own stopwatch in the app, never derived by subtraction.**
+    The caption used to compute it as `wall_clock − generation`, which does not mean
+    "retrieval" — it means *everything that was not the LLM call*, printed under the word
+    retrieval. Worse, it made the three displayed numbers **always reconcile**, because one
+    was defined as the other two subtracted, and a breakdown that cannot fail to reconcile
+    cannot ever surface an anomaly — it relocates it into whichever bucket is the leftover.
+    That bucket was labelled `retrieval`, so the retriever absorbed the blame for everything.
+    The leftover is now its own term, shown when it exceeds 250 ms, and **deliberately
+    allowed not to add up**. See gotcha 26.
+38. **`warm_models()` issues a real warmup query, not just model construction.** Constructing
+    a model is not warming it: torch pays kernel setup on the first real forward pass, and
+    Chroma loads its HNSW segment on the first *query* — the startup path calls `.count()`,
+    which reads metadata and never touches the index. `vector` only, deliberately: warming
+    `rerank` would run a cross-encoder pass during boot, and one pass adds ~473 MB of peak
+    RSS on a ~1 GB host, trading a slow first reranked query for a crash-loop at startup.
+    The eval harness has done this since the beginning (gotcha 11); the app had not, which
+    is why every *published* latency figure was warm and the *deployed* one was not.
+39. **The measurement tab's milestone slider holds exactly ONE variable, and latency is not
+    on it.** Every position is scored by the question set that is live now, so an evaluation
+    change cannot appear as a step — there is nothing for it to be a step *between*. The
+    eval corrections get a separate panel with the retriever held fixed. Chosen over one
+    timeline with "system"/"measurement" badges, because a badge relies on being read and
+    the failure mode is a visitor reading quickly. **Latency is the subject of a section
+    rather than a metric on the slider** (gotcha 26): a number on a dashboard is read as a
+    measurement whatever the footnote says.
 
 ## Gotchas — each of these cost hours
 
@@ -1622,6 +1658,32 @@ assertion.
     longest sequence present, so one 512-token chunk makes every chunk in that batch cost 512.
 25. **`src.retrieve`'s CLI shows only the first 400 characters of a ~2,400-character chunk**,
     which makes correct retrieval look wrong. Not yet fixed.
+26. **Retrieval latency spans ~1.7× on one machine in one session, and the results files record
+    nothing about the machine.** The proof was already committed: two `rerank` runs from the
+    **same day**, same question set, same code — `20260824T185017Z` and `20260824T073542Z` —
+    report MRR 0.7947 and hit@1 71.7% *identically*, with p50 of **2,012 ms and 3,269 ms**.
+    A rotated, repeated experiment put the spread at 1.69× for `rerank` and 1.88× for `vector`,
+    driven mostly by CPU boost state: inserting a **2 s idle gap between queries makes retrieval
+    ~32% faster**, because the power budget recovers between bursts. Question mix (+3.3%) and
+    CPU-cache eviction (null) were measured and are not the cause; a thermal-drift explanation
+    did not reproduce. **Treat every `retrieve p50` in this README as a point sample.** The
+    format records k, the embedding model, the chunk parameters and a hash of the question set,
+    and nothing about the machine — it protects the metric that is byte-reproducible and records
+    nothing for the one that moves.
+27. **Constructing a model is not warming it**, and a function called `warm_models` conflated
+    the two. See design decision 38. On the deployed app this surfaced as a `vector` question
+    reporting **10.1 s of "retrieval"** against 36 ms in the eval, while a `rerank` question on
+    the same warm process reported 3.2 s — impossible, since `rerank` does dense retrieval
+    *plus* BM25 *plus* a cross-encoder. The structural contradiction identified the bug before
+    any profiling.
+28. **`@st.cache_data` means a regenerated `config/showcase.json` is not picked up until the
+    process restarts.** Harmless on Community Cloud, where `git push` restarts the app — but it
+    also means **a test that overwrites that file and re-runs the app is testing the cache, not
+    the file.** One did, and reported a failure that said nothing about the app. Had the
+    assertion been the more natural "it does not crash", it would have *passed* while executing
+    none of the code it existed to cover. The fix was a control: assert the field is **present**
+    with the new file and **absent** with the old one, so the test proves it can tell the two
+    states apart before it is trusted about either.
 
 ## Anti-goals — from the brief
 
@@ -1689,12 +1751,34 @@ plan did not anticipate: thread count is worth ~48% of reranked latency on a 2-v
 budget, and cold start is ~26 s of model loading regardless of packaging. See
 [Deployment measurements](#deployment-measurements--what-was-verified-before-anything-was-hosted).
 
+**Live, and measured on the host**
+
+The app is deployed on Streamlit Community Cloud, free tier, from this repository —
+deploying is `git push`. Three tabs: **Ask**, **How this was measured** (design decision 39),
+and **About**.
+
+- **The measurement tab reads every figure from a committed results file.** Nothing on it is
+  typed in, and a mode with no matching run shows "no current measurement" rather than a stale
+  number. It shows the regressions — keyword-only's worse hit@5, fusion's worse hit@1 — because
+  a dashboard where every line goes up is not a record of what happened.
+- **The app is verified rather than asserted**: 17 headless cases through
+  `streamlit.testing.v1.AppTest` cover boot, all six retrieval modes, precomputed and live
+  answers, a non-default `k`, live and precomputed abstention, the quota caps, and backward
+  compatibility with an older `showcase.json`. One of them exists because `st.tabs` renders every
+  tab in one pass while the question flow calls `st.stop()` in five places — `st.stop()` halts the
+  *script*, so the static tabs are rendered first and a quota-blocked visitor still gets a
+  complete site.
+
 **Not yet built**
-- The public deployment itself, on Streamlit Community Cloud. One decision stays open
-  until it is measured on the real host: whether the demo defaults to `vector` or
-  `rerank`. Three independent lines of evidence currently favour `vector` — reranking
-  costs ~6.3–7.8 s end to end against a ~5 s threshold, needs ~470 MB more memory, and
-  showed no citation-precision gain on any model tested. `rerank` stays selectable.
+- **`DEFAULT_MODE` is still `vector`, and the decision is still open.** Evidence favouring it:
+  reranking shows no citation-precision gain on any model tested and needs ~470 MB more memory.
+  Evidence that has weakened the latency half of the case: on the deployed host, *generation*
+  was observed swinging **1.9 s to 10.4 s** across six back-to-back calls to the same endpoint,
+  which is larger than the entire retrieval difference between the modes. `rerank` stays
+  selectable either way.
+- **The deployed host's latency spread is uncharacterised.** Gotcha 26 was measured on the
+  development machine; Community Cloud is shared vCPUs, so it is likely wider. The only honest
+  host numbers today are the per-request timings the Ask tab shows live.
 - int8 ONNX quantisation, which would cut the retrieval half of that latency at the cost
   of re-baselining all four retrievers. Not needed unless the deployed number is worse
   than the projection.
@@ -1705,7 +1789,7 @@ budget, and cold start is ~26 s of model loading regardless of packaging. See
 - Public deployment — planned in [Docs/DEPLOYMENT.md](Docs/DEPLOYMENT.md)
 - CI running the eval per PR
 
-**Four times the measurement was the bug, not the system**
+**Five times the measurement was the bug, not the system**
 
 Each would have produced a confident, plausible, wrong number:
 
@@ -1718,6 +1802,10 @@ Each would have produced a confident, plausible, wrong number:
 - "13 of 14 citation failures had the evidence retrieved" was reported as a finding. It is the
   base rate — 51 of 52 answered questions had the evidence retrieved. Always compare a rate
   against its base rate before calling it a result.
+- The deployed app reported **10.1 s of `vector` retrieval** against 36 ms in the eval. Nothing
+  was wrong with the retriever: the caption computed retrieval by subtracting the model's
+  self-reported time from a wall clock, so it meant "everything that was not the LLM call" and
+  absorbed one-time model initialisation. Design decisions 37 and 38.
 - A documented **reranker failure mode** — "adjacent pages crowd each other out", with a worked
   example naming four page numbers — was an eval failure. All four pages answered the question;
   the golden set listed one. The retracted paragraph is kept in place above.
